@@ -314,9 +314,6 @@
                 <input type="text" id="admin-search-bar" onkeyup="filterAdminOrders()" placeholder="ابحث برقم الطلب، رقم الهاتف، المندوب...">
             </div>
 
-            <h4 class="section-title">💰 العهدة المالية للمناديب (كاش)</h4>
-            <div id="admin-driver-cash" class="cash-box">جاري تحميل الحسابات...</div>
-
             <h4 class="section-title">🔥 خريطة تركيز الطلبات</h4>
             <div id="admin-heatmap" class="map-box"></div>
 
@@ -329,6 +326,27 @@
 
             <h4 class="section-title">📋 جميع الطلبات النشطة والسابقة</h4>
             <div id="admin-all-orders"></div>
+
+            <div id="admin-dashboard" class="card section hidden">
+            <hr style="margin: 30px 0; border-top: 2px dashed #ddd;">
+            <h4 class="section-title">💰 العهدة المالية للمناديب (اليوم)</h4>
+            <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; overflow-x: auto; margin-bottom: 20px;">
+                <table style="width: 100%; text-align: center; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="background: #333; color: var(--primary-gold);">
+                            <th style="padding: 10px; border: 1px solid #ccc;">المندوب</th>
+                            <th style="padding: 10px; border: 1px solid #ccc;">الطلبات المسلمة</th>
+                            <th style="padding: 10px; border: 1px solid #ccc;">الكاش المحصل (ر.ع)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-body">
+                        <tr><td colspan="3" style="padding: 10px; color:#666;">اضغط على الزر أدناه لحساب العهدة ⬇️</td></tr>
+                    </tbody>
+                </table>
+                <button onclick="fetchLedger()" style="background: #28a745; margin-top: 15px; width: 100%;">تحديث وحساب العهدة المالية 🔄</button>
+            </div>
+            <button onclick="archiveCompletedOrders()" ...>إغلاق اليوم وأرشفة الطلبات</button>
+        </div>
 
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
@@ -352,7 +370,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // ⚠️ ضع رابط جوجل شيت الخاص بك هنا
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd-ooPxZulyLkS3D98taT0mBF6e3ZqjjV6dkv_9_sgS1nY4quVYnLEBc9pwoBXc7EA/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBUvaoI2zrMqn-hsO7e21-HRR3IVLsU4G175TjpEtpFjWJWLikm0nn7C6ThEP6LWAr/exec'; 
 
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
@@ -861,6 +879,39 @@
             Chart.defaults.font.family = 'Cairo';
             if(chart1) { chart1.data.datasets[0].data = [pCount, iCount, dCount]; chart1.update(); } else { chart1 = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: { labels: ['قيد المراجعة', 'قيد التوصيل', 'تم التسليم'], datasets: [{ data: [pCount, iCount, dCount], backgroundColor: ['#ffc107', '#17a2b8', '#28a745'] }] } }); }
             if(chart2) { chart2.data.labels = topDNames; chart2.data.datasets[0].data = topDLoads; chart2.update(); } else { chart2 = new Chart(document.getElementById('driversChart'), { type: 'bar', data: { labels: topDNames, datasets: [{ label: 'الطلبات المنجزة', data: topDLoads, backgroundColor: '#D4AF37' }] }}); }
+        }
+        function fetchLedger() {
+            let btn = document.querySelector('button[onclick="fetchLedger()"]');
+            let oldText = btn.innerText;
+            btn.innerText = "جاري الحساب... ⏳";
+            btn.disabled = true;
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_ledger' }) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    let tbody = document.getElementById('ledger-body');
+                    tbody.innerHTML = '';
+                    let totalCash = 0;
+                    
+                    if(data.ledger.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" style="padding:10px; color:#666;">لا توجد طلبات مسلمة حتى الآن</td></tr>';
+                    } else {
+                        data.ledger.forEach(item => {
+                            totalCash += item.total;
+                            tbody.innerHTML += `<tr>
+                                <td style="padding: 8px; border: 1px solid #ccc; font-weight:bold;">${item.driver}</td>
+                                <td style="padding: 8px; border: 1px solid #ccc;">${item.count}</td>
+                                <td style="padding: 8px; border: 1px solid #ccc; color:green; font-weight:bold;">${item.total}</td>
+                            </tr>`;
+                        });
+                        // صف الإجمالي النهائي
+                        tbody.innerHTML += `<tr style="background:#eee; font-weight:bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ccc; text-align:left;">إجمالي الكاش المتوقع بالصندوق:</td>
+                            <td style="padding: 10px; border: 1px solid #ccc; color:red;">${totalCash} ر.ع</td>
+                        </tr>`;
+                    }
+                }
+            }).finally(() => { btn.innerText = oldText; btn.disabled = false; });
         }
     </script>
 </body>
