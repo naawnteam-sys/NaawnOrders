@@ -207,6 +207,12 @@
             <p id="loc-status" style="font-size: 12px; color: green; margin: -5px 0 10px 0; text-align: center; display: none;">✅ تم تحديد موقعك بنجاح</p>
             <input type="text" id="pickup-loc" placeholder="مكان الاستلام (اسم المحل/المطعم)">
             <textarea id="order-details" placeholder="تفاصيل الطلب..."></textarea>
+
+            <label style="font-size: 14px; color: #666; font-weight: bold;">أولوية التوصيل:</label>
+            <select id="cust-urgency" style="border: 2px solid var(--primary-gold); background: #fff9eb; margin-bottom: 15px; width: 100%; padding: 10px; border-radius: 8px;">
+                <option value="عادي 🟢">توصيل عادي 🟢 (حسب المسار المعتاد)</option>
+                <option value="مستعجل 🔴">توصيل مستعجل 🔴 (أولوية قصوى)</option>
+            </select>
             
             <label style="font-size: 14px; color: #666; font-weight: bold;">🎁 كود الخصم (اختياري):</label>
             <div class="coupon-box"><input type="text" id="promo-code" placeholder="أدخل الكود هنا"><button onclick="applyCoupon(event)" type="button">تطبيق</button></div>
@@ -482,14 +488,36 @@
             });
         }
 
-        function submitOrder(e) {
-            const payload = { action: 'new_order', phone: localStorage.getItem('customerPhone'), city: document.getElementById('cust-city').value, area: document.getElementById('cust-area').value, pickup: document.getElementById('pickup-loc').value, details: document.getElementById('order-details').value, custLat: tempCustLat, custLng: tempCustLng, promoCode: activePromoCode };
+       function submitOrder(e) {
+            // --- دمج نوع الطلب مع التفاصيل ---
+            let originalDetails = document.getElementById('order-details').value;
+            let urgency = document.getElementById('cust-urgency').value;
+            let finalDetails = "[أولوية: " + urgency + "] | " + originalDetails;
+            // ---------------------------------
+
+            const payload = { 
+                action: 'new_order', 
+                phone: localStorage.getItem('customerPhone'), 
+                city: document.getElementById('cust-city').value, 
+                area: document.getElementById('cust-area').value, 
+                pickup: document.getElementById('pickup-loc').value, 
+                details: finalDetails, // <-- تم دمج التفاصيل هنا بنجاح
+                custLat: tempCustLat, 
+                custLng: tempCustLng, 
+                promoCode: activePromoCode 
+            };
+            
             if(!payload.city || !payload.area || !payload.pickup) { alert('الرجاء تعبئة البيانات'); return; }
             const btn = e.target; btn.innerText = 'جاري التسجيل...'; btn.disabled = true;
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(() => {
                 alert('تم إرسال الطلب بنجاح لأسطول نعاون!'); checkMyOrder();
-                document.getElementById('pickup-loc').value = ''; document.getElementById('order-details').value = ''; document.getElementById('promo-code').value = ''; activePromoCode = ""; document.getElementById('coupon-msg').classList.add('hidden'); document.getElementById('promo-code').disabled = false;
+                document.getElementById('pickup-loc').value = ''; 
+                document.getElementById('order-details').value = ''; 
+                document.getElementById('promo-code').value = ''; 
+                activePromoCode = ""; 
+                document.getElementById('coupon-msg').classList.add('hidden'); 
+                document.getElementById('promo-code').disabled = false;
             }).finally(() => { btn.innerText = 'إرسال الطلب واعتماده 📲'; btn.disabled = false; });
         }
 
