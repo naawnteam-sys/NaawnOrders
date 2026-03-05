@@ -249,6 +249,13 @@
         <div id="vendor-dashboard" class="card section hidden">
             <h3 id="vendor-welcome-msg" style="color: var(--primary-gold);">مرحباً بك</h3>
             <p style="font-size:14px; color:#666; margin-top:-10px;">اطلب مناديب لتوصيل طلبات زبائنك بسهولة.</p>
+            <div style="background: #eef2f5; border: 1px dashed var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">🔗 رابط الطلب المباشر (ضعه في بايو الإنستجرام):</h4>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="vendor-magic-link" readonly style="flex: 2; margin: 0; font-size: 12px; background: #fff; text-align: left;" dir="ltr">
+                    <button onclick="copyVendorLink()" style="flex: 1; margin: 0; background: #333; font-size: 13px;">نسخ 📋</button>
+                </div>
+            </div>
             
             <h4 class="section-title" style="margin-top:0;">🚀 إرسال طلب لزبون</h4>
             <input type="tel" id="vnd-cust-phone" placeholder="رقم هاتف الزبون (للتواصل معه)">
@@ -379,11 +386,16 @@
         }
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail: ', err)); }); }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('hasSeenGuide')) {
-                document.getElementById('welcome-modal').classList.remove('hidden');
-            }
+       window.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('hasSeenGuide')) { document.getElementById('welcome-modal').classList.remove('hidden'); }
             loadSettings(); 
+            
+            // --- التقاط الرابط السحري للمطعم ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const magicVendor = urlParams.get('vendor');
+            if (magicVendor) { sessionStorage.setItem('autoFillVendor', magicVendor); }
+            // -----------------------------------
+
             if (localStorage.getItem('adminLogged') === 'true') { showSection('admin-dashboard'); startAdminAutoRefresh(); }
             else if (localStorage.getItem('driverId')) { 
                 document.getElementById('driver-welcome-msg').innerText = `أهلاً بك، ${localStorage.getItem('driverName')}`; 
@@ -392,10 +404,24 @@
             }
             else if (localStorage.getItem('vendorId')) {
                 document.getElementById('vendor-welcome-msg').innerText = `أهلاً بك، متجر ${localStorage.getItem('vendorName')} 🏪`;
+                generateMagicLink(localStorage.getItem('vendorName')); // توليد الرابط
                 showSection('vendor-dashboard'); fetchVendorOrders();
             }
-            else if (localStorage.getItem('customerPhone')) { showSection('customer-dashboard'); checkMyOrder(); }
+            else if (localStorage.getItem('customerPhone')) { 
+                showSection('customer-dashboard'); 
+                checkMyOrder(); 
+                checkAndFillMagicVendor(); // تعبئة اسم المطعم إذا جاء من الرابط
+            }
         });
+
+        // دالة تعبئة اسم المطعم للعميل
+        function checkAndFillMagicVendor() {
+            let savedVendor = sessionStorage.getItem('autoFillVendor');
+            if(savedVendor) {
+                document.getElementById('pickup-loc').value = savedVendor;
+                sessionStorage.removeItem('autoFillVendor'); // مسحه بعد التعبئة
+            }
+        }
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
@@ -434,7 +460,17 @@
         }
 
         /* ================= العميل المباشر والتقييم ================= */
-        function loginCustomer() { const p = document.getElementById('cust-phone').value; if(p.length >= 8) { localStorage.setItem('customerPhone', p); showSection('customer-dashboard'); checkMyOrder(); } else alert('رقم هاتف غير صحيح'); }
+      function loginCustomer() { 
+            const p = document.getElementById('cust-phone').value; 
+            if(p.length >= 8) { 
+                localStorage.setItem('customerPhone', p); 
+                showSection('customer-dashboard'); 
+                checkMyOrder(); 
+                checkAndFillMagicVendor(); // سحر التعبئة هنا
+            } else {
+                alert('رقم هاتف غير صحيح'); 
+            }
+        }
 
         function getCustomerLocation(e) {
             e.preventDefault(); const btn = document.getElementById('btn-get-loc'); btn.innerText = 'جاري التحديد... ⏳';
@@ -543,6 +579,7 @@
                 if(data.status === 'success') { 
                     localStorage.setItem('vendorId', id); localStorage.setItem('vendorName', data.name); 
                     document.getElementById('vendor-welcome-msg').innerText = `أهلاً بك، متجر ${data.name} 🏪`; 
+                    generateMagicLink(data.name); // توليد الرابط
                     showSection('vendor-dashboard'); fetchVendorOrders(); 
                 } else alert('بيانات التاجر غير صحيحة!');
             }).finally(() => { btn.innerText = 'دخول التاجر'; btn.disabled = false; });
@@ -863,6 +900,21 @@
             Chart.defaults.font.family = 'Cairo';
             if(chart1) { chart1.data.datasets[0].data = [pCount, iCount, dCount]; chart1.update(); } else { chart1 = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: { labels: ['قيد المراجعة', 'قيد التوصيل', 'تم التسليم'], datasets: [{ data: [pCount, iCount, dCount], backgroundColor: ['#ffc107', '#17a2b8', '#28a745'] }] } }); }
             if(chart2) { chart2.data.labels = topDNames; chart2.data.datasets[0].data = topDLoads; chart2.update(); } else { chart2 = new Chart(document.getElementById('driversChart'), { type: 'bar', data: { labels: topDNames, datasets: [{ label: 'الطلبات المنجزة', data: topDLoads, backgroundColor: '#D4AF37' }] }}); }
+        }
+        // دوال الرابط السحري للمطاعم
+        function generateMagicLink(vendorName) {
+            let baseUrl = window.location.href.split('?')[0]; // أخذ رابط موقعك الأصلي
+            let magicUrl = baseUrl + '?vendor=' + encodeURIComponent(vendorName);
+            document.getElementById('vendor-magic-link').value = magicUrl;
+        }
+
+        function copyVendorLink() {
+            let linkInput = document.getElementById('vendor-magic-link');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // للهواتف
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                alert('✅ تم نسخ الرابط بنجاح! يمكنك الآن لصقه في بايو الإنستجرام أو إرساله للزبائن بالواتساب.');
+            });
         }
     </script>
 </body>
