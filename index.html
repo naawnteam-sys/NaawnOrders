@@ -23,9 +23,17 @@
         .header { background-color: var(--bg-white); color: var(--primary-gold); text-align: center; padding: 15px; font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-bottom: 3px solid var(--primary-gold); position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
         .header img { height: 40px; margin-left: 10px; border-radius: 8px; }
         
-        #promo-banner-container { background: #333; color: var(--primary-gold); overflow: hidden; white-space: nowrap; padding: 8px 0; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--primary-gold); }
-        .scrolling-text { display: inline-block; padding-left: 100%; animation: scroll-left 15s linear infinite; }
-        @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+      #promo-banner-container { background: #333; color: var(--primary-gold); overflow: hidden; white-space: nowrap; padding: 8px 0; font-size: 15px; font-weight: bold; border-bottom: 1px solid var(--primary-gold); width: 100%; box-sizing: border-box; }
+        .scrolling-text { 
+            display: inline-block; 
+            /* تفعيل معالج الرسوميات (GPU) لحركة فائقة السلاسة */
+            will-change: transform; 
+            animation: scroll-smooth 20s linear infinite; 
+        }
+        @keyframes scroll-smooth { 
+            0% { transform: translate3d(100vw, 0, 0); }  /* يبدأ من أقصى اليمين خارج الشاشة */
+            100% { transform: translate3d(-100%, 0, 0); } /* ينتهي في أقصى اليسار خارج الشاشة */
+        }
 
         .container { padding: 20px; max-width: 600px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box;}
         .card { background: var(--bg-white); border-radius: 12px; padding: 25px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px; }
