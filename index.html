@@ -290,6 +290,28 @@
             <button onclick="loginDriver(event)">تسجيل الدخول</button>
         </div>
 
+        <div id="driver-login" class="card section hidden">
+            </div>
+
+        <div id="driver-expired-dashboard" class="card section hidden" style="text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🏦</div>
+            <h3 style="color: #dc3545; margin-top: 0;">بوابة تجديد الاشتراك</h3>
+            <p style="color: #555; font-size: 14px; line-height: 1.6;">
+                كابتن، لتفعيل حسابك واستقبال الطلبات، يرجى تحويل رسوم المنصة (1 ر.ع) إلى الحساب البنكي للإدارة، ثم إدخال رقم الإيصال بالأسفل.
+            </p>
+            
+            <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #333;">بيانات التحويل:</h4>
+                <p style="margin: 0; font-size: 13px; font-weight: bold;">بنك مسقط: 00000000000000</p>
+                <p style="margin: 5px 0 15px 0; font-size: 13px; font-weight: bold;">أو الدفع بالهاتف: 9XXXXXXX</p>
+                
+                <input type="text" id="receipt-input" placeholder="أدخل رقم الإيصال البنكي المكون من أرقام" style="border: 2px solid #ccc; text-align: center; font-weight: bold; letter-spacing: 1px;">
+                <button id="submit-receipt-btn" onclick="submitRealReceipt()" style="background: #28a745; margin-top: 5px; font-size: 15px;">إرسال رقم الإيصال للتحقق 📤</button>
+            </div>
+            
+            <button onclick="logout()" class="btn-back">تسجيل خروج 🚪</button>
+        </div>
+        
         <div id="driver-dashboard" class="card section hidden">
             <div style="text-align: center;">
                 <h3 id="driver-welcome-msg" style="margin-bottom: 5px;">أهلاً بك 🛵</h3>
@@ -347,6 +369,12 @@
              <h4 class="section-title">💰 العهدة المالية للمناديب (كاش)</h4>
             <div id="admin-driver-cash" class="cash-box">جاري تحميل الحسابات...</div>
 
+            <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
+            <div id="admin-renewals-list" style="margin-bottom: 20px;">
+                <button onclick="fetchAdminRenewals()" style="background: #333; font-size: 14px; margin-bottom: 10px;">🔄 تحديث طلبات التجديد</button>
+                <div id="renewals-container"></div>
+            </div>
+
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
 
@@ -368,8 +396,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ⚠️ ضع رابط جوجل شيت الخاص بك هنا
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaPD_9eQNgH2qh-TqCCMT9FA_JVfb5fLY6uLy-IUrZ9mDJanZBcyGSJhyXd7BMMNkP/exec'; 
+        // ⚠️ 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJjEoApoEgRACoq_Y41pFNVIhhkRhHlNnqxLaZVdIY1unEeO-t9vIyIkwyzQOqOFQ/exec'; 
 
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
@@ -783,7 +811,7 @@
         }
 
         let isFetchingAdmin = false;
-        function fetchAdminData() {
+       function fetchAdminData() {
             if(isFetchingAdmin) return; isFetchingAdmin = true;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
             .then(res => res.json()).then(data => {
@@ -798,8 +826,8 @@
                     let cashHtml = '';
                     data.drivers.forEach(d => {
                         cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
-                            <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${d.cash} ر.ع</strong></span>
-                            <button onclick="clearDriverCash('${d.id}', '${d.name}', ${d.cash})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
+                            <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${d.cash || 0} ر.ع</strong></span>
+                            <button onclick="clearDriverCash('${d.id}', '${d.name}', ${d.cash || 0})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
                         </div>`;
                     });
                     document.getElementById('admin-driver-cash').innerHTML = cashHtml || '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
@@ -830,10 +858,28 @@
                         let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
                         allContainer.innerHTML += `<div class="admin-order-card" style="border-bottom:1px solid #eee; padding:10px 0; font-size:14px;"><strong>${o.id}</strong> - <span class="badge ${badgeClass}">${o.status}</span><p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold)">المندوب: '+o.driverName+'</span>' : ''} ${o.price > 0 ? '<br><span style="color:green; font-weight:bold;">المبلغ المحصل: '+o.price+' ر.ع</span>' : ''}</p></div>`;
                     });
+
+                    // 
+                    const renContainer = document.getElementById('renewals-container');
+                    if (renContainer) {
+                        renContainer.innerHTML = '';
+                        if(data.renewals && data.renewals.length > 0) {
+                            data.renewals.forEach(r => {
+                                renContainer.innerHTML += `
+                                    <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                        <strong>المندوب:</strong> ${r.driverName} <br>
+                                        <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
+                                        <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; margin-top:10px; width:auto;">تأكيد الدفع وتجديد 30 يوم ✅</button>
+                                    </div>`;
+                            });
+                        } else {
+                            renContainer.innerHTML = '<p style="color:green; font-size:13px; font-weight:bold;">لا توجد طلبات تجديد معلقة.</p>';
+                        }
+                    }
+
                 }
             }).finally(() => { isFetchingAdmin = false; filterAdminOrders(); });
         }
-
         function clearDriverCash(driverId, driverName, amount) {
             if(amount === 0) { alert('العهدة مصفرة بالفعل!'); return; }
             if(confirm(`هل متأكد أنك استلمت (${amount} ر.ع) كاش من المندوب ${driverName} وتريد تصفية عهدته؟`)) {
@@ -922,6 +968,53 @@
             linkInput.setSelectionRange(0, 99999); // للهواتف
             navigator.clipboard.writeText(linkInput.value).then(() => {
                 alert('✅ تم نسخ الرابط بنجاح! يمكنك الآن لصقه في بايو الإنستجرام أو إرساله للزبائن بالواتساب.');
+            });
+        }
+        // 1. دالة إرسال الإيصال (للمندوب)
+        function submitRealReceipt() {
+            const receipt = document.getElementById('receipt-input').value;
+            if(!receipt || receipt.length < 4) { alert('الرجاء إدخال رقم إيصال صحيح!'); return; }
+            
+            const btn = document.getElementById('submit-receipt-btn');
+            btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
+            
+            const payload = {
+                action: 'submit_receipt',
+                driverId: localStorage.getItem('driverId'),
+                driverName: localStorage.getItem('driverName'),
+                receiptNo: receipt
+            };
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    alert('✅ تم استلام إيصالك! جاري التحقق منه من قبل الإدارة. يرجى الانتظار والمحاولة لاحقاً.');
+                    btn.innerText = 'تم إرسال الطلب للمراجعة ⏳';
+                    btn.style.background = '#ffc107';
+                    btn.style.color = '#000';
+                }
+            });
+        }
+
+        // 2. دالة جلب طلبات التجديد (للإدارة)
+        function fetchAdminRenewals() {
+            const container = document.getElementById('renewals-container');
+            container.innerHTML = '<p style="color:#666; font-size:13px;">جاري جلب الإيصالات... ⏳</p>';
+            
+            // سنستخدم نفس دالة get_admin_data بعد أن نضيف لها جلب الإيصالات (الخطوة التالية)
+            fetchAdminData(); 
+        }
+
+        // 3. دالة موافقة الإدارة وتجديد حساب المندوب تلقائياً
+        function approveDriverRenewal(driverId) {
+            if(!confirm('هل أنت متأكد من استلامك لمبلغ 1 ريال من هذا المندوب؟ سيتم تجديد حسابه 30 يوماً فوراً.')) return;
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve_renewal', driverId: driverId }) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    alert('✅ تم تجديد حساب المندوب بنجاح! يمكنه الآن استقبال الطلبات.');
+                    fetchAdminData(); // تحديث اللوحة
+                }
             });
         }
     </script>
