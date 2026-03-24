@@ -766,6 +766,7 @@
                         }
                     } catch(e) {}
 
+                   // 4. تحديث الإيصالات والتجديد
                     try {
                         const renContainer = document.getElementById('renewals-container');
                         if (renContainer) {
@@ -776,7 +777,10 @@
                                         <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
                                             <strong>المندوب:</strong> ${r.driverName} <br>
                                             <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
-                                            <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; margin-top:10px; width:auto;">تأكيد الدفع وتجديد 30 يوم ✅</button>
+                                            <div style="display:flex; gap:10px; margin-top:10px;">
+                                                <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; width:100%; margin:0;">تأكيد وتجديد ✅</button>
+                                                <button onclick="deleteDriverReceipt('${r.driverId}')" style="background:#dc3545; padding:5px 10px; font-size:12px; width:100%; margin:0;">رفض وحذف ❌</button>
+                                            </div>
                                         </div>`;
                                 });
                             } else {
@@ -784,7 +788,6 @@
                             }
                         }
                     } catch(e) {}
-
                     try {
                         const newContainer = document.getElementById('admin-new-orders');
                         if(newContainer) {
@@ -922,6 +925,20 @@
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve_renewal', driverId: driverId }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تم تجديد حساب المندوب بنجاح! يمكنه الآن استقبال الطلبات.'); fetchAdminData(); }
+            });
+        }
+        // 4. دالة رفض الإيصال وحذفه (لكي يدخله المندوب من جديد)
+        function deleteDriverReceipt(driverId) {
+            if(!confirm('هل أنت متأكد من رفض وحذف هذا الإيصال؟\nسيتم حذفه من النظام وسيضطر المندوب لكتابته من جديد.')) return;
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_receipt', driverId: driverId }) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    alert('🗑️ تم حذف الإيصال بنجاح!');
+                    fetchAdminData(); // تحديث اللوحة فوراً
+                } else {
+                    alert('⚠️ حدث خطأ أثناء الحذف.');
+                }
             });
         }
     </script>
