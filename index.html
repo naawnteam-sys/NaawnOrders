@@ -362,6 +362,12 @@
             <h4 class="section-title">🔥 خريطة تركيز الطلبات</h4>
             <div id="admin-heatmap" class="map-box"></div>
 
+             <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
+            <div id="admin-renewals-list" style="margin-bottom: 20px;">
+                <button onclick="fetchAdminRenewals()" style="background: #333; font-size: 14px; margin-bottom: 10px;">🔄 تحديث طلبات التجديد</button>
+                <div id="renewals-container"></div>
+            </div>
+
             <h4 class="section-title">📊 إحصائيات نعاون</h4>
             <div class="chart-container"><canvas id="statusChart"></canvas></div>
             <div class="chart-container"><canvas id="driversChart"></canvas></div>
@@ -373,11 +379,6 @@
              <h4 class="section-title">💰 العهدة المالية للمناديب (كاش)</h4>
             <div id="admin-driver-cash" class="cash-box">جاري تحميل الحسابات...</div>
 
-            <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
-            <div id="admin-renewals-list" style="margin-bottom: 20px;">
-                <button onclick="fetchAdminRenewals()" style="background: #333; font-size: 14px; margin-bottom: 10px;">🔄 تحديث طلبات التجديد</button>
-                <div id="renewals-container"></div>
-            </div>
 
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
