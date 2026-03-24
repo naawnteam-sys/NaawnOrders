@@ -819,70 +819,107 @@
             if(isFetchingAdmin) return; isFetchingAdmin = true;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
             .then(res => res.json()).then(data => {
-                if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
-                    const newContainer = document.getElementById('admin-new-orders'); const allContainer = document.getElementById('admin-all-orders');
-                    newContainer.innerHTML = ''; allContainer.innerHTML = ''; availableDriversData = data.drivers; 
-                    
-                    if(data.newOrders.length > lastNewOrdersCount && isAudioAllowed) { adminAudio.play().catch(e=>console.log(e)); } lastNewOrdersCount = data.newOrders.length;
-                    
-                    renderCharts(data.allOrders, data.drivers); renderHeatmap(data.allOrders); 
+                try {
+                    if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
+                        
+                        // جلب الصناديق بأمان
+                        const newContainer = document.getElementById('admin-new-orders'); 
+                        const allContainer = document.getElementById('admin-all-orders');
+                        const cashContainer = document.getElementById('admin-driver-cash');
+                        const renContainer = document.getElementById('renewals-container');
 
-                    let cashHtml = '';
-                    data.drivers.forEach(d => {
-                        cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
-                            <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${d.cash || 0} ر.ع</strong></span>
-                            <button onclick="clearDriverCash('${d.id}', '${d.name}', ${d.cash || 0})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
-                        </div>`;
-                    });
-                    document.getElementById('admin-driver-cash').innerHTML = cashHtml || '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
+                        // تفريغ الصناديق القديمة إذا كانت موجودة
+                        if(newContainer) newContainer.innerHTML = ''; 
+                        if(allContainer) allContainer.innerHTML = ''; 
 
-                    if(data.newOrders.length === 0) newContainer.innerHTML = '<p style="color:#666;">لا توجد طلبات جديدة.</p>';
-                    else {
-                        let opts = '<option value="">اختر المندوب يدوياً...</option>';
-                        data.drivers.forEach(d => opts += `<option value="${d.id}" data-name="${d.name}">${d.name} (طلباته: ${d.load})</option>`);
-                        data.newOrders.forEach(o => {
-                            let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
-                            newContainer.innerHTML += `
-                                <div class="admin-order-card" style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px; border-right: 5px solid var(--primary-gold); background:#fff;">
-                                    <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
-                                    <p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p>
-                                    <p style="margin:5px 0;"><strong>الاستلام من:</strong> ${o.pickup}</p>
-                                    ${o.promoCode ? `<p style="margin:5px 0; color:green;"><strong>🎁 كود الخصم المطبق:</strong> ${o.promoCode}</p>` : ''}
-                                    <p style="margin:5px 0;"><strong>العميل:</strong> ${o.phone}</p>
-                                    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-                                    <div style="display:flex; flex-direction:column; gap:5px;">
-                                        <button onclick="autoAssignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}')" class="btn-smart">🪄 إسناد ذكي للمتاحين فقط</button>
-                                        <select id="driver-select-${o.id}">${opts}</select>
-                                        <button onclick="assignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}', event)">إسناد للمندوب المحدد 📲</button>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                    data.allOrders.reverse().forEach(o => {
-                        let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
-                        allContainer.innerHTML += `<div class="admin-order-card" style="border-bottom:1px solid #eee; padding:10px 0; font-size:14px;"><strong>${o.id}</strong> - <span class="badge ${badgeClass}">${o.status}</span><p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold)">المندوب: '+o.driverName+'</span>' : ''} ${o.price > 0 ? '<br><span style="color:green; font-weight:bold;">المبلغ المحصل: '+o.price+' ر.ع</span>' : ''}</p></div>`;
-                    });
+                        availableDriversData = data.drivers || []; 
+                        
+                        // تشغيل الصوت للطلبات الجديدة
+                        if(data.newOrders && data.newOrders.length > lastNewOrdersCount && typeof isAudioAllowed !== 'undefined' && isAudioAllowed && typeof adminAudio !== 'undefined') { 
+                            adminAudio.play().catch(e=>console.log(e)); 
+                        } 
+                        if(data.newOrders) lastNewOrdersCount = data.newOrders.length;
+                        
+                        // الخرائط والإحصائيات
+                        if(typeof renderCharts === 'function' && data.allOrders) renderCharts(data.allOrders, data.drivers || []); 
+                        if(typeof renderHeatmap === 'function' && data.allOrders) renderHeatmap(data.allOrders); 
 
-                    // 
-                    const renContainer = document.getElementById('renewals-container');
-                    if (renContainer) {
-                        renContainer.innerHTML = '';
-                        if(data.renewals && data.renewals.length > 0) {
-                            data.renewals.forEach(r => {
-                                renContainer.innerHTML += `
-                                    <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                                        <strong>المندوب:</strong> ${r.driverName} <br>
-                                        <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
-                                        <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; margin-top:10px; width:auto;">تأكيد الدفع وتجديد 30 يوم ✅</button>
+                        // 1. عرض عهدة المناديب (الكاش)
+                        if(cashContainer) {
+                            let cashHtml = '';
+                            if(data.drivers && data.drivers.length > 0) {
+                                data.drivers.forEach(d => {
+                                    let c = d.cash || 0;
+                                    cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
+                                        <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${c} ر.ع</strong></span>
+                                        <button onclick="clearDriverCash('${d.id}', '${d.name}', ${c})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
                                     </div>`;
-                            });
-                        } else {
-                            renContainer.innerHTML = '<p style="color:green; font-size:13px; font-weight:bold;">لا توجد طلبات تجديد معلقة.</p>';
+                                });
+                            }
+                            cashContainer.innerHTML = cashHtml || '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
                         }
-                    }
 
+                        // 2. عرض الطلبات الجديدة
+                        if(newContainer) {
+                            if(!data.newOrders || data.newOrders.length === 0) {
+                                newContainer.innerHTML = '<p style="color:#666;">لا توجد طلبات جديدة.</p>';
+                            } else {
+                                let opts = '<option value="">اختر المندوب يدوياً...</option>';
+                                if(data.drivers) data.drivers.forEach(d => opts += `<option value="${d.id}" data-name="${d.name}">${d.name} (طلباته: ${d.load || 0})</option>`);
+                                
+                                data.newOrders.forEach(o => {
+                                    let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
+                                    newContainer.innerHTML += `
+                                        <div class="admin-order-card" style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px; border-right: 5px solid var(--primary-gold); background:#fff;">
+                                            <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
+                                            <p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p>
+                                            <p style="margin:5px 0;"><strong>الاستلام من:</strong> ${o.pickup}</p>
+                                            ${o.promoCode ? `<p style="margin:5px 0; color:green;"><strong>🎁 كود الخصم المطبق:</strong> ${o.promoCode}</p>` : ''}
+                                            <p style="margin:5px 0;"><strong>العميل:</strong> ${o.phone}</p>
+                                            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                                <button onclick="autoAssignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}')" class="btn-smart">🪄 إسناد ذكي للمتاحين فقط</button>
+                                                <select id="driver-select-${o.id}">${opts}</select>
+                                                <button onclick="assignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}', event)">إسناد للمندوب المحدد 📲</button>
+                                            </div>
+                                        </div>`;
+                                });
+                            }
+                        }
+
+                        // 3. عرض كل الطلبات السابقة
+                        if(allContainer && data.allOrders) {
+                            data.allOrders.reverse().forEach(o => {
+                                let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
+                                allContainer.innerHTML += `<div class="admin-order-card" style="border-bottom:1px solid #eee; padding:10px 0; font-size:14px;"><strong>${o.id}</strong> - <span class="badge ${badgeClass}">${o.status}</span><p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold)">المندوب: '+o.driverName+'</span>' : ''} ${o.price > 0 ? '<br><span style="color:green; font-weight:bold;">المبلغ المحصل: '+o.price+' ر.ع</span>' : ''}</p></div>`;
+                            });
+                        }
+
+                        // 4. عرض طلبات التجديد والإيصالات
+                        if (renContainer) {
+                            renContainer.innerHTML = '';
+                            if(data.renewals && data.renewals.length > 0) {
+                                data.renewals.forEach(r => {
+                                    renContainer.innerHTML += `
+                                        <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                            <strong>المندوب:</strong> ${r.driverName} <br>
+                                            <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
+                                            <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; margin-top:10px; width:auto;">تأكيد الدفع وتجديد 30 يوم ✅</button>
+                                        </div>`;
+                                });
+                            } else {
+                                renContainer.innerHTML = '<p style="color:green; font-size:13px; font-weight:bold;">لا توجد طلبات تجديد معلقة.</p>';
+                            }
+                        }
+
+                    }
+                } catch(error) {
+                    console.error("حدث خطأ:", error);
                 }
-            }).finally(() => { isFetchingAdmin = false; filterAdminOrders(); });
+            }).catch(e => { console.log("Fetch Error", e); }).finally(() => { 
+                isFetchingAdmin = false; 
+                if(typeof filterAdminOrders === 'function') filterAdminOrders(); 
+            });
         }
         function clearDriverCash(driverId, driverName, amount) {
             if(amount === 0) { alert('العهدة مصفرة بالفعل!'); return; }
