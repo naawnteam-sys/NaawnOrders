@@ -379,7 +379,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzG9_9DtaJkO6CzXmdOgyLg7gzqAEid7n6N_ZXq5YIkVB0TFT-rJTNUCWcyZH3GWzt5/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3LaLMzPYandr6S5bxPf7PAWy2QxvxfsZJUJ194J0GEH6tKs4ewuElsqVCW-W3ARaS/exec'; 
 
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
@@ -928,10 +928,32 @@
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { alert('تم سحب الطلب ونقله بنجاح 🔄'); fetchAdminData(); });
         }
 
-        // 4. دالة قيام الإدارة بتوصيل الطلب بنفسها (جديدة)
-        function assignOrderToAdmin(orderId) {
-            if(!confirm('هل ستقوم أنت (الإدارة المناوبة) بتوصيل هذا الطلب بنفسك؟')) return;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (الإدارة)', driverId: 'admin_00', driverName: 'الإدارة المناوبة 🚗' }) }).then(() => { alert('تم تحويل الطلب لعهدتك بنجاح ✅'); fetchAdminData(); });
+       // 4. دالة قيام الإدارة بتوصيل الطلب بنفسها (مُحدثة لإرسال رسالة واتساب)
+        function assignOrderToAdmin(orderId, phone, encArea, encPickup, encDetails) {
+            if(!confirm('هل ستقوم أنت (الإدارة المناوبة) بتوصيل هذا الطلب بنفسك؟\nسيتم إرسال تفاصيل الطلب إلى رقم الواتساب الخاص بك.')) return;
+            
+            // تجهيز نص الرسالة الأنيق الذي سيصل للإدارة
+            let adminMessage = `🚗 *استلام طلب للإدارة* 🚗\n\n` +
+                               `*رقم الطلب:* ${orderId}\n` +
+                               `*هاتف الزبون:* ${phone}\n` +
+                               `*الاستلام من:* ${decodeURIComponent(encPickup)}\n` +
+                               `*التوصيل إلى:* ${decodeURIComponent(encArea)}\n` +
+                               `*التفاصيل:* ${decodeURIComponent(encDetails)}`;
+
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'update_status', 
+                    orderId: orderId, 
+                    newStatus: 'قيد التوصيل (الإدارة)', 
+                    driverId: 'admin_00', 
+                    driverName: 'الإدارة المناوبة 🚗',
+                    adminMsg: adminMessage // نرسل الرسالة الجاهزة للسيرفر
+                }) 
+            }).then(() => { 
+                alert('تم تحويل الطلب لعهدتك وإرسال التفاصيل للواتساب بنجاح ✅'); 
+                fetchAdminData(); 
+            });
         }
 
         // 5. دالة الأرشفة الإجبارية للإدارة (جديدة)
