@@ -17,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #333333; --light-gray: #F9F9F9; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--light-gray); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; }
@@ -81,6 +82,22 @@
         .welcome-content ul { padding-right: 20px; }
         .btn-understand { background: var(--primary-gold); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; }
         .btn-understand:hover { background: var(--dark-gold); }
+
+        /* تنسيقات نظام المناوبات الجديد */
+        .shift-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #ecf0f1; padding: 10px; border-radius: 8px; }
+        .shift-input-group { display: flex; flex-direction: column; gap: 5px; }
+        .btn-shift-add { background: #27ae60; color: white; padding: 8px; font-size:13px; margin: 0; }
+        .btn-shift-rand { background: #8e44ad; color: white; padding: 8px; font-size:13px; margin: 0;}
+        .btn-shift-pdf { background: #e67e22; color: white; grid-column: span 2; padding: 8px; margin: 0;}
+        .btn-shift-wa { background: #25D366; color: white; padding: 4px 8px; font-size: 11px; margin:0; width:auto; border-radius:4px; }
+        .shifts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+        .shift-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
+        .shift-header { font-weight: bold; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+        .header-morning { background: #3498db; } .header-evening { background: #8e44ad; }
+        .delegate-item { background: #f9f9f9; padding: 8px; margin: 5px 0; border-right: 4px solid #27ae60; border-radius: 4px; border-left: 1px solid #eee; }
+        .delegate-name { font-weight: bold; font-size:14px; }
+        .shift-checkbox-group { display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;}
+        .shift-checkbox-group label { padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -301,7 +318,6 @@
             <div style="text-align: center;">
                 <h3 id="driver-welcome-msg" style="margin-bottom: 5px;">أهلاً بك 🛵</h3>
                 <div id="driver-badge-display" class="driver-badge">🌟 جاري حساب مستواك...</div>
-                <button id="drv-status-btn" onclick="toggleDriverStatus()" style="width: auto; padding: 6px 20px; border-radius: 20px; font-size: 14px; margin-top: 0; margin-bottom: 15px;">🟢 متصل وجاهز للعمل</button>
             </div>
             <button onclick="fetchDriverOrders(true)" style="background:#17a2b8; margin-bottom:10px;">تحديث وتفعيل جرس الطلبات 🔔</button>
             <div id="driver-orders-list"></div>
@@ -323,6 +339,27 @@
 
         <div id="admin-dashboard" class="card section hidden">
             <h3>إدارة العمليات والمناديب</h3>
+
+            <button onclick="toggleShiftsUI()" style="background:#8e44ad; font-size:16px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">🗓️ نظام إدارة المناوبات الذكي</button>
+
+            <div id="shifts-management-section" class="hidden" style="background: #f4f7f6; padding: 15px; border-radius: 10px; border: 2px solid #8e44ad; margin-bottom: 20px;">
+                <h4 style="color: #8e44ad; text-align: center; margin-top: 0; border-bottom: 2px solid #8e44ad; padding-bottom:10px;">جدول المناوبات اليومية</h4>
+                
+                <div class="shift-controls">
+                    <div class="shift-input-group">
+                        <input type="text" id="delegateName" placeholder="اسم المندوب" style="margin:0; padding:10px;">
+                        <input type="text" id="delegatePhone" placeholder="رقم الواتساب" style="margin:0; padding:10px;">
+                        <button class="btn-shift-add" onclick="addSingleShiftDelegate()">➕ إضافة مندوب</button>
+                    </div>
+                    <div class="shift-input-group">
+                        <textarea id="bulkInput" placeholder="لصق (الاسم، الرقم) كل سطر..." style="margin:0; padding:10px; height:80px;"></textarea>
+                        <button class="btn-shift-add" onclick="addBulkShiftDelegates()">📋 إضافة القائمة</button>
+                    </div>
+                    <button class="btn-shift-rand" onclick="randomizeShiftsDistribution()">🎲 توزيع ذكي (شفتين / بدون توالي)</button>
+                    <button id="pdfBtn" class="btn-shift-pdf" onclick="downloadShiftsPDF()">📄 تصدير الجدول PDF</button>
+                </div>
+                <div class="shifts-grid" id="shiftsContainer"></div>
+            </div>
             <h4 class="section-title">⚙️ إعدادات النظام السريعة</h4>
             <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <label style="font-size: 14px; color: #666; font-weight: bold;">📱 تغيير رقم واتساب الإدارة (المناوب الحالي):</label>
@@ -613,8 +650,10 @@
 
         function applyDriverStatusUI(status) {
             currentDriverStatus = status; let btn = document.getElementById('drv-status-btn');
-            if(status === "غير متاح") { btn.innerText = "🔴 غير متاح حالياً"; btn.style.background = "#dc3545"; } 
-            else { btn.innerText = "🟢 متصل وجاهز للعمل"; btn.style.background = "#28a745"; }
+            if(btn) {
+                if(status === "غير متاح") { btn.innerText = "🔴 غير متاح حالياً"; btn.style.background = "#dc3545"; } 
+                else { btn.innerText = "🟢 متصل وجاهز للعمل"; btn.style.background = "#28a745"; }
+            }
         }
 
         function toggleDriverStatus() {
@@ -631,7 +670,6 @@
                 if(data.status === 'success') { 
                     localStorage.setItem('driverId', id); localStorage.setItem('driverName', data.name); 
                     
-                    // هنا قمنا بإضافة كود فحص الاشتراك المفقود!
                     if (data.isExpired) {
                         showSection('driver-expired-dashboard');
                     } else {
@@ -647,7 +685,6 @@
             if(userClicked) { isAudioAllowed = true; } const id = localStorage.getItem('driverId'); const container = document.getElementById('driver-orders-list'); container.innerHTML = '<p>جاري البحث عن طلباتك... ⏳</p>';
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_driver_data', driverId: id }) })
             .then(res => res.json()).then(data => {
-                // فحص الاشتراك المفقود هنا أيضاً!
                 if(data.status === "expired") {
                     showSection('driver-expired-dashboard');
                     return;
@@ -726,146 +763,150 @@
         }
 
         let isFetchingAdmin = false;
-       function fetchAdminData() {
-    if(isFetchingAdmin || window.pauseRefresh) return; 
-    isFetchingAdmin = true;
-    
-    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
-    .then(res => res.json())
-    .then(data => {
-        if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
+        function fetchAdminData() {
+            if(isFetchingAdmin || window.pauseRefresh) return; 
+            isFetchingAdmin = true;
             
-            try {
-                if(data.newOrders && data.newOrders.length > (lastNewOrdersCount || 0) && typeof isAudioAllowed !== 'undefined' && isAudioAllowed && typeof adminAudio !== 'undefined') { 
-                    adminAudio.play().catch(e=>console.log("Audio issue", e)); 
-                } 
-                if(data.newOrders) lastNewOrdersCount = data.newOrders.length;
-            } catch(e) {}
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
+            .then(res => res.json())
+            .then(data => {
+                if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
+                    
+                    try {
+                        if(data.newOrders && data.newOrders.length > (lastNewOrdersCount || 0) && typeof isAudioAllowed !== 'undefined' && isAudioAllowed && typeof adminAudio !== 'undefined') { 
+                            adminAudio.play().catch(e=>console.log("Audio issue", e)); 
+                        } 
+                        if(data.newOrders) lastNewOrdersCount = data.newOrders.length;
+                    } catch(e) {}
 
-            try {
-                if(typeof renderCharts === 'function' && data.allOrders) renderCharts(data.allOrders, data.drivers || []); 
-                if(typeof renderHeatmap === 'function' && data.allOrders) renderHeatmap(data.allOrders); 
-            } catch(e) { console.log("Charts/Heatmap skipped", e); }
+                    try {
+                        if(typeof renderCharts === 'function' && data.allOrders) renderCharts(data.allOrders, data.drivers || []); 
+                        if(typeof renderHeatmap === 'function' && data.allOrders) renderHeatmap(data.allOrders); 
+                    } catch(e) { console.log("Charts/Heatmap skipped", e); }
 
-            try {
-                const cashContainer = document.getElementById('admin-driver-cash');
-                if(cashContainer) {
-                    let cashHtml = '';
-                    if(data.drivers && data.drivers.length > 0) {
-                        data.drivers.forEach(d => {
-                            let c = d.cash || 0;
-                            cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
-                                <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${c} ر.ع</strong></span>
-                                <button onclick="clearDriverCash('${d.id}', '${d.name}', ${c})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
-                            </div>`;
-                        });
-                        cashContainer.innerHTML = cashHtml;
-                    } else {
-                        cashContainer.innerHTML = '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
-                    }
-                }
-            } catch(e) {}
-
-            try {
-                const renContainer = document.getElementById('renewals-container');
-                if (renContainer) {
-                    renContainer.innerHTML = '';
-                    if(data.renewals && data.renewals.length > 0) {
-                        data.renewals.forEach(r => {
-                            renContainer.innerHTML += `
-                                <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                                    <strong>المندوب:</strong> ${r.driverName} <br>
-                                    <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
-                                    <div style="display:flex; gap:10px; margin-top:10px;">
-                                        <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; width:100%; margin:0;">تأكيد وتجديد ✅</button>
-                                        <button onclick="deleteDriverReceipt('${r.driverId}')" style="background:#dc3545; padding:5px 10px; font-size:12px; width:100%; margin:0;">رفض وحذف ❌</button>
-                                    </div>
-                                </div>`;
-                        });
-                    } else {
-                        renContainer.innerHTML = '<p style="color:green; font-size:13px; font-weight:bold;">لا توجد طلبات تجديد معلقة.</p>';
-                    }
-                }
-            } catch(e) {}
-
-            // تجهيز قائمة المناديب مرة واحدة لاستخدامها في قسم الطلبات الجديدة وقسم "جميع الطلبات"
-            let opts = '<option value="">اختر المندوب يدوياً...</option>';
-            if(data.drivers) data.drivers.forEach(d => opts += `<option value="${d.id}" data-name="${d.name}">${d.name} (طلباته: ${d.load || 0})</option>`);
-
-            try {
-                const newContainer = document.getElementById('admin-new-orders');
-                if(newContainer) {
-                    newContainer.innerHTML = '';
-                    if(!data.newOrders || data.newOrders.length === 0) {
-                        newContainer.innerHTML = '<p style="color:#666;">لا توجد طلبات جديدة.</p>';
-                    } else {
-                        data.newOrders.forEach(o => {
-                            let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
-                            newContainer.innerHTML += `
-                                <div class="admin-order-card" style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px; border-right: 5px solid var(--primary-gold); background:#fff;">
-                                    <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
-                                    <p style="margin:0 0 10px 0; font-size:13px; color:#555; background:#f9f9f9; padding:5px; border-radius:5px;">🕒 <strong>الوقت:</strong> ${formatTime(o.date)}</p>
-                                    <p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p>
-                                    <p style="margin:5px 0;"><strong>الاستلام من:</strong> ${o.pickup}</p>
-                                    <p style="margin:5px 0;"><strong>العميل:</strong> ${o.phone}</p>
-                                    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-                                    <div style="display:flex; flex-direction:column; gap:5px;">
-                                        <button onclick="autoAssignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}')" class="btn-smart">🪄 إسناد ذكي للمتاحين</button>
-                                        <select id="driver-select-${o.id}" onfocus="window.pauseRefresh = true;" onblur="window.pauseRefresh = false;">${opts}</select>
-                                        <button onclick="assignOrder('${o.id}', event)">إسناد للمندوب المحدد 📲</button>
-                                        <div style="display:flex; gap:5px; margin-top:5px;">
-    <button onclick="assignOrderToAdmin('${o.id}', '${o.phone}', '${encodeURIComponent(o.area || '')}', '${encodeURIComponent(o.pickup || '')}', '${encodeURIComponent(o.details || '')}')" style="background:#17a2b8; padding:5px; margin:0; flex:1; font-size:12px; color:white;">🚗 توصيل الإدارة</button>
-    <button onclick="archiveOrder('${o.id}')" style="background:#6c757d; padding:5px; margin:0; flex:1; font-size:12px; color:white;">📦 أرشفة إجبارية</button>
-</div>
-                                    </div>
-                                </div>`;
-                        });
-                    }
-                }
-            } catch(e) {}
-
-            try {
-                const allContainer = document.getElementById('admin-all-orders');
-                if(allContainer && data.allOrders) {
-                    allContainer.innerHTML = '';
-                    data.allOrders.reverse().forEach(o => {
-                        let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
-                        
-                        let reassignBlock = '';
-                        // إظهار أدوات النقل فقط إذا كان الطلب لم يسلم ولم يلغى
-                        if(!o.status.includes('تم التسليم') && !o.status.includes('ملغي')) {
-                            reassignBlock = `
-                            <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">
-                                <label style="font-size:12px; color:#888;">🔄 سحب الطلب وتغيير المندوب:</label>
-                                <div style="display:flex; gap:5px;">
-                                    <select id="reassign-select-${o.id}" style="font-size:13px; padding:5px; margin:0; flex:2;" onfocus="window.pauseRefresh = true;" onblur="window.pauseRefresh = false;">${opts}</select>
-                                    <button onclick="reassignOrder('${o.id}', event)" style="margin:0; padding:5px; font-size:13px; flex:1; background:#333;">نقل</button>
-                                </div>
-                                <button onclick="assignOrderToAdmin('${o.id}')" style="background:#17a2b8; padding:5px; margin-top:5px; width:100%; font-size:13px;">🚗 استلام الطلب للإدارة</button>
-                            </div>`;
+                    try {
+                        const cashContainer = document.getElementById('admin-driver-cash');
+                        if(cashContainer) {
+                            let cashHtml = '';
+                            if(data.drivers && data.drivers.length > 0) {
+                                data.drivers.forEach(d => {
+                                    let c = d.cash || 0;
+                                    cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
+                                        <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${c} ر.ع</strong></span>
+                                        <button onclick="clearDriverCash('${d.id}', '${d.name}', ${c})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
+                                    </div>`;
+                                });
+                                cashContainer.innerHTML = cashHtml;
+                            } else {
+                                cashContainer.innerHTML = '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
+                            }
                         }
+                    } catch(e) {}
 
-                        allContainer.innerHTML += `
-                        <div class="admin-order-card" style="border-bottom:2px solid #eee; padding:15px 0; font-size:14px;">
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong>${o.id}</strong>
-                                <span class="badge ${badgeClass}">${o.status}</span>
-                            </div>
-                            <p style="margin:5px 0; font-size:12px; color:#888;">🕒 ${formatTime(o.date)}</p>
-                            <p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold); font-weight:bold;">المندوب الحالي: '+o.driverName+'</span>' : ''}</p>
-                            ${reassignBlock}
-                        </div>`;
-                    });
+                    try {
+                        const renContainer = document.getElementById('renewals-container');
+                        if (renContainer) {
+                            renContainer.innerHTML = '';
+                            if(data.renewals && data.renewals.length > 0) {
+                                data.renewals.forEach(r => {
+                                    renContainer.innerHTML += `
+                                        <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                            <strong>المندوب:</strong> ${r.driverName} <br>
+                                            <strong>رقم الإيصال:</strong> <span style="color:red; letter-spacing:1px; font-weight:bold;">${r.receipt}</span> <br>
+                                            <div style="display:flex; gap:10px; margin-top:10px;">
+                                                <button onclick="approveDriverRenewal('${r.driverId}')" style="background:#28a745; padding:5px 10px; font-size:12px; width:100%; margin:0;">تأكيد وتجديد ✅</button>
+                                                <button onclick="deleteDriverReceipt('${r.driverId}')" style="background:#dc3545; padding:5px 10px; font-size:12px; width:100%; margin:0;">رفض وحذف ❌</button>
+                                            </div>
+                                        </div>`;
+                                });
+                            } else {
+                                renContainer.innerHTML = '<p style="color:green; font-size:13px; font-weight:bold;">لا توجد طلبات تجديد معلقة.</p>';
+                            }
+                        }
+                    } catch(e) {}
+
+                    // تجهيز قائمة المناديب مرة واحدة لاستخدامها
+                    let opts = '<option value="">اختر المندوب يدوياً...</option>';
+                    if(data.drivers) {
+                        data.drivers.forEach(d => opts += `<option value="${d.id}" data-name="${d.name}">${d.name} (طلباته: ${d.load || 0})</option>`);
+                        availableDriversData = data.drivers; // تحديث المصفوفة العامة للاستخدام في الإسناد الذكي
+                    }
+
+                    try {
+                        const newContainer = document.getElementById('admin-new-orders');
+                        if(newContainer) {
+                            newContainer.innerHTML = '';
+                            if(!data.newOrders || data.newOrders.length === 0) {
+                                newContainer.innerHTML = '<p style="color:#666;">لا توجد طلبات جديدة.</p>';
+                            } else {
+                                data.newOrders.forEach(o => {
+                                    let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
+                                    newContainer.innerHTML += `
+                                        <div class="admin-order-card" style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px; border-right: 5px solid var(--primary-gold); background:#fff;">
+                                            <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
+                                            <p style="margin:0 0 10px 0; font-size:13px; color:#555; background:#f9f9f9; padding:5px; border-radius:5px;">🕒 <strong>الوقت:</strong> ${formatTime(o.date)}</p>
+                                            <p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p>
+                                            <p style="margin:5px 0;"><strong>الاستلام من:</strong> ${o.pickup}</p>
+                                            <p style="margin:5px 0;"><strong>العميل:</strong> ${o.phone}</p>
+                                            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                                <button onclick="autoAssignOrder('${o.id}', '${o.phone}', '${encArea}', '${encDetails}')" class="btn-smart">🪄 إسناد ذكي للمتاحين</button>
+                                                <select id="driver-select-${o.id}" onfocus="window.pauseRefresh = true;" onblur="window.pauseRefresh = false;">${opts}</select>
+                                                <button onclick="assignOrder('${o.id}', event)">إسناد للمندوب المحدد 📲</button>
+                                                <div style="display:flex; gap:5px; margin-top:5px;">
+            <button onclick="assignOrderToAdmin('${o.id}', '${o.phone}', '${encodeURIComponent(o.area || '')}', '${encodeURIComponent(o.pickup || '')}', '${encodeURIComponent(o.details || '')}')" style="background:#17a2b8; padding:5px; margin:0; flex:1; font-size:12px; color:white;">🚗 توصيل الإدارة</button>
+            <button onclick="archiveOrder('${o.id}')" style="background:#6c757d; padding:5px; margin:0; flex:1; font-size:12px; color:white;">📦 أرشفة إجبارية</button>
+        </div>
+                                            </div>
+                                        </div>`;
+                                });
+                            }
+                        }
+                    } catch(e) {}
+
+                    try {
+                        const allContainer = document.getElementById('admin-all-orders');
+                        if(allContainer && data.allOrders) {
+                            allContainer.innerHTML = '';
+                            data.allOrders.reverse().forEach(o => {
+                                let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
+                                
+                                let reassignBlock = '';
+                                // إظهار أدوات النقل فقط إذا كان الطلب لم يسلم ولم يلغى
+                                if(!o.status.includes('تم التسليم') && !o.status.includes('ملغي')) {
+                                    reassignBlock = `
+                                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">
+                                        <label style="font-size:12px; color:#888;">🔄 سحب الطلب وتغيير المندوب:</label>
+                                        <div style="display:flex; gap:5px;">
+                                            <select id="reassign-select-${o.id}" style="font-size:13px; padding:5px; margin:0; flex:2;" onfocus="window.pauseRefresh = true;" onblur="window.pauseRefresh = false;">${opts}</select>
+                                            <button onclick="reassignOrder('${o.id}', event)" style="margin:0; padding:5px; font-size:13px; flex:1; background:#333;">نقل</button>
+                                        </div>
+                                        <button onclick="assignOrderToAdmin('${o.id}')" style="background:#17a2b8; padding:5px; margin-top:5px; width:100%; font-size:13px;">🚗 استلام الطلب للإدارة</button>
+                                    </div>`;
+                                }
+
+                                allContainer.innerHTML += `
+                                <div class="admin-order-card" style="border-bottom:2px solid #eee; padding:15px 0; font-size:14px;">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <strong>${o.id}</strong>
+                                        <span class="badge ${badgeClass}">${o.status}</span>
+                                    </div>
+                                    <p style="margin:5px 0; font-size:12px; color:#888;">🕒 ${formatTime(o.date)}</p>
+                                    <p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold); font-weight:bold;">المندوب الحالي: '+o.driverName+'</span>' : ''}</p>
+                                    ${reassignBlock}
+                                </div>`;
+                            });
+                        }
+                    } catch(e) {}
+
                 }
-            } catch(e) {}
-
+            })
+            .catch(e => { console.log("Fetch Error", e); })
+            .finally(() => { 
+                isFetchingAdmin = false; 
+            });
         }
-    })
-    .catch(e => { console.log("Fetch Error", e); })
-    .finally(() => { 
-        isFetchingAdmin = false; 
-    });
-}
+
         function clearDriverCash(driverId, driverName, amount) {
             if(amount === 0) { alert('العهدة مصفرة بالفعل!'); return; }
             if(confirm(`هل متأكد أنك استلمت (${amount} ر.ع) كاش من المندوب ${driverName} وتريد تصفية عهدته؟`)) {
@@ -901,14 +942,14 @@
             }
         }
 
-       // 1. دالة تنسيق الوقت والتاريخ (جديدة)
+       // 1. دالة تنسيق الوقت والتاريخ
         function formatTime(dateStr) {
             if (!dateStr) return '';
             let d = new Date(dateStr);
             return d.toLocaleTimeString('ar-OM', { hour: '2-digit', minute: '2-digit', hour12: true }) + ' | ' + d.toLocaleDateString('ar-OM', { month: 'short', day: 'numeric' });
         }
 
-        // 2. دالة الإسناد العادي (المُحدثة التي ستستبدل دالتك القديمة)
+        // 2. دالة الإسناد العادي
         function assignOrder(orderId, event) {
             const select = document.getElementById(`driver-select-${orderId}`); 
             if(!select.value) { alert('اختر مندوباً أولاً!'); return; }
@@ -917,7 +958,7 @@
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { alert('تم الإسناد بنجاح ✅'); fetchAdminData(); });
         }
 
-        // 3. دالة نقل الطلب من مندوب لآخر (جديدة)
+        // 3. دالة نقل الطلب من مندوب لآخر
         function reassignOrder(orderId, event) {
             const select = document.getElementById(`reassign-select-${orderId}`); 
             if(!select.value) { alert('اختر المندوب الجديد أولاً!'); return; }
@@ -928,11 +969,10 @@
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { alert('تم سحب الطلب ونقله بنجاح 🔄'); fetchAdminData(); });
         }
 
-       // 4. دالة قيام الإدارة بتوصيل الطلب بنفسها (مُحدثة لإرسال رسالة واتساب)
+       // 4. دالة قيام الإدارة بتوصيل الطلب بنفسها
         function assignOrderToAdmin(orderId, phone, encArea, encPickup, encDetails) {
             if(!confirm('هل ستقوم أنت (الإدارة المناوبة) بتوصيل هذا الطلب بنفسك؟\nسيتم إرسال تفاصيل الطلب إلى رقم الواتساب الخاص بك.')) return;
             
-            // تجهيز نص الرسالة الأنيق الذي سيصل للإدارة
             let adminMessage = `🚗 *استلام طلب للإدارة* 🚗\n\n` +
                                `*رقم الطلب:* ${orderId}\n` +
                                `*هاتف الزبون:* ${phone}\n` +
@@ -948,7 +988,7 @@
                     newStatus: 'قيد التوصيل (الإدارة)', 
                     driverId: 'admin_00', 
                     driverName: 'الإدارة المناوبة 🚗',
-                    adminMsg: adminMessage // نرسل الرسالة الجاهزة للسيرفر
+                    adminMsg: adminMessage 
                 }) 
             }).then(() => { 
                 alert('تم تحويل الطلب لعهدتك وإرسال التفاصيل للواتساب بنجاح ✅'); 
@@ -956,7 +996,7 @@
             });
         }
 
-        // 5. دالة الأرشفة الإجبارية للإدارة (جديدة)
+        // 5. دالة الأرشفة الإجبارية للإدارة
         function archiveOrder(orderId) {
             if(!confirm('هل أنت متأكد من إغلاق وأرشفة هذا الطلب إجبارياً؟\n(سيتم تحويل حالته إلى "تم التسليم" وإخفاؤه من الطلبات النشطة حتى لو لم ينهه المندوب)')) return;
             
@@ -1021,7 +1061,7 @@
                 if(data.status === 'success') { alert('✅ تم تجديد حساب المندوب بنجاح! يمكنه الآن استقبال الطلبات.'); fetchAdminData(); }
             });
         }
-        // 4. دالة رفض الإيصال وحذفه (لكي يدخله المندوب من جديد)
+
         function deleteDriverReceipt(driverId) {
             if(!confirm('هل أنت متأكد من رفض وحذف هذا الإيصال؟\nسيتم حذفه من النظام وسيضطر المندوب لكتابته من جديد.')) return;
             
@@ -1029,12 +1069,275 @@
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') {
                     alert('🗑️ تم حذف الإيصال بنجاح!');
-                    fetchAdminData(); // تحديث اللوحة فوراً
+                    fetchAdminData();
                 } else {
                     alert('⚠️ حدث خطأ أثناء الحذف.');
                 }
             });
         }
+
+        // ==========================================
+        // ✨ نظام المناوبات الذكي ✨
+        // ==========================================
+        const shiftsConfig = [
+            { id: 1, time: "08:00 ص → 11:00 ص", type: "morning" },
+            { id: 2, time: "11:00 ص → 02:00 م", type: "morning" },
+            { id: 3, time: "02:00 م → 05:00 م", type: "morning" },
+            { id: 4, time: "05:00 م → 07:30 م", type: "evening" },
+            { id: 5, time: "07:30 م → 10:00 م", type: "evening" },
+            { id: 6, time: "10:00 م → 01:00 ص", type: "evening" }
+        ];
+
+        let allDelegates = [];
+
+        function toggleShiftsUI() {
+            const section = document.getElementById('shifts-management-section');
+            section.classList.toggle('hidden');
+            if(!section.classList.contains('hidden')) {
+                fetchShifts();
+            }
+        }
+
+        function fetchShifts() {
+            document.getElementById('shiftsContainer').innerHTML = '<h4 style="text-align:center; width:100%;">جاري تحميل المناوبات... ⏳</h4>';
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_shifts' }) })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    allDelegates = data.delegates || [];
+                    renderShiftsUI();
+                }
+            }).catch(e => console.log("Shifts fetch error:", e));
+        }
+
+        function saveShiftsToServer() {
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_shifts', delegates: allDelegates }) })
+            .then(() => console.log('تم حفظ المناوبات في السيرفر بنجاح'));
+        }
+
+        function renderShiftsUI() {
+            const container = document.getElementById('shiftsContainer');
+            container.innerHTML = '';
+
+            shiftsConfig.forEach(shift => {
+                const delegatesInShift = allDelegates.filter(d => d.shiftIds.includes(shift.id));
+                const headerClass = shift.type === 'morning' ? 'header-morning' : 'header-evening';
+                const shiftLabel = shift.type === 'morning' ? 'صباحي' : 'مسائي';
+                
+                const card = document.createElement('div');
+                card.className = 'shift-card';
+                card.innerHTML = `
+                    <div class="shift-header ${headerClass}">
+                        الفترة ${shift.id} (${shiftLabel}) - المجموع: ${delegatesInShift.length}<br>
+                        <small dir="ltr">${shift.time}</small>
+                    </div>
+                    <div>
+                        ${delegatesInShift.map(d => `
+                            <div class="delegate-item">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span class="delegate-name">${d.name}</span>
+                                    <div style="display:flex; gap:5px;">
+                                        <button class="btn-shift-wa" onclick="sendShiftWhatsApp('${d.id}')">💬</button>
+                                        <button style="background:none; color:red; cursor:pointer; font-size:18px; font-weight:bold; border:none; margin:0; padding:0 5px;" onclick="removeShiftDelegate('${d.id}')">×</button>
+                                    </div>
+                                </div>
+                                <div class="shift-checkbox-group">
+                                    ${shiftsConfig.map(s => `
+                                        <label style="background: ${d.shiftIds.includes(s.id) ? '#27ae60' : '#eee'}; color: ${d.shiftIds.includes(s.id) ? 'white' : 'black'}">
+                                            <input type="checkbox" style="display:none" onchange="toggleShiftSelection('${d.id}', ${s.id})" ${d.shiftIds.includes(s.id) ? 'checked' : ''}>
+                                            ${s.id}
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // قائمة الانتظار
+            const unassigned = allDelegates.filter(d => d.shiftIds.length === 0);
+            const unCard = document.createElement('div');
+            unCard.className = 'shift-card';
+            unCard.style.border = '2px dashed #f39c12';
+            unCard.innerHTML = `
+                <div class="shift-header" style="background: #f39c12;">قائمة الانتظار (بدون فترة)</div>
+                <div>
+                    ${unassigned.map(d => `
+                        <div class="delegate-item" style="border-right-color: #f39c12;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="delegate-name">${d.name}</span>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn-shift-wa" onclick="sendShiftWhatsApp('${d.id}')">💬</button>
+                                    <button style="background:none; color:red; cursor:pointer; font-size:18px; font-weight:bold; border:none; margin:0; padding:0 5px;" onclick="removeShiftDelegate('${d.id}')">×</button>
+                                </div>
+                            </div>
+                            <div class="shift-checkbox-group">
+                                ${shiftsConfig.map(s => `
+                                    <label style="background: #eee; color: black">
+                                        <input type="checkbox" style="display:none" onchange="toggleShiftSelection('${d.id}', ${s.id})">
+                                        ${s.id}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${unassigned.length === 0 ? '<p style="text-align:center; color:#7f8c8d; font-size:13px; margin-top:10px;">لا يوجد مناديب في قائمة الانتظار</p>' : ''}
+                </div>
+            `;
+            container.appendChild(unCard);
+        }
+
+        function addSingleShiftDelegate() {
+            const name = document.getElementById('delegateName').value;
+            const phone = document.getElementById('delegatePhone').value;
+            if (!name) return;
+            allDelegates.push({ id: Date.now().toString(), name: name, phone: phone, shiftIds: [] });
+            document.getElementById('delegateName').value = ''; document.getElementById('delegatePhone').value = '';
+            renderShiftsUI(); saveShiftsToServer();
+        }
+
+        function addBulkShiftDelegates() {
+            const raw = document.getElementById('bulkInput').value;
+            const lines = raw.split('\n').filter(l => l.trim() !== "");
+            lines.forEach(line => {
+                const parts = line.split(/[،,]/);
+                allDelegates.push({ 
+                    id: Math.random().toString(36).substr(2, 9), 
+                    name: parts[0].trim(), 
+                    phone: parts[1] ? parts[1].trim() : "", 
+                    shiftIds: [] 
+                });
+            });
+            document.getElementById('bulkInput').value = '';
+            renderShiftsUI(); saveShiftsToServer();
+        }
+
+        function sendShiftWhatsApp(delegateId) {
+            const delegate = allDelegates.find(d => d.id === delegateId);
+            if (!delegate.phone) { alert("يرجى إضافة رقم جوال لهذا المندوب أولاً"); return; }
+            let message = "";
+            if (delegate.shiftIds && delegate.shiftIds.length > 0) {
+                const sortedShifts = [...delegate.shiftIds].sort((a, b) => a - b);
+                let shiftsText = sortedShifts.map(id => {
+                    const shift = shiftsConfig.find(s => s.id === id);
+                    return `▪️ الفترة رقم (${shift.id}): من ${shift.time}`;
+                }).join('\n');
+                message = `أهلاً ${delegate.name} \nلديك مناوبات في الفترات التالية:\n\n${shiftsText}\n\nبالتوفيق!`;
+            } else {
+                message = `أهلاً ${delegate.name} \nأنت حالياً في قائمة الانتظار. سنقوم بالتواصل معك قريباً لتحديد موعد مناوبتك!`;
+            }
+            window.open(`https://wa.me/${delegate.phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function toggleShiftSelection(delegateId, shiftId) {
+            const delegate = allDelegates.find(d => d.id === delegateId);
+            if (delegate) {
+                if (delegate.shiftIds.includes(shiftId)) {
+                    delegate.shiftIds = delegate.shiftIds.filter(id => id !== shiftId);
+                } else {
+                    delegate.shiftIds.push(shiftId);
+                }
+                renderShiftsUI(); saveShiftsToServer();
+            }
+        }
+
+        function removeShiftDelegate(id) {
+            if(confirm("هل أنت متأكد من حذف المندوب من الجدول؟")) {
+                allDelegates = allDelegates.filter(d => d.id !== id);
+                renderShiftsUI(); saveShiftsToServer();
+            }
+        }
+
+        function randomizeShiftsDistribution() {
+            if (allDelegates.length === 0) return alert("أضف مناديب أولاً!");
+            allDelegates.forEach(d => d.shiftIds = []);
+            let delegates = [...allDelegates];
+
+            delegates.forEach(delegate => {
+                let assigned = 0; let attempts = 0;
+                while(assigned < 2 && attempts < 20) {
+                    attempts++;
+                    let shiftNeeds = shiftsConfig.map(s => {
+                        let currentCount = allDelegates.filter(d => d.shiftIds.includes(s.id)).length;
+                        let target = (s.type === 'evening') ? 5 : 3;
+                        return { id: s.id, need: target - currentCount };
+                    });
+                    shiftNeeds.sort((a,b) => (b.need - a.need) || (Math.random() - 0.5));
+
+                    for (let s of shiftNeeds) {
+                        if (assigned >= 2) break;
+                        let sId = s.id;
+                        if (delegate.shiftIds.includes(sId)) continue;
+                        if (delegate.shiftIds.length === 1) {
+                            if (Math.abs(delegate.shiftIds[0] - sId) <= 1) continue;
+                        }
+                        delegate.shiftIds.push(sId); assigned++; break; 
+                    }
+                }
+                delegate.shiftIds.sort((a,b) => a - b);
+            });
+            renderShiftsUI(); saveShiftsToServer();
+        }
+
+        function downloadShiftsPDF() {
+            const pdfBtn = document.getElementById('pdfBtn');
+            const originalText = pdfBtn.innerHTML;
+            pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true;
+
+            let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff;">`;
+
+            for (let i = 0; i < shiftsConfig.length; i += 2) {
+                printHTML += `<div style="page-break-after: always; padding: 20px; box-sizing: border-box; min-height: 200mm;">`;
+                if (i === 0) {
+                    printHTML += `<h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 25px;">جدول مناوبات فريق نعاون</h1>`;
+                } else {
+                    printHTML += `<div style="height: 30px;"></div>`;
+                }
+
+                printHTML += `<div style="display: flex; justify-content: space-between; gap: 20px;">`;
+                for(let j = 0; j < 2; j++) {
+                    if (i + j < shiftsConfig.length) {
+                        const shift = shiftsConfig[i + j];
+                        const delegatesInShift = allDelegates.filter(d => d.shiftIds.includes(shift.id));
+                        const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
+                        
+                        let delegatesHTML = delegatesInShift.map(d => `
+                            <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
+                                ${d.name}
+                            </div>
+                        `).join('');
+
+                        if(delegatesInShift.length === 0) delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px;">لا يوجد مناديب</div>`;
+
+                        printHTML += `
+                        <div style="flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box;">
+                            <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
+                                الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br>
+                                <span style="font-size: 14px;" dir="ltr">${shift.time}</span>
+                            </div>
+                            <div>${delegatesHTML}</div>
+                        </div>`;
+                    }
+                }
+                printHTML += `</div></div>`;
+            }
+            printHTML += `</div>`;
+
+            const opt = { 
+                margin: 0, filename: 'جدول_المناوبات_نعاون.pdf', image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: 'css' }
+            };
+
+            html2pdf().set(opt).from(printHTML).save().then(() => {
+                pdfBtn.innerHTML = originalText; pdfBtn.disabled = false;
+            }).catch(err => {
+                console.error("PDF Error: ", err); pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; alert("حدث خطأ أثناء تصدير الملف.");
+            });
+        }
+        // ==========================================
+
     </script>
 </body>
 </html>
