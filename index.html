@@ -340,26 +340,6 @@
         <div id="admin-dashboard" class="card section hidden">
             <h3>إدارة العمليات والمناديب</h3>
 
-            <button onclick="toggleShiftsUI()" style="background:#8e44ad; font-size:16px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">🗓️ نظام إدارة المناوبات الذكي</button>
-
-            <div id="shifts-management-section" class="hidden" style="background: #f4f7f6; padding: 15px; border-radius: 10px; border: 2px solid #8e44ad; margin-bottom: 20px;">
-                <h4 style="color: #8e44ad; text-align: center; margin-top: 0; border-bottom: 2px solid #8e44ad; padding-bottom:10px;">جدول المناوبات اليومية</h4>
-                
-                <div class="shift-controls">
-                    <div class="shift-input-group">
-                        <input type="text" id="delegateName" placeholder="اسم المندوب" style="margin:0; padding:10px;">
-                        <input type="text" id="delegatePhone" placeholder="رقم الواتساب" style="margin:0; padding:10px;">
-                        <button class="btn-shift-add" onclick="addSingleShiftDelegate()">➕ إضافة مندوب</button>
-                    </div>
-                    <div class="shift-input-group">
-                        <textarea id="bulkInput" placeholder="لصق (الاسم، الرقم) كل سطر..." style="margin:0; padding:10px; height:80px;"></textarea>
-                        <button class="btn-shift-add" onclick="addBulkShiftDelegates()">📋 إضافة القائمة</button>
-                    </div>
-                    <button class="btn-shift-rand" onclick="randomizeShiftsDistribution()">🎲 توزيع ذكي (شفتين / بدون توالي)</button>
-                    <button id="pdfBtn" class="btn-shift-pdf" onclick="downloadShiftsPDF()">📄 تصدير الجدول PDF</button>
-                </div>
-                <div class="shifts-grid" id="shiftsContainer"></div>
-            </div>
             <h4 class="section-title">⚙️ إعدادات النظام السريعة</h4>
             <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <label style="font-size: 14px; color: #666; font-weight: bold;">📱 تغيير رقم واتساب الإدارة (المناوب الحالي):</label>
@@ -398,6 +378,27 @@
                 <p style="color:#666; font-size:14px; margin:0;">جاري التحميل...</p>
             </div>
 
+            <button onclick="toggleShiftsUI()" style="background:#8e44ad; font-size:16px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">🗓️ نظام إدارة المناوبات الذكي</button>
+
+            <div id="shifts-management-section" class="hidden" style="background: #f4f7f6; padding: 15px; border-radius: 10px; border: 2px solid #8e44ad; margin-bottom: 20px;">
+                <h4 style="color: #8e44ad; text-align: center; margin-top: 0; border-bottom: 2px solid #8e44ad; padding-bottom:10px;">جدول المناوبات اليومية</h4>
+                
+                <div class="shift-controls">
+                    <div class="shift-input-group">
+                        <input type="text" id="delegateName" placeholder="اسم المندوب" style="margin:0; padding:10px;">
+                        <input type="text" id="delegatePhone" placeholder="رقم الواتساب" style="margin:0; padding:10px;">
+                        <button class="btn-shift-add" onclick="addSingleShiftDelegate()">➕ إضافة مندوب</button>
+                    </div>
+                    <div class="shift-input-group">
+                        <textarea id="bulkInput" placeholder="لصق (الاسم، الرقم) كل سطر..." style="margin:0; padding:10px; height:80px;"></textarea>
+                        <button class="btn-shift-add" onclick="addBulkShiftDelegates()">📋 إضافة القائمة</button>
+                    </div>
+                    <button class="btn-shift-rand" onclick="randomizeShiftsDistribution()">🎲 توزيع ذكي (شفتين / بدون توالي)</button>
+                    <button id="pdfBtn" class="btn-shift-pdf" onclick="downloadShiftsPDF()">📄 تصدير الجدول PDF</button>
+                    <button class="btn-danger" style="grid-column: span 2; margin-top: 5px; padding: 10px;" onclick="clearAllShifts()">🗑️ مسح جدول الأمس وبدء يوم جديد</button>
+                </div>
+                <div class="shifts-grid" id="shiftsContainer"></div>
+            </div>
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
             <button onclick="logout()" class="btn-back" style="margin-top:20px;">تسجيل خروج 🚪</button>
@@ -416,7 +417,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3Wo746IfdItzFc-M1mEk6_lrFgoEGanhgljJDEnL227rGoT0Cjm1ascnRzovFMER7/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUP981H2-QqcvuTy8LRBv9Fhsf_eg2tTXe4tAsRJkz2HWNbl4UGWBuo2QYQvPW3Ze-/exec'; 
 
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
@@ -1250,6 +1251,16 @@
             }
         }
 
+        // الزر الجديد لتصفير الجدول يومياً
+        function clearAllShifts() {
+            if(confirm("⚠️ هل أنت متأكد من مسح جميع المناديب من جدول المناوبات للبدء بيوم جديد؟\n(هذا الإجراء لا يمكن التراجع عنه)")) {
+                allDelegates = [];
+                renderShiftsUI();
+                saveShiftsToServer();
+                alert("✅ تم تصفير الجدول بنجاح! يمكنك الآن إضافة مناديب اليوم الجديد.");
+            }
+        }
+
         function randomizeShiftsDistribution() {
             if (allDelegates.length === 0) return alert("أضف مناديب أولاً!");
             allDelegates.forEach(d => d.shiftIds = []);
@@ -1286,12 +1297,14 @@
             const originalText = pdfBtn.innerHTML;
             pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true;
 
-            let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff;">`;
+            const todayDate = new Date().toLocaleDateString('ar-OM', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff; width: 100%;">`;
 
             for (let i = 0; i < shiftsConfig.length; i += 2) {
-                printHTML += `<div style="page-break-after: always; padding: 20px; box-sizing: border-box; min-height: 200mm;">`;
+                printHTML += `<div style="padding: 20px; box-sizing: border-box;">`;
+                
                 if (i === 0) {
-                    printHTML += `<h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 25px;">جدول مناوبات فريق نعاون</h1>`;
+                    printHTML += `<h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 25px;">جدول مناوبات فريق نعاون<br><span style="font-size: 16px; color: #666; font-weight: normal;">بتاريخ: ${todayDate}</span></h1>`;
                 } else {
                     printHTML += `<div style="height: 30px;"></div>`;
                 }
@@ -1304,15 +1317,15 @@
                         const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
                         
                         let delegatesHTML = delegatesInShift.map(d => `
-                            <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
+                            <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px; page-break-inside: avoid;">
                                 ${d.name}
                             </div>
                         `).join('');
 
-                        if(delegatesInShift.length === 0) delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px;">لا يوجد مناديب</div>`;
+                        if(delegatesInShift.length === 0) delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; page-break-inside: avoid;">لا يوجد مناديب</div>`;
 
                         printHTML += `
-                        <div style="flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box;">
+                        <div style="flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; page-break-inside: avoid;">
                             <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
                                 الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br>
                                 <span style="font-size: 14px;" dir="ltr">${shift.time}</span>
@@ -1322,12 +1335,21 @@
                     }
                 }
                 printHTML += `</div></div>`;
+                
+                if (i + 2 < shiftsConfig.length) {
+                    printHTML += `<div class="html2pdf__page-break"></div>`;
+                }
             }
+
             printHTML += `</div>`;
 
             const opt = { 
-                margin: 0, filename: 'جدول_المناوبات_نعاون.pdf', image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: 'css' }
+                margin: [10, 10, 10, 10], 
+                filename: `جدول_المناوبات_${new Date().toISOString().split('T')[0]}.pdf`, 
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2, useCORS: true, logging: false }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['css', 'legacy'] }
             };
 
             html2pdf().set(opt).from(printHTML).save().then(() => {
