@@ -357,8 +357,8 @@
             <h4 class="section-title" style="margin-top: 10px;">🆕 الطلبات الجديدة</h4>
             <div id="admin-new-orders"></div>
             
-            <h4 class="section-title">🔥 خريطة تركيز الطلبات</h4>
-            <div id="admin-heatmap" class="map-box"></div>
+            /*<h4 class="section-title">🔥 خريطة تركيز الطلبات</h4>
+            <div id="admin-heatmap" class="map-box"></div>*/
 
              <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
             <div id="admin-renewals-list" style="margin-bottom: 20px;">
@@ -494,13 +494,13 @@
             });
         }
 
-        let heatmap;
+        /*let heatmap;
         function renderHeatmap(orders) {
             if(!heatmap) { heatmap = L.map('admin-heatmap').setView([23.2255, 56.5165], 8); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(heatmap); }
             heatmap.eachLayer((layer) => { if (layer instanceof L.Circle) heatmap.removeLayer(layer); });
             orders.forEach(o => { if(o.custLat && o.custLng) { L.circle([o.custLat, o.custLng], { color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 500 }).addTo(heatmap); } });
             setTimeout(() => heatmap.invalidateSize(), 500);
-        }
+        }*/
 
         function loginCustomer() { 
             const p = document.getElementById('cust-phone').value; 
@@ -782,7 +782,7 @@
 
                     try {
                         if(typeof renderCharts === 'function' && data.allOrders) renderCharts(data.allOrders, data.drivers || []); 
-                        if(typeof renderHeatmap === 'function' && data.allOrders) renderHeatmap(data.allOrders); 
+                        //if(typeof renderHeatmap === 'function' && data.allOrders) renderHeatmap(data.allOrders); 
                     } catch(e) { console.log("Charts/Heatmap skipped", e); }
 
                     try {
