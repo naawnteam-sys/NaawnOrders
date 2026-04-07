@@ -1292,17 +1292,16 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
-       function downloadShiftsPDF() {
+      function downloadShiftsPDF() { // أو downloadPDF حسب اسم دالتك
     const pdfBtn = document.getElementById('pdfBtn');
-    const originalText = pdfBtn.innerHTML;
-    pdfBtn.innerHTML = '⏳ جاري التجهيز...'; 
-    pdfBtn.disabled = true;
+    const originalText = pdfBtn ? pdfBtn.innerHTML : 'تصدير';
+    if(pdfBtn) { pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true; }
 
     const todayDate = new Date().toLocaleDateString('ar-OM', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
-    // بناء قالب HTML مستقل ونظيف مخصص للطباعة (بالاعتماد على هيكلك القديم الناجح)
+    // بناء القالب الناجح الخاص بك
     let printHTML = `
-    <div style="font-family: 'Cairo', sans-serif; direction: rtl; padding: 20px; background: #fff;">
+    <div style="font-family: 'Cairo', sans-serif; direction: rtl; padding: 20px; background: #fff; width: 100%; box-sizing: border-box;">
         <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">
             جدول مناوبات فريق نعاون<br>
             <span style="font-size: 16px; color: #666; font-weight: normal;">بتاريخ: ${todayDate}</span>
@@ -1310,20 +1309,17 @@
     `;
 
     for (let i = 0; i < shiftsConfig.length; i += 2) {
-        
-        // إضافة فاصل صفحات بطريقتك القديمة المضمونة
         if (i > 0) {
             printHTML += `<div class="html2pdf__page-break" style="page-break-before: always; height: 0; display: block; width: 100%;"></div>`;
         }
         
         printHTML += `<div style="display: block; width: 100%; clear: both;">`;
         
-        // طباعة فترتين بجانب بعضهما
         for(let j = 0; j < 2; j++) {
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // الاحتفاظ بالذكاء الجديد في المطابقة لضمان ظهور الأسماء
+                // مطابقة ذكية للمناديب
                 const delegatesInShift = allDelegates.filter(d => {
                     if (!d.shiftIds) return false;
                     return d.shiftIds.some(sid => String(sid).trim() === String(shift.id).trim());
@@ -1341,27 +1337,32 @@
                     delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب</div>`;
                 }
 
-                // تصميم بطاقة الفترة بنفس الطريقة القديمة (inline-block و 48%)
                 printHTML += `
                 <div style="display: inline-block; width: 48%; vertical-align: top; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; margin: 0 0.5%;">
                     <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
                         الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br>
                         <span style="font-size: 14px;" dir="ltr">${shift.time}</span>
                     </div>
-                    <div>
-                        ${delegatesHTML}
-                    </div>
+                    <div>${delegatesHTML}</div>
                 </div>
                 `;
             }
         }
-        
-        printHTML += `</div>`; // إغلاق صف الفترتين
+        printHTML += `</div>`; 
     }
+    printHTML += `</div>`;
 
-    printHTML += `</div>`; // إغلاق الحاوية الرئيسية
+    // 🔥 الحل الجذري: زراعة العنصر فعلياً في الشاشة فوق كل شيء ليتم تصويره
+    const printWrapper = document.createElement('div');
+    printWrapper.innerHTML = printHTML;
+    printWrapper.style.position = 'absolute';
+    printWrapper.style.top = '0';
+    printWrapper.style.right = '0';
+    printWrapper.style.width = '297mm'; // فرض عرض ورقة A4 ليتم التصوير بدقة
+    printWrapper.style.backgroundColor = '#ffffff';
+    printWrapper.style.zIndex = '999999'; // ليكون فوق الواجهة تماماً
+    document.body.appendChild(printWrapper);
 
-    // إعدادات مكتبة الـ PDF
     const opt = { 
         margin: 10, 
         filename: `جدول_المناوبات_${new Date().toISOString().split('T')[0]}.pdf`, 
@@ -1371,14 +1372,14 @@
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // تمرير النص البرمجي كما هو في الكود القديم
-    html2pdf().set(opt).from(printHTML).save().then(() => {
-        pdfBtn.innerHTML = originalText; 
-        pdfBtn.disabled = false;
+    // نصور العنصر الحقيقي المزروع
+    html2pdf().set(opt).from(printWrapper).save().then(() => {
+        document.body.removeChild(printWrapper); // مسح العنصر فوراً بعد التصوير
+        if(pdfBtn) { pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; }
     }).catch(err => {
         console.error("PDF Error: ", err); 
-        pdfBtn.innerHTML = originalText; 
-        pdfBtn.disabled = false; 
+        if(document.body.contains(printWrapper)) document.body.removeChild(printWrapper); // مسح العنصر حتى لو فشل
+        if(pdfBtn) { pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; }
         alert("حدث خطأ أثناء تصدير الملف.");
     });
 }
