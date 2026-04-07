@@ -1292,10 +1292,13 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
-   function downloadShiftsPDF() {
+  function downloadShiftsPDF() {
     const pdfBtn = document.getElementById('pdfBtn');
     const originalText = pdfBtn.innerHTML;
     pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true;
+
+    // 🚀 الضربة القاضية 1: إجبار الشاشة على الصعود للأعلى فوراً لتفادي التقاط فراغ أبيض
+    window.scrollTo(0, 0);
 
     let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff;">`;
 
@@ -1312,7 +1315,7 @@
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // 🚀 هذا هو السطر الوحيد الذي تم تعديله في كودك لضمان عدم اختفاء أسماء المناديب
+                // البحث عن الأسماء بشكل سليم
                 const delegatesInShift = allDelegates.filter(d => 
                     String(d.shiftIds || "").split(',').map(s => s.trim()).includes(String(shift.id).trim())
                 );
@@ -1341,9 +1344,14 @@
     }
     printHTML += `</div>`;
 
+    // 🚀 الضربة القاضية 2: إجبار الكاميرا على تجاهل التمرير (scrollY: 0)
     const opt = { 
-        margin: 0, filename: 'جدول_المناوبات_نعاون.pdf', image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: 'css' }
+        margin: 0, 
+        filename: 'جدول_المناوبات_نعاون.pdf', 
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1200 }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, 
+        pagebreak: { mode: 'css' }
     };
 
     html2pdf().set(opt).from(printHTML).save().then(() => {
