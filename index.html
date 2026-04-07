@@ -1292,22 +1292,20 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
-  function downloadPDF() {
-    window.scrollTo(0, 0); // رفع الشاشة للأعلى لمنع التقاط فراغ أبيض
+ function downloadShiftsPDF() { // تم تعديل الاسم ليتطابق مع الزر
+    window.scrollTo(0, 0); 
 
     const pdfBtn = document.getElementById('pdfBtn');
     const originalText = pdfBtn.innerHTML;
     pdfBtn.innerHTML = '⏳ جاري تجهيز الملف... الرجاء الانتظار';
     pdfBtn.disabled = true;
 
-    // قالبك الأصلي النظيف تماماً
     let printHTML = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; background: #fff;">
         <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">جدول مناوبات فريق نعاون</h1>
     `;
 
     for (let i = 0; i < shiftsConfig.length; i += 2) {
-        
         if (i > 0) {
             printHTML += `<div class="html2pdf__page-break" style="page-break-before: always; height: 0; display: block; width: 100%;"></div>`;
         }
@@ -1318,7 +1316,6 @@
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // التعديل السحري: مطابقة ذكية تتوافق مع بيانات جوجل
                 const delegatesInShift = allDelegates.filter(d => {
                     if (!d.shiftIds) return false;
                     let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
@@ -1335,7 +1332,6 @@
                     delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب في هذه الفترة</div>`;
                 }
 
-                // هيكل inline-block الناجح الخاص بك
                 printHTML += `
                 <div style="display: inline-block; width: 48%; vertical-align: top; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; margin: 0 0.5%;">
                     <div style="font-weight: bold; background: #2c3e50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
@@ -1348,27 +1344,36 @@
                 `;
             }
         }
-        
         printHTML += `</div>`; 
     }
-
     printHTML += `</div>`;
 
-    // إعدادات مكتبتك الأصلية
+    // 🚀 السر لضمان عدم خروج صفحة بيضاء: وضع النص داخل عنصر حقيقي مخفي في الصفحة
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = printHTML;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.top = '-9999px'; // إخفاء العنصر عن رؤية المستخدم
+    tempDiv.style.left = '0';
+    tempDiv.style.width = '1200px'; // إجبار المتصفح على عرض ثابت للجدول
+    tempDiv.style.background = '#fff';
+    document.body.appendChild(tempDiv);
+
     const opt = { 
         margin: 10, 
         filename: 'جدول_المناوبات_نعاون.pdf', 
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true }, 
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 1200 }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    html2pdf().set(opt).from(printHTML).save().then(() => {
+    html2pdf().set(opt).from(tempDiv).save().then(() => {
+        document.body.removeChild(tempDiv); // مسح العنصر الوهمي فوراً بعد الطباعة
         pdfBtn.innerHTML = originalText;
         pdfBtn.disabled = false;
     }).catch(err => {
         console.error("PDF Error: ", err);
+        document.body.removeChild(tempDiv); // مسحه أيضاً في حال حدوث خطأ
         pdfBtn.innerHTML = originalText;
         pdfBtn.disabled = false;
         alert("حدث خطأ أثناء تصدير الملف.");
