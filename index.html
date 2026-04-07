@@ -1292,90 +1292,65 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
- function downloadShiftsPDF() { // تم تعديل الاسم ليتطابق مع الزر
-    window.scrollTo(0, 0); 
-
+ function downloadShiftsPDF() {
     const pdfBtn = document.getElementById('pdfBtn');
     const originalText = pdfBtn.innerHTML;
-    pdfBtn.innerHTML = '⏳ جاري تجهيز الملف... الرجاء الانتظار';
-    pdfBtn.disabled = true;
+    pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true;
 
-    let printHTML = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; background: #fff;">
-        <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">جدول مناوبات فريق نعاون</h1>
-    `;
+    let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff;">`;
 
     for (let i = 0; i < shiftsConfig.length; i += 2) {
-        if (i > 0) {
-            printHTML += `<div class="html2pdf__page-break" style="page-break-before: always; height: 0; display: block; width: 100%;"></div>`;
+        printHTML += `<div style="page-break-after: always; padding: 20px; box-sizing: border-box; min-height: 200mm;">`;
+        if (i === 0) {
+            printHTML += `<h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 25px;">جدول مناوبات فريق نعاون</h1>`;
+        } else {
+            printHTML += `<div style="height: 30px;"></div>`;
         }
-        
-        printHTML += `<div style="display: block; width: 100%; clear: both;">`;
-        
+
+        printHTML += `<div style="display: flex; justify-content: space-between; gap: 20px;">`;
         for(let j = 0; j < 2; j++) {
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
-                
-                const delegatesInShift = allDelegates.filter(d => {
-                    if (!d.shiftIds) return false;
-                    let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
-                    return ids.some(id => String(id).trim() === String(shift.id).trim());
-                });
+                const delegatesInShift = allDelegates.filter(d => d.shiftIds.includes(shift.id));
+                const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
                 
                 let delegatesHTML = delegatesInShift.map(d => `
-                    <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid #27ae60; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
+                    <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
                         ${d.name}
                     </div>
                 `).join('');
 
-                if(delegatesInShift.length === 0) {
-                    delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب في هذه الفترة</div>`;
-                }
+                if(delegatesInShift.length === 0) delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px;">لا يوجد مناديب</div>`;
 
                 printHTML += `
-                <div style="display: inline-block; width: 48%; vertical-align: top; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; margin: 0 0.5%;">
-                    <div style="font-weight: bold; background: #2c3e50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
-                        الفترة ${shift.id}<br><span style="font-size: 14px;" dir="ltr">${shift.time}</span>
+                <div style="flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box;">
+                    <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
+                        الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br>
+                        <span style="font-size: 14px;" dir="ltr">${shift.time}</span>
                     </div>
-                    <div>
-                        ${delegatesHTML}
-                    </div>
-                </div>
-                `;
+                    <div>${delegatesHTML}</div>
+                </div>`;
             }
         }
-        printHTML += `</div>`; 
+        printHTML += `</div></div>`;
     }
     printHTML += `</div>`;
 
-    // 🚀 السر لضمان عدم خروج صفحة بيضاء: وضع النص داخل عنصر حقيقي مخفي في الصفحة
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = printHTML;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.top = '-9999px'; // إخفاء العنصر عن رؤية المستخدم
-    tempDiv.style.left = '0';
-    tempDiv.style.width = '1200px'; // إجبار المتصفح على عرض ثابت للجدول
-    tempDiv.style.background = '#fff';
-    document.body.appendChild(tempDiv);
-
     const opt = { 
-        margin: 10, 
+        margin: 0, 
         filename: 'جدول_المناوبات_نعاون.pdf', 
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, windowWidth: 1200 }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-        pagebreak: { mode: ['css', 'legacy'] }
+        html2canvas: { scale: 2, useCORS: true }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, 
+        pagebreak: { mode: 'css' }
     };
 
-    html2pdf().set(opt).from(tempDiv).save().then(() => {
-        document.body.removeChild(tempDiv); // مسح العنصر الوهمي فوراً بعد الطباعة
-        pdfBtn.innerHTML = originalText;
-        pdfBtn.disabled = false;
+    html2pdf().set(opt).from(printHTML).save().then(() => {
+        pdfBtn.innerHTML = originalText; pdfBtn.disabled = false;
     }).catch(err => {
-        console.error("PDF Error: ", err);
-        document.body.removeChild(tempDiv); // مسحه أيضاً في حال حدوث خطأ
-        pdfBtn.innerHTML = originalText;
-        pdfBtn.disabled = false;
+        console.error("PDF Error: ", err); 
+        pdfBtn.innerHTML = originalText; 
+        pdfBtn.disabled = false; 
         alert("حدث خطأ أثناء تصدير الملف.");
     });
 }
