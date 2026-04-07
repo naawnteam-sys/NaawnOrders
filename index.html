@@ -1299,7 +1299,7 @@
     pdfBtn.disabled = true;
 
     const todayDate = new Date().toLocaleDateString('ar-OM', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff; width: 100%; padding: 10px;">`;
+    let printHTML = `<div id="pdf-wrapper" style="font-family: 'Cairo', sans-serif; direction: rtl; background: #fff; width: 100%; padding: 20px; color: #000; box-sizing: border-box;">`;
 
     for (let i = 0; i < shiftsConfig.length; i += 2) {
         printHTML += `<div style="padding: 10px; box-sizing: border-box;">`;
@@ -1315,7 +1315,6 @@
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // 🚀 التعديل الذكي الأول: مطابقة رقم الفترة بغض النظر عن كونه نص أو رقم أو فيه مسافات
                 const delegatesInShift = allDelegates.filter(d => {
                     if (!d.shiftIds) return false;
                     return d.shiftIds.some(sid => String(sid).trim() === String(shift.id).trim());
@@ -1350,25 +1349,31 @@
 
     printHTML += `</div>`;
 
-    // 🚀 التعديل الذكي الثاني: تحويل النص إلى عنصر HTML حقيقي لتفهمة مكتبة الطباعة
+    // 🚀 الحل السحري: زراعة الكود في الشاشة بشكل مخفي ليتم تصويره
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = printHTML;
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px'; // إبعاده خارج الشاشة
+    tempContainer.style.top = '0';
+    tempContainer.style.width = '1050px'; // تحديد عرض ثابت لضمان عدم تداخل العناصر
+    document.body.appendChild(tempContainer);
 
     const opt = { 
         margin: [10, 10, 10, 10], 
         filename: `جدول_المناوبات_${new Date().toISOString().split('T')[0]}.pdf`, 
         image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, logging: false }, 
+        html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1050 }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // نمرر الحاوية (tempContainer) بدلاً من النص
     html2pdf().set(opt).from(tempContainer).save().then(() => {
+        document.body.removeChild(tempContainer); // حذف الكود بعد التصوير
         pdfBtn.innerHTML = originalText; 
         pdfBtn.disabled = false;
     }).catch(err => {
         console.error("PDF Error: ", err); 
+        if(document.body.contains(tempContainer)) document.body.removeChild(tempContainer); // حذفه حتى لو حدث خطأ
         pdfBtn.innerHTML = originalText; 
         pdfBtn.disabled = false; 
         alert("حدث خطأ أثناء تصدير الملف.");
