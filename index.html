@@ -1292,24 +1292,20 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
-     function downloadShiftsPDF() {
+    function downloadShiftsPDF() {
     const pdfBtn = document.getElementById('pdfBtn');
     const originalText = pdfBtn.innerHTML;
-    pdfBtn.innerHTML = '⏳ جاري التجهيز...'; 
+    pdfBtn.innerHTML = '⏳ جاري تجهيز الملف... الرجاء الانتظار';
     pdfBtn.disabled = true;
 
-    const todayDate = new Date().toLocaleDateString('ar-OM', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
-    // 🔥 السر هنا: استخدام خطوط النظام الأساسية كما كان في كودك القديم لضمان عدم اختفاء النص
+    // قالبك الأصلي النظيف والمضمون
     let printHTML = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; background: #ffffff; color: #000000;">
-        <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">
-            جدول مناوبات فريق نعاون<br>
-            <span style="font-size: 16px; color: #666; font-weight: normal;">بتاريخ: ${todayDate}</span>
-        </h1>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; background: #fff;">
+        <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">جدول مناوبات فريق نعاون</h1>
     `;
 
     for (let i = 0; i < shiftsConfig.length; i += 2) {
+        
         if (i > 0) {
             printHTML += `<div class="html2pdf__page-break" style="page-break-before: always; height: 0; display: block; width: 100%;"></div>`;
         }
@@ -1319,59 +1315,53 @@
         for(let j = 0; j < 2; j++) {
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
-                
-                // البحث الذكي عن المناديب 
-                const delegatesInShift = allDelegates.filter(d => {
-                    if (!d.shiftIds) return false;
-                    let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
-                    return ids.map(id => String(id).trim()).includes(String(shift.id).trim());
-                });
-                
-                const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
+                // طريقة الفلترة الأصلية الخاصة بك التي تظهر الأسماء بنجاح
+                const delegatesInShift = allDelegates.filter(d => d.shiftIds.includes(shift.id));
                 
                 let delegatesHTML = delegatesInShift.map(d => `
-                    <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
+                    <div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid #27ae60; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">
                         ${d.name}
                     </div>
                 `).join('');
 
                 if(delegatesInShift.length === 0) {
-                    delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب</div>`;
+                    delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب في هذه الفترة</div>`;
                 }
 
-                // نفس طريقة التقسيم 48% الناجحة لديك
                 printHTML += `
                 <div style="display: inline-block; width: 48%; vertical-align: top; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; margin: 0 0.5%;">
-                    <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
-                        الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br>
-                        <span style="font-size: 14px;" dir="ltr">${shift.time}</span>
+                    <div style="font-weight: bold; background: #2c3e50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
+                        الفترة ${shift.id}<br><span style="font-size: 14px;" dir="ltr">${shift.time}</span>
                     </div>
-                    <div>${delegatesHTML}</div>
+                    <div>
+                        ${delegatesHTML}
+                    </div>
                 </div>
                 `;
             }
         }
+        
         printHTML += `</div>`; 
     }
+
     printHTML += `</div>`;
 
     const opt = { 
         margin: 10, 
-        filename: `جدول_المناوبات_${new Date().toISOString().split('T')[0]}.pdf`, 
+        filename: 'جدول_المناوبات.pdf', 
         image: { type: 'jpeg', quality: 1 },
         html2canvas: { scale: 2, useCORS: true }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // نمرر النص مباشرة كما كان كودك يفعل، بدون التلاعب بالشاشة
     html2pdf().set(opt).from(printHTML).save().then(() => {
-        pdfBtn.innerHTML = originalText; 
+        pdfBtn.innerHTML = originalText;
         pdfBtn.disabled = false;
     }).catch(err => {
-        console.error("PDF Error: ", err); 
-        pdfBtn.innerHTML = originalText; 
-        pdfBtn.disabled = false; 
+        console.error("PDF Error: ", err);
+        pdfBtn.innerHTML = originalText;
+        pdfBtn.disabled = false;
         alert("حدث خطأ أثناء تصدير الملف.");
     });
 }
