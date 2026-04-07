@@ -1298,25 +1298,19 @@
     pdfBtn.innerHTML = '⏳ جاري التجهيز...'; 
     pdfBtn.disabled = true;
 
-    // 1. إنشاء عنصر مؤقت بالخلفية ليجبر المتصفح على رسم الأسماء
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.top = '0';
-    tempDiv.style.left = '0';
-    tempDiv.style.width = '1122px'; // عرض مثالي لورقة A4 بالعرض
-    tempDiv.style.zIndex = '-1'; // إخفاؤه خلف الصفحة لكي لا يزعجك
-    tempDiv.style.backgroundColor = '#ffffff';
-    tempDiv.style.padding = '20px';
-    
-    let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl;">`;
-    printHTML += `<h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 20px;">جدول مناوبات فريق نعاون</h1>`;
+    // 1. نعود لطريقتك الأصلية: تجميع HTML كنص لضمان ظهور الأسماء دائماً
+    let printHTML = `
+    <div style="font-family: 'Cairo', sans-serif; direction: rtl; width: 1000px; padding: 20px; background: #fff; color: #000;">
+        <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">جدول مناوبات فريق نعاون</h1>
+    `;
 
-    // 2. تجميع كل فترتين في حاوية مستقلة لمنع القص تماماً
+    // تجميع كل فترتين في صف واحد
     for (let i = 0; i < shiftsConfig.length; i += 2) {
         
-        // السر هنا: فاصل صفحات إجباري ويدوي بعد كل فترتين!
+        // 2. الحل السحري لمشكلة الانقسام: وضع فاصل صفحات معتمد من المكتبة قبل كل صف جديد
         if (i > 0) {
             printHTML += `<div class="html2pdf__page-break"></div>`;
+            printHTML += `<div style="height: 10px;"></div>`; // مساحة صغيرة بعد الفاصل
         }
 
         printHTML += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 20px;">`;
@@ -1325,13 +1319,12 @@
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // جلب المناديب بشكل آمن
                 const delegatesInShift = allDelegates.filter(d => {
                     if (!d.shiftIds) return false;
                     let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
                     return ids.some(id => String(id).trim() === String(shift.id).trim());
                 });
-
+                
                 const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
                 
                 let delegatesHTML = delegatesInShift.map(d => `
@@ -1341,7 +1334,7 @@
                 `).join('');
 
                 if(delegatesInShift.length === 0) {
-                    delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px;">لا يوجد مناديب</div>`;
+                    delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب في هذه الفترة</div>`;
                 }
 
                 printHTML += `
@@ -1356,35 +1349,29 @@
         }
         printHTML += `</div>`; 
     }
-    printHTML += `</div>`;
     
-    // إضافة العنصر لصفحة الويب
-    tempDiv.innerHTML = printHTML;
-    document.body.appendChild(tempDiv);
+    printHTML += `</div>`;
 
-    // 3. إعطاء المتصفح نصف ثانية لرسم الأسماء، ثم التقاط الصورة الصافية
-    setTimeout(() => {
-        const opt = { 
-            margin: 10, 
-            filename: 'جدول_المناوبات_نعاون.pdf', 
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, windowWidth: 1122 }, 
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            // تم إزالة الأوامر المسببة للصفحات البيضاء لأننا قمنا بالتقسيم يدوياً
-        };
+    // 3. إعدادات بسيطة مع تفعيل قراءة الـ page-break
+    const opt = { 
+        margin:       10, 
+        filename:     'جدول_المناوبات_نعاون.pdf', 
+        image:        { type: 'jpeg', quality: 1 },
+        html2canvas:  { scale: 2, useCORS: true }, 
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak:    { mode: ['css', 'legacy'] } // هذا السطر يجعل الفاصل يعمل بنجاح
+    };
 
-        html2pdf().set(opt).from(tempDiv).save().then(() => {
-            document.body.removeChild(tempDiv);
-            pdfBtn.innerHTML = originalText; 
-            pdfBtn.disabled = false;
-        }).catch(err => {
-            console.error("PDF Error: ", err); 
-            document.body.removeChild(tempDiv);
-            pdfBtn.innerHTML = originalText; 
-            pdfBtn.disabled = false; 
-            alert("حدث خطأ أثناء تصدير الملف.");
-        });
-    }, 500);
+    // تمرير النص مباشرة للمكتبة (كما في نسختك الأصلية تماماً)
+    html2pdf().set(opt).from(printHTML).save().then(() => {
+        pdfBtn.innerHTML = originalText; 
+        pdfBtn.disabled = false;
+    }).catch(err => {
+        console.error("PDF Error: ", err); 
+        pdfBtn.innerHTML = originalText; 
+        pdfBtn.disabled = false; 
+        alert("حدث خطأ أثناء تصدير الملف.");
+    });
 }
     </script>
 </body>
