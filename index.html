@@ -1292,16 +1292,17 @@
             renderShiftsUI(); saveShiftsToServer();
         }
 
-      function downloadShiftsPDF() { // أو downloadPDF حسب اسم دالتك
+     function downloadShiftsPDF() {
     const pdfBtn = document.getElementById('pdfBtn');
-    const originalText = pdfBtn ? pdfBtn.innerHTML : 'تصدير';
-    if(pdfBtn) { pdfBtn.innerHTML = '⏳ جاري التجهيز...'; pdfBtn.disabled = true; }
+    const originalText = pdfBtn.innerHTML;
+    pdfBtn.innerHTML = '⏳ جاري التجهيز...'; 
+    pdfBtn.disabled = true;
 
     const todayDate = new Date().toLocaleDateString('ar-OM', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     
-    // بناء القالب الناجح الخاص بك
+    // 🔥 السر هنا: استخدام خطوط النظام الأساسية كما كان في كودك القديم لضمان عدم اختفاء النص
     let printHTML = `
-    <div style="font-family: 'Cairo', sans-serif; direction: rtl; padding: 20px; background: #fff; width: 100%; box-sizing: border-box;">
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20px; background: #ffffff; color: #000000;">
         <h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">
             جدول مناوبات فريق نعاون<br>
             <span style="font-size: 16px; color: #666; font-weight: normal;">بتاريخ: ${todayDate}</span>
@@ -1319,10 +1320,11 @@
             if (i + j < shiftsConfig.length) {
                 const shift = shiftsConfig[i + j];
                 
-                // مطابقة ذكية للمناديب
+                // البحث الذكي عن المناديب 
                 const delegatesInShift = allDelegates.filter(d => {
                     if (!d.shiftIds) return false;
-                    return d.shiftIds.some(sid => String(sid).trim() === String(shift.id).trim());
+                    let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
+                    return ids.map(id => String(id).trim()).includes(String(shift.id).trim());
                 });
                 
                 const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
@@ -1337,6 +1339,7 @@
                     delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب</div>`;
                 }
 
+                // نفس طريقة التقسيم 48% الناجحة لديك
                 printHTML += `
                 <div style="display: inline-block; width: 48%; vertical-align: top; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; margin: 0 0.5%;">
                     <div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">
@@ -1352,17 +1355,6 @@
     }
     printHTML += `</div>`;
 
-    // 🔥 الحل الجذري: زراعة العنصر فعلياً في الشاشة فوق كل شيء ليتم تصويره
-    const printWrapper = document.createElement('div');
-    printWrapper.innerHTML = printHTML;
-    printWrapper.style.position = 'absolute';
-    printWrapper.style.top = '0';
-    printWrapper.style.right = '0';
-    printWrapper.style.width = '297mm'; // فرض عرض ورقة A4 ليتم التصوير بدقة
-    printWrapper.style.backgroundColor = '#ffffff';
-    printWrapper.style.zIndex = '999999'; // ليكون فوق الواجهة تماماً
-    document.body.appendChild(printWrapper);
-
     const opt = { 
         margin: 10, 
         filename: `جدول_المناوبات_${new Date().toISOString().split('T')[0]}.pdf`, 
@@ -1372,14 +1364,14 @@
         pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // نصور العنصر الحقيقي المزروع
-    html2pdf().set(opt).from(printWrapper).save().then(() => {
-        document.body.removeChild(printWrapper); // مسح العنصر فوراً بعد التصوير
-        if(pdfBtn) { pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; }
+    // نمرر النص مباشرة كما كان كودك يفعل، بدون التلاعب بالشاشة
+    html2pdf().set(opt).from(printHTML).save().then(() => {
+        pdfBtn.innerHTML = originalText; 
+        pdfBtn.disabled = false;
     }).catch(err => {
         console.error("PDF Error: ", err); 
-        if(document.body.contains(printWrapper)) document.body.removeChild(printWrapper); // مسح العنصر حتى لو فشل
-        if(pdfBtn) { pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; }
+        pdfBtn.innerHTML = originalText; 
+        pdfBtn.disabled = false; 
         alert("حدث خطأ أثناء تصدير الملف.");
     });
 }
