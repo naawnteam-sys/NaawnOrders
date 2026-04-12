@@ -517,7 +517,16 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
             
             const urlParams = new URLSearchParams(window.location.search);
             const magicVendor = urlParams.get('vendor');
-            if (magicVendor) { sessionStorage.setItem('autoFillVendor', magicVendor); }
+            
+            if (magicVendor) { 
+                sessionStorage.setItem('autoFillVendor', magicVendor); 
+                // ✨ اللمسة السحرية: تغيير الترحيب ليطابق اسم التاجر
+                const welcomeTitle = document.querySelector('#customer-login h2');
+                if(welcomeTitle) welcomeTitle.innerText = `توصيل من متجر ${magicVendor} 🛵`;
+                
+                const welcomeDesc = document.querySelector('#customer-login p');
+                if(welcomeDesc) welcomeDesc.innerText = "أدخل رقم هاتفك لتأكيد الطلب وتتبعه مباشرة!";
+            }
 
             if (localStorage.getItem('adminLogged') === 'true') { showSection('admin-dashboard'); startAdminAutoRefresh(); }
             else if (localStorage.getItem('driverId')) { 
@@ -537,9 +546,16 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
 
         function checkAndFillMagicVendor() {
             let savedVendor = sessionStorage.getItem('autoFillVendor');
-            if(savedVendor) { document.getElementById('pickup-loc').value = savedVendor; sessionStorage.removeItem('autoFillVendor'); }
+            if(savedVendor) { 
+                document.getElementById('pickup-loc').value = savedVendor; 
+                sessionStorage.removeItem('autoFillVendor'); 
+                // ✨ اللمسة السحرية 2: النزول تلقائياً لنموذج الطلب لراحة الزبون
+                setTimeout(() => {
+                    document.getElementById('pickup-loc').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 400);
+            }
         }
-
+        
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
             document.getElementById(sectionId).classList.remove('hidden');
