@@ -255,7 +255,7 @@
             <button onclick="logout()" class="btn-danger">تسجيل خروج 🚪</button>
         </div>
 
-       <div id="vendor-login" class="card section hidden">
+      <div id="vendor-login" class="card section hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                 <button class="btn-back" onclick="showSection('customer-login')" style="margin:0;">🔙 العودة</button>
                 <button onclick="toggleVendorLang()" id="v-lang-btn1" style="background:#333; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; font-weight:bold;">English</button>
@@ -296,22 +296,7 @@
             <div id="vendor-orders-list"></div>
             <button onclick="logout()" data-vi18n="v_logout_btn" class="btn-danger">تسجيل خروج 🚪</button>
         </div>
-            
-            <h4 class="section-title" style="margin-top:0;">🚀 إرسال طلب لزبون</h4>
-            <input type="tel" id="vnd-cust-phone" placeholder="رقم هاتف الزبون">
-            <input type="text" id="vnd-cust-city" placeholder="الولاية (مثال: عبري)">
-            <input type="text" id="vnd-cust-area" placeholder="المنطقة / الحي">
-            <textarea id="vnd-order-details" placeholder="تفاصيل الطلب"></textarea>
-            <input type="number" id="vnd-order-price" placeholder="المبلغ المطلوب تحصيله من الزبون (بالريال)">
-            <button onclick="submitVendorOrder(event)">طلب مندوب فوراً 🛵</button>
-            
-            <hr style="margin: 25px 0;">
-            <h4 class="section-title">📦 طلباتي النشطة</h4>
-            <button onclick="fetchVendorOrders()" style="background:#17a2b8; margin-bottom:10px; font-size:14px;">تحديث حالة الطلبات 🔄</button>
-            <div id="vendor-orders-list"></div>
-            <button onclick="logout()" class="btn-danger">تسجيل خروج 🚪</button>
-        </div>
-
+        
         <div id="driver-login" class="card section hidden">
             <button class="btn-back" onclick="showSection('customer-login')">🔙 العودة للرئيسية</button>
             <div style="text-align: center;"><img src="https://i.imgur.com/OqQuD0p.png" style="width: 80px; margin-bottom: 10px; border-radius: 10px;"></div>
