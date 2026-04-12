@@ -255,25 +255,47 @@
             <button onclick="logout()" class="btn-danger">تسجيل خروج 🚪</button>
         </div>
 
-        <div id="vendor-login" class="card section hidden">
-            <button class="btn-back" onclick="showSection('customer-login')">🔙 العودة للرئيسية</button>
+       <div id="vendor-login" class="card section hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <button class="btn-back" onclick="showSection('customer-login')" style="margin:0;">🔙 العودة</button>
+                <button onclick="toggleVendorLang()" id="v-lang-btn1" style="background:#333; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; font-weight:bold;">English</button>
+            </div>
             <div style="text-align: center;"><img src="https://i.imgur.com/OqQuD0p.png" style="width: 80px; margin-bottom: 10px; border-radius: 10px;"></div>
-            <h3>بوابة التُجّار والمطاعم </h3>
-            <input type="text" id="vnd-id" placeholder="رقم التاجر (ID)">
-            <input type="password" id="vnd-pass" placeholder="كلمة المرور">
-            <button onclick="loginVendor(event)">دخول التاجر</button>
+            <h3 data-vi18n="v_login_title">بوابة التُجّار والمطاعم</h3>
+            <input type="text" id="vnd-id" data-vi18n="v_id_ph" placeholder="رقم التاجر (ID)">
+            <input type="password" id="vnd-pass" data-vi18n="v_pass_ph" placeholder="كلمة المرور">
+            <button onclick="loginVendor(event)" data-vi18n="v_login_btn">دخول التاجر</button>
         </div>
 
         <div id="vendor-dashboard" class="card section hidden">
-            <h3 id="vendor-welcome-msg" style="color: var(--primary-gold);">مرحباً بك</h3>
-            <p style="font-size:14px; color:#666; margin-top:-10px;">اطلب مناديب لتوصيل طلبات زبائنك بسهولة.</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                <h3 id="vendor-welcome-msg" style="color: var(--primary-gold); margin:0;" data-vi18n="v_welcome">مرحباً بك</h3>
+                <button onclick="toggleVendorLang()" id="v-lang-btn2" style="background:#333; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; font-weight:bold;">English</button>
+            </div>
+            <p data-vi18n="v_subtitle" style="font-size:14px; color:#666; margin-top:5px;">اطلب مناديب لتوصيل طلبات زبائنك بسهولة.</p>
+            
             <div style="background: #eef2f5; border: 1px dashed var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">🔗 رابط الطلب المباشر:</h4>
+                <h4 data-vi18n="v_link_title" style="margin: 0 0 10px 0; color: #333; font-size: 14px;">🔗 رابط الطلب المباشر:</h4>
                 <div style="display: flex; gap: 5px;">
                     <input type="text" id="vendor-magic-link" readonly style="flex: 2; margin: 0; font-size: 12px; background: #fff; text-align: left;" dir="ltr">
-                    <button onclick="copyVendorLink()" style="flex: 1; margin: 0; background: #333; font-size: 13px;">نسخ 📋</button>
+                    <button onclick="copyVendorLink()" data-vi18n="v_copy_btn" style="flex: 1; margin: 0; background: #333; font-size: 13px;">نسخ 📋</button>
                 </div>
             </div>
+            
+            <h4 class="section-title" data-vi18n="v_new_order_title" style="margin-top:0;">🚀 إرسال طلب لزبون</h4>
+            <input type="tel" id="vnd-cust-phone" data-vi18n="v_cust_phone_ph" placeholder="رقم هاتف الزبون">
+            <input type="text" id="vnd-cust-city" data-vi18n="v_cust_city_ph" placeholder="الولاية (مثال: عبري)">
+            <input type="text" id="vnd-cust-area" data-vi18n="v_cust_area_ph" placeholder="المنطقة / الحي">
+            <textarea id="vnd-order-details" data-vi18n="v_details_ph" placeholder="تفاصيل الطلب"></textarea>
+            <input type="number" id="vnd-order-price" data-vi18n="v_price_ph" placeholder="المبلغ المطلوب تحصيله من الزبون (بالريال)">
+            <button onclick="submitVendorOrder(event)" data-vi18n="v_submit_btn">طلب مندوب فوراً 🛵</button>
+            
+            <hr style="margin: 25px 0;">
+            <h4 class="section-title" data-vi18n="v_active_orders_title">📦 طلباتي النشطة</h4>
+            <button onclick="fetchVendorOrders()" data-vi18n="v_refresh_btn" style="background:#17a2b8; margin-bottom:10px; font-size:14px;">تحديث حالة الطلبات 🔄</button>
+            <div id="vendor-orders-list"></div>
+            <button onclick="logout()" data-vi18n="v_logout_btn" class="btn-danger">تسجيل خروج 🚪</button>
+        </div>
             
             <h4 class="section-title" style="margin-top:0;">🚀 إرسال طلب لزبون</h4>
             <input type="tel" id="vnd-cust-phone" placeholder="رقم هاتف الزبون">
@@ -418,6 +440,70 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxEygnMiewHpVLYpuISsF1zI58JailhcSVNutr9RRja9y14_wktcjtSZ0XuYo8L_x4/exec'; 
+        // ==========================================
+// ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
+// ==========================================
+const v_translations = {
+    ar: {
+        v_login_title: "بوابة التُجّار والمطاعم", v_id_ph: "رقم التاجر (ID)", v_pass_ph: "كلمة المرور", v_login_btn: "دخول التاجر",
+        v_welcome: "مرحباً بك", v_subtitle: "اطلب مناديب لتوصيل طلبات زبائنك بسهولة.",
+        v_link_title: "🔗 رابط الطلب المباشر:", v_copy_btn: "نسخ 📋",
+        v_new_order_title: "🚀 إرسال طلب لزبون", v_cust_phone_ph: "رقم هاتف الزبون", v_cust_city_ph: "الولاية (مثال: عبري)",
+        v_cust_area_ph: "المنطقة / الحي", v_details_ph: "تفاصيل الطلب", v_price_ph: "المبلغ المطلوب تحصيله من الزبون (بالريال)", v_submit_btn: "طلب مندوب فوراً 🛵",
+        v_active_orders_title: "📦 طلباتي النشطة", v_refresh_btn: "تحديث حالة الطلبات 🔄", v_logout_btn: "تسجيل خروج 🚪",
+        v_dyn_no_orders: "لا توجد طلبات نشطة حالياً.", v_dyn_order: "الطلب:", v_dyn_phone: "هاتف الزبون:", v_dyn_area: "المنطقة:", v_dyn_price: "المبلغ للتحصيل:", v_dyn_unspecified: "غير محدد", v_dyn_driver: "المندوب:", v_dyn_status: "الحالة:"
+    },
+    en: {
+        v_login_title: "Vendors & Restaurants Portal", v_id_ph: "Vendor ID", v_pass_ph: "Password", v_login_btn: "Vendor Login",
+        v_welcome: "Welcome", v_subtitle: "Request drivers to deliver your customers' orders easily.",
+        v_link_title: "🔗 Direct Order Link:", v_copy_btn: "Copy 📋",
+        v_new_order_title: "🚀 Send Order to Customer", v_cust_phone_ph: "Customer Phone", v_cust_city_ph: "City (e.g. Ibri)",
+        v_cust_area_ph: "Area / Neighborhood", v_details_ph: "Order Details", v_price_ph: "Amount to collect from customer (OMR)", v_submit_btn: "Request Driver Now 🛵",
+        v_active_orders_title: "📦 My Active Orders", v_refresh_btn: "Refresh Orders Status 🔄", v_logout_btn: "Logout 🚪",
+        v_dyn_no_orders: "No active orders currently.", v_dyn_order: "Order:", v_dyn_phone: "Customer Phone:", v_dyn_area: "Area:", v_dyn_price: "Amount to collect:", v_dyn_unspecified: "Unspecified", v_dyn_driver: "Driver:", v_dyn_status: "Status:"
+    }
+};
+
+let currentVLang = localStorage.getItem('vendor_lang') || 'ar';
+
+function applyVendorLang() {
+    let t = v_translations[currentVLang];
+    
+    // تغيير اتجاه حاويات التجار فقط لليسار إذا كانت إنجليزي
+    document.getElementById('vendor-login').setAttribute('dir', currentVLang === 'ar' ? 'rtl' : 'ltr');
+    document.getElementById('vendor-dashboard').setAttribute('dir', currentVLang === 'ar' ? 'rtl' : 'ltr');
+    
+    // تغيير أزرار التبديل
+    document.getElementById('v-lang-btn1').innerText = currentVLang === 'ar' ? 'English' : 'عربي';
+    document.getElementById('v-lang-btn2').innerText = currentVLang === 'ar' ? 'English' : 'عربي';
+
+    // تغيير رسالة الترحيب إذا كان التاجر مسجل دخول
+    let vName = localStorage.getItem('vendorName');
+    if(vName) {
+        document.getElementById('vendor-welcome-msg').innerText = currentVLang === 'ar' ? `أهلاً بك، متجر ${vName} 🏪` : `Welcome, ${vName} 🏪`;
+    }
+
+    // ترجمة العناصر الثابتة
+    document.querySelectorAll('[data-vi18n]').forEach(el => {
+        let key = el.getAttribute('data-vi18n');
+        if (t[key]) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key];
+            else el.innerText = t[key];
+        }
+    });
+}
+
+function toggleVendorLang() {
+    currentVLang = currentVLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('vendor_lang', currentVLang);
+    applyVendorLang();
+    // إذا كان التاجر داخل لوحة التحكم، قم بتحديث قائمة الطلبات لتترجم فوراً
+    if(!document.getElementById('vendor-dashboard').classList.contains('hidden')) {
+        fetchVendorOrders();
+    }
+}
+// تفعيل اللغة المخزنة عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', applyVendorLang);
 
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
@@ -624,17 +710,37 @@
         }
 
         function fetchVendorOrders() {
-            const vName = localStorage.getItem('vendorName'); const container = document.getElementById('vendor-orders-list'); container.innerHTML = '<p>جاري البحث... ⏳</p>';
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_vendor_data', vendorName: vName }) })
-            .then(res => res.json()).then(data => {
-                if(data.status !== "success") return; container.innerHTML = '';
-                if(data.orders.length === 0) { container.innerHTML = '<p style="color:green; font-weight:bold; font-size:14px;">لا توجد طلبات نشطة حالياً.</p>'; return; }
-                data.orders.forEach(o => {
-                    let bc = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : 'badge-prog';
-                    container.innerHTML += `<div style="border:1px solid #ddd; padding:15px; border-radius:8px; margin-bottom:15px; background:#fff;"><h4 style="margin-top:0; color:var(--primary-gold);">الطلب: ${o.id}</h4><p style="margin:5px 0;"><strong>هاتف الزبون:</strong> ${o.phone}</p><p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p><p style="margin:5px 0;"><strong>المبلغ للتحصيل:</strong> ${o.price > 0 ? o.price + ' ر.ع' : 'غير محدد'}</p><p style="margin:5px 0;"><strong>المندوب:</strong> ${o.driverName}</p><p style="margin:5px 0;"><strong>الحالة:</strong> <span class="badge ${bc}">${o.status}</span></p></div>`;
-                });
-            });
+    const vName = localStorage.getItem('vendorName'); 
+    const container = document.getElementById('vendor-orders-list'); 
+    container.innerHTML = '<p>جاري البحث... ⏳</p>';
+    
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_vendor_data', vendorName: vName }) })
+    .then(res => res.json()).then(data => {
+        if(data.status !== "success") return; 
+        container.innerHTML = '';
+        let t = v_translations[currentVLang]; // استدعاء لغة التاجر الحالية
+        
+        if(data.orders.length === 0) { 
+            container.innerHTML = `<p style="color:green; font-weight:bold; font-size:14px;">${t.v_dyn_no_orders}</p>`; 
+            return; 
         }
+        data.orders.forEach(o => {
+            let bc = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : 'badge-prog';
+            let currency = currentVLang === 'ar' ? ' ر.ع' : ' OMR';
+            let priceText = o.price > 0 ? o.price + currency : t.v_dyn_unspecified;
+            
+            container.innerHTML += `
+            <div style="border:1px solid #ddd; padding:15px; border-radius:8px; margin-bottom:15px; background:#fff;">
+                <h4 style="margin-top:0; color:var(--primary-gold);">${t.v_dyn_order} ${o.id}</h4>
+                <p style="margin:5px 0;"><strong>${t.v_dyn_phone}</strong> ${o.phone}</p>
+                <p style="margin:5px 0;"><strong>${t.v_dyn_area}</strong> ${o.area}</p>
+                <p style="margin:5px 0;"><strong>${t.v_dyn_price}</strong> ${priceText}</p>
+                <p style="margin:5px 0;"><strong>${t.v_dyn_driver}</strong> ${o.driverName}</p>
+                <p style="margin:5px 0;"><strong>${t.v_dyn_status}</strong> <span class="badge ${bc}">${o.status}</span></p>
+            </div>`;
+        });
+    });
+}
 
         function submitVendorOrder(e) {
             const vName = localStorage.getItem('vendorName');
