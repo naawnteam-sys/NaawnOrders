@@ -424,7 +424,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxEygnMiewHpVLYpuISsF1zI58JailhcSVNutr9RRja9y14_wktcjtSZ0XuYo8L_x4/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVOXjb7AjOP95dBJ4K4Wpv_ZM6o3FUSohxuSPT6ZXjcbZPfSSFiQ8fqqovt2ddXrtk/exec'; 
         // ==========================================
 // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
 // ==========================================
@@ -951,7 +951,10 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
                                     let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
                                     newContainer.innerHTML += `
                                         <div class="admin-order-card" style="border:1px solid #ddd; padding:15px; margin-bottom:15px; border-radius:8px; border-right: 5px solid var(--primary-gold); background:#fff;">
-                                            <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                             <h4 style="margin-top:0; color:var(--primary-gold);">طلب: ${o.id}</h4>
+                                             <button onclick="deleteOrderAdmin('${o.id}')" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;" title="حذف نهائي">🗑️ حذف</button>
+                                             </div>
                                             <p style="margin:0 0 10px 0; font-size:13px; color:#555; background:#f9f9f9; padding:5px; border-radius:5px;">🕒 <strong>الوقت:</strong> ${formatTime(o.date)}</p>
                                             <p style="margin:5px 0;"><strong>المنطقة:</strong> ${o.area}</p>
                                             <p style="margin:5px 0;"><strong>الاستلام من:</strong> ${o.pickup}</p>
@@ -995,10 +998,13 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
 
                                 allContainer.innerHTML += `
                                 <div class="admin-order-card" style="border-bottom:2px solid #eee; padding:15px 0; font-size:14px;">
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <strong>${o.id}</strong>
-                                        <span class="badge ${badgeClass}">${o.status}</span>
-                                    </div>
+                                   <div style="display:flex; justify-content:space-between; align-items:center;">
+                                   <div>
+                                 <strong style="margin-left:10px;">${o.id}</strong>
+                                 <span class="badge ${badgeClass}">${o.status}</span>
+                                 </div>
+                                 <button onclick="deleteOrderAdmin('${o.id}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; cursor:pointer;">🗑️ حذف</button>
+                                 </div>
                                     <p style="margin:5px 0; font-size:12px; color:#888;">🕒 ${formatTime(o.date)}</p>
                                     <p style="margin:5px 0; color:#555;">من: ${o.pickup} | إلى: ${o.area} <br>الهاتف: ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold); font-weight:bold;">المندوب الحالي: '+o.driverName+'</span>' : ''}</p>
                                     ${reassignBlock}
@@ -1480,6 +1486,22 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
         alert("حدث خطأ أثناء تصدير الملف.");
     });
 }
+        // دالة الحذف النهائي للطلبات (للإدارة)
+        function deleteOrderAdmin(orderId) {
+            if(!confirm(`⚠️ تحذير: هل أنت متأكد من حذف الطلب (${orderId}) بشكل نهائي؟\n(لن يتم إرسال أي رسالة للعميل، وسيختفي الطلب تماماً من النظام)`)) return;
+            
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'delete_order', orderId: orderId }) 
+            }).then(res => res.json()).then(data => {
+                if(data.status === 'success') { 
+                    alert('تم حذف الطلب بنجاح 🗑️'); 
+                    fetchAdminData(); // تحديث اللوحة لإخفاء الطلب فوراً
+                } else {
+                    alert('حدث خطأ أثناء الحذف.');
+                }
+            });
+        }
     </script>
 </body>
 </html>
