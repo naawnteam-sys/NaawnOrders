@@ -902,21 +902,27 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
                     } catch(e) { console.log("Charts/Heatmap skipped", e); }
 
                     try {
-                        const cashContainer = document.getElementById('admin-driver-cash');
-                        if(cashContainer) {
-                            let cashHtml = '';
+                        const cashSelect = document.getElementById('admin-cash-select');
+                        if(cashSelect) {
+                            let optionsHtml = '<option value="">اختر المندوب...</option>';
                             if(data.drivers && data.drivers.length > 0) {
                                 data.drivers.forEach(d => {
                                     let c = d.cash || 0;
-                                    cashHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0;">
-                                        <span>🛵 ${d.name}</span> <span style="color:var(--dark-gold); font-size:18px;"><strong>${c} ر.ع</strong></span>
-                                        <button onclick="clearDriverCash('${d.id}', '${d.name}', ${c})" style="width:auto; padding:5px 10px; margin:0; background:#28a745; font-size:12px;">تصفية الكاش</button>
-                                    </div>`;
+                                    optionsHtml += `<option value="${d.id}" data-name="${d.name}" data-cash="${c}">🛵 ${d.name} (الكاش: ${c} ر.ع)</option>`;
                                 });
-                                cashContainer.innerHTML = cashHtml;
                             } else {
-                                cashContainer.innerHTML = '<p style="color:#666; font-size:14px; margin:0;">لا يوجد مناديب متاحين حالياً.</p>';
+                                optionsHtml = '<option value="">لا يوجد مناديب متاحين حالياً</option>';
                             }
+                            
+                            let currentVal = cashSelect.value; // حفظ التحديد الحالي حتى لا يضيع عند التحديث التلقائي
+                            cashSelect.innerHTML = optionsHtml;
+                            
+                            if(currentVal && cashSelect.querySelector(`option[value="${currentVal}"]`)) {
+                                cashSelect.value = currentVal;
+                            } else {
+                                document.getElementById('cash-action-box').classList.add('hidden');
+                            }
+                            updateCashView(); // تحديث المربع الأخضر
                         }
                     } catch(e) {}
 
