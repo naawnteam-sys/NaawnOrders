@@ -424,7 +424,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVOXjb7AjOP95dBJ4K4Wpv_ZM6o3FUSohxuSPT6ZXjcbZPfSSFiQ8fqqovt2ddXrtk/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxX0uvi6Ez3aLnVzgUzvo3-aQRmUSmybrJZeQOncyNOWNpha_UXg_T-nYT3H3qCy6Sf/exec'; 
         // ==========================================
 // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
 // ==========================================
@@ -1029,13 +1029,27 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
             }
         }
 
-        function archiveCompletedOrders() {
-            if(confirm('⚠️ تنبيه هام!\nهل أنت متأكد من إغلاق اليوم؟\nسيتم أرشفة الطلبات (التي تم تسليمها وتصفية عهدتها المالية فقط) لتسريع النظام.')) {
-                document.querySelector('button[onclick="archiveCompletedOrders()"]').innerText = "جاري الأرشفة... ⏳";
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'archive_orders' }) })
+       function archiveCompletedOrders() {
+            if(confirm('⚠️ تحذير شديد الأهمية!\nهل أنت متأكد من إغلاق اليوم؟\nسيتم "سحب وأرشفة كافة الطلبات" (حتى الطلبات قيد المراجعة أو التي لم يسلمها المندوب) بشكل نهائي وبدون إرسال أي رسائل للعملاء.')) {
+                
+                const btn = document.querySelector('button[onclick="archiveCompletedOrders()"]');
+                const originalText = btn.innerText;
+                btn.innerText = "جاري الإغلاق والأرشفة الشاملة... ⏳";
+                
+                fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'force_archive_all' }) 
+                })
                 .then(res => res.json()).then(data => {
-                    if(data.status === 'success') { alert(`✅ تم إغلاق اليوم بنجاح!\nتم نقل (${data.archivedCount}) طلب إلى الأرشيف.`); fetchAdminData(); }
-                }).finally(() => { document.querySelector('button[onclick="archiveCompletedOrders()"]').innerText = "🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة"; });
+                    if(data.status === 'success') { 
+                        alert(`✅ تم إغلاق اليوم وتصفير النظام بنجاح!\nتمت أرشفة (${data.archivedCount}) طلب.`); 
+                        fetchAdminData(); 
+                    } else {
+                        alert('حدث خطأ أثناء الأرشفة.');
+                    }
+                }).finally(() => { 
+                    btn.innerText = originalText; 
+                });
             }
         }
         function changeAdminPhone(event) {
