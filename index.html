@@ -417,9 +417,21 @@
             </div>
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
+            
+            <!-- قسم إضافة مندوب جديد (تم نقله هنا) -->
+            <h4 class="section-title">👤 إضافة مندوب جديد</h4>
+            <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="new-drv-id" placeholder="رقم المندوب (اسم المستخدم)" style="margin: 0;">
+                    <input type="text" id="new-drv-pass" placeholder="كلمة المرور" style="margin: 0;">
+                    <input type="text" id="new-drv-name" placeholder="اسم المندوب الثلاثي" style="margin: 0;">
+                    <input type="tel" id="new-drv-phone" placeholder="رقم الواتساب (مثال: 9XXXXXXX)" style="margin: 0;">
+                </div>
+                <button onclick="addNewDriverAdmin(event)" style="background: #28a745; margin-top: 10px; width: 100%;">إضافة المندوب واعتماده ✅</button>
+            </div>
+            
             <button onclick="logout()" class="btn-back" style="margin-top:20px;">تسجيل خروج 🚪</button>
         </div>
-    </div>
 
     <div class="footer" id="main-footer">
         <span onclick="showSection('driver-login')">الموظفين</span> | 
@@ -433,7 +445,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzjhJ3NJVUl7bym-M5qSsbJcDKtBprVRWDGoy_45A1D4e8mL8jhgryH8JVhyOEz0s4/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQlf7qnRHQKlC5NZaYPh3atv4Z4mAJ3hWttJ3dhpvMa3Vewjk1v_qGEfCayHyLj5y8/exec'; 
         // ==========================================
 // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
 // ==========================================
@@ -1543,6 +1555,47 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
             })
             .finally(() => {
                 window.pauseRefresh = false; // إعادة تشغيل التحديث التلقائي
+            });
+        }
+        // دالة إضافة مندوب جديد من لوحة الإدارة
+        function addNewDriverAdmin(event) {
+            const id = document.getElementById('new-drv-id').value;
+            const pass = document.getElementById('new-drv-pass').value;
+            const name = document.getElementById('new-drv-name').value;
+            const phone = document.getElementById('new-drv-phone').value;
+
+            if(!id || !pass || !name) {
+                alert('الرجاء تعبئة البيانات الأساسية (اسم المستخدم، كلمة المرور، واسم المندوب)!');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'جاري تسجيل المندوب... ⏳';
+            btn.disabled = true;
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add_new_driver', id: id, name: name, phone: phone, pass: pass })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert('✅ تم إضافة المندوب بنجاح!\n(سيحتاج المندوب الآن للدخول ودفع رسوم الاشتراك لتفعيل حسابه)');
+                    document.getElementById('new-drv-id').value = '';
+                    document.getElementById('new-drv-pass').value = '';
+                    document.getElementById('new-drv-name').value = '';
+                    document.getElementById('new-drv-phone').value = '';
+                    fetchAdminData(); // تحديث اللوحة ليظهر في القوائم المنسدلة
+                } else if (data.status === 'exists') {
+                    alert('⚠️ اسم المستخدم (رقم المندوب) موجود مسبقاً، الرجاء اختيار رقم آخر.');
+                } else {
+                    alert('❌ حدث خطأ أثناء الإضافة.');
+                }
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
             });
         }
     </script>
