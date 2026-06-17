@@ -141,13 +141,13 @@
             <div style="text-align: center; margin-bottom: 25px;">
                 <img src="https://i.imgur.com/OqQuD0p.png" style="width: 120px; margin-bottom: 15px; border-radius: 20px; box-shadow: 0 10px 25px rgba(212,175,55,0.2);">
                 <h2 style="color: var(--text-dark); margin-bottom: 5px; font-weight: 800;">أهلاً بك في نعاون</h2>
-                <p style="color: #7f8c8d; font-size: 15px; margin-top: 0;">أسرع منصة لتوصيل طلباتك</p>
+                <p style="color: #7f8c8d; font-size: 15px; margin-top: 0;">نوصل كل حاجه في بالك</p>
             </div>
             <input type="tel" id="cust-phone" placeholder="أدخل رقم هاتفك للبدء (مثال: 9XXXXXXX)" style="text-align: center; font-size: 18px; font-weight: bold; letter-spacing: 2px;">
-            <button onclick="loginCustomer()">متابعة للتطبيق 🚀</button>
+            <button onclick="loginCustomer()">متابعة للتطبيق</button>
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; text-align: center;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: bold;">أصحاب المشاريع والتُجّار؟</p>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: bold;">دخول أصحاب المشاريع والتُجّار</p>
                 <button onclick="showSection('vendor-login')" style="background: #2c3e50; color: var(--primary-gold); width: auto; padding: 10px 25px; font-size: 14px; border-radius: 20px;">بوابة التُجّار 🏪</button>
             </div>
         </div>
@@ -159,7 +159,7 @@
                     <div class="saved-location-card" id="saved-loc-display" style="display: none;">
                         <div class="saved-loc-details">
                             <div class="saved-loc-title">موقع التوصيل الحالي</div>
-                            <h3 class="saved-loc-address" id="display-cust-area">مسقط، الموالح</h3>
+                            <h3 class="saved-loc-address" id="display-cust-area">عبري</h3>
                         </div>
                         <button class="btn-change-loc" onclick="openLocationEditor()">تغيير ✏️</button>
                     </div>
@@ -168,7 +168,7 @@
                         <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; text-align:center;">📍 حدد موقع التوصيل</h4>
                         <p style="font-size: 13px; color: #666; text-align:center; margin-top:-5px;">سيتم حفظ الموقع لطلباتك القادمة لتسريع العملية</p>
                         <input type="text" id="cust-city" placeholder="الولاية (مثال: عبري، نزوى)">
-                        <input type="text" id="cust-area" placeholder="المنطقة / الحي (مثال: السوق، الريبة)">
+                        <input type="text" id="cust-area" placeholder="المنطقة / الحي (مثال: السوق، المرتفع)">
                         <button onclick="getCustomerLocation(event)" class="btn-location" id="btn-get-loc">🎯 التحديد التلقائي بالـ GPS</button>
                         <p id="loc-status" style="font-size: 13px; color: #2ed573; margin: 5px 0 15px 0; text-align: center; font-weight:bold; display: none;">✅ تم التقاط الإحداثيات الدقيقة بنجاح</p>
                         <button onclick="saveCustomerLocation()" style="background: var(--text-dark); color: var(--primary-gold);">حفظ الموقع ومتابعة الطلب ✨</button>
@@ -198,7 +198,7 @@
                     </div>
                     <span id="coupon-msg" class="success-text hidden" style="text-align: center; margin-bottom: 15px;"></span>
 
-                    <button onclick="submitOrder(event)" id="submit-order-btn" style="font-size: 18px; padding: 18px; box-shadow: 0 8px 20px rgba(212,175,55,0.3);">إرسال الطلب الآن 🚀</button>
+                    <button onclick="submitOrder(event)" id="submit-order-btn" style="font-size: 18px; padding: 18px; box-shadow: 0 8px 20px rgba(212,175,55,0.3);">إرسال الطلب الآن </button>
                 </div>
             </div>
 
@@ -539,7 +539,7 @@
 
     <div class="footer" id="main-footer">
         <span onclick="showSection('driver-login')">الموظفين</span> | 
-        <span onclick="showSection('admin-login')">الإدارة</span>
+        <span onclick="showSection('admin-login')">الإعدادات</span>
         <div style="margin-top: 15px;">
             <span onclick="showSection('join-driver')" style="font-size: 13px; color: var(--dark-gold); text-decoration: underline; cursor: pointer; font-weight: bold;">العمل كمندوب توصيل؟ اضغط هنا 🛵</span><br>
             <span onclick="showSection('join-vendor')" style="font-size: 13px; color: var(--dark-gold); text-decoration: underline; cursor: pointer; font-weight: bold; display: block; margin-top: 10px;">صاحب مطعم وتريد الاشتراك؟ اضغط هنا 🤝</span>
