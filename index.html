@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#D4AF37">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Na'awn">
+    <meta name="apple-mobile-web-app-title" content="Na'awen">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -363,21 +363,12 @@
 
             <h4 class="section-title" style="margin-top: 10px;">🆕 الطلبات الجديدة</h4>
             <div id="admin-new-orders"></div>
-            <!--
-            <h4 class="section-title">🔥 خريطة تركيز الطلبات</h4>
-            <div id="admin-heatmap" class="map-box"></div>-->
-
-             <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
+            <h4 class="section-title" style="color: #dc3545;">🏦 طلبات تجديد المناديب (الإيصالات)</h4>
             <div id="admin-renewals-list" style="margin-bottom: 20px;">
                 <button onclick="fetchAdminRenewals()" style="background: #333; font-size: 14px; margin-bottom: 10px;">🔄 تحديث طلبات التجديد</button>
                 <div id="renewals-container"></div>
             </div>
-<!--
-            <h4 class="section-title">📊 إحصائيات نعاون</h4>
-            <div class="chart-container"><canvas id="statusChart"></canvas></div>
-            <div class="chart-container"><canvas id="driversChart"></canvas></div>  -->
-            
-            <h4 class="section-title">📋 جميع الطلبات النشطة والسابقة</h4>
+<h4 class="section-title">📋 جميع الطلبات النشطة والسابقة</h4>
             <div id="admin-all-orders"></div>
 
              <h4 class="section-title">🛵 المناديب المتاحين و (الكاش)</h4>
@@ -418,7 +409,6 @@
             <hr style="margin-top:30px; border-top: 2px dashed #dc3545;">
             <button onclick="archiveCompletedOrders()" class="btn-danger" style="background:#8b0000; padding:18px; border-radius:12px; box-shadow: 0 4px 10px rgba(139,0,0,0.3);">🗄️ إغلاق اليوم وأرشفة الطلبات المكتملة</button>
             
-            <!-- قسم إضافة مندوب جديد (تم نقله هنا) -->
             <h4 class="section-title">👤 إضافة مندوب جديد</h4>
             <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -428,6 +418,16 @@
                     <input type="tel" id="new-drv-phone" placeholder="رقم الواتساب (مثال: 9XXXXXXX)" style="margin: 0;">
                 </div>
                 <button onclick="addNewDriverAdmin(event)" style="background: #28a745; margin-top: 10px; width: 100%;">إضافة المندوب واعتماده ✅</button>
+            </div>
+
+            <h4 class="section-title">🏪 إضافة متجر (تاجر) جديد</h4>
+            <div style="background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input type="text" id="new-vnd-id" placeholder="معرف المتجر (ID)" style="margin: 0;">
+                    <input type="text" id="new-vnd-pass" placeholder="كلمة المرور" style="margin: 0;">
+                    <input type="text" id="new-vnd-name" placeholder="اسم المتجر (الذي يظهر للزبائن)" style="margin: 0; grid-column: span 2;">
+                </div>
+                <button onclick="addNewVendorAdmin(event)" style="background: #e67e22; margin-top: 10px; width: 100%;">إضافة المتجر واعتماده ✅</button>
             </div>
             
             <button onclick="logout()" class="btn-back" style="margin-top:20px;">تسجيل خروج 🚪</button>
@@ -446,6 +446,34 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const SCRIPT_URL = 'https://lightgreen-squirrel-796252.hostingersite.com/api.php'; 
+
+        // ==========================================
+        // ⏱️ أداة التحكم بساعات عمل فريق نعاون
+        // يمكنك تغيير هذه الأوقات مستقبلاً من هنا مباشرة
+        // ==========================================
+        const workStartTime = "08:00"; // وقت بداية العمل (بنظام 24 ساعة)
+        const workEndTime = "23:00";   // وقت نهاية العمل (بنظام 24 ساعة)
+
+        function isWithinWorkingHours() {
+            let now = new Date();
+            let currentHour = now.getHours();
+            let currentMinute = now.getMinutes();
+
+            let [startH, startM] = workStartTime.split(':').map(Number);
+            let [endH, endM] = workEndTime.split(':').map(Number);
+
+            let currentTotalMinutes = currentHour * 60 + currentMinute;
+            let startTotalMinutes = startH * 60 + startM;
+            let endTotalMinutes = endH * 60 + endM;
+
+            if (startTotalMinutes <= endTotalMinutes) {
+                return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes;
+            } else {
+                // في حال كانت النهاية بعد منتصف الليل (مثلاً من 20:00 إلى 02:00)
+                return currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes;
+            }
+        }
+
         // ==========================================
 // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
 // ==========================================
@@ -669,6 +697,13 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
         }
 
        function submitOrder(e) {
+           // --- بداية التحقق من ساعات العمل ---
+           if (!isWithinWorkingHours()) {
+               alert(`⚠️ عذراً! أنت تطلب خارج أوقات العمل الرسمية لفريق نعاون.\nساعات العمل من ${workStartTime} إلى ${workEndTime}.\nالرجاء المحاولة خلال الأوقات المتاحة.`);
+               return;
+           }
+           // --- نهاية التحقق ---
+
             let originalDetails = document.getElementById('order-details').value;
             let urgency = document.getElementById('cust-urgency').value;
             let finalDetails = "[أولوية: " + urgency + "] | " + originalDetails;
@@ -1589,6 +1624,45 @@ window.addEventListener('DOMContentLoaded', applyVendorLang);
                     fetchAdminData(); // تحديث اللوحة ليظهر في القوائم المنسدلة
                 } else if (data.status === 'exists') {
                     alert('⚠️ اسم المستخدم (رقم المندوب) موجود مسبقاً، الرجاء اختيار رقم آخر.');
+                } else {
+                    alert('❌ حدث خطأ أثناء الإضافة.');
+                }
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        // دالة إضافة متجر (تاجر) جديد من لوحة الإدارة
+        function addNewVendorAdmin(event) {
+            const id = document.getElementById('new-vnd-id').value;
+            const pass = document.getElementById('new-vnd-pass').value;
+            const name = document.getElementById('new-vnd-name').value;
+
+            if(!id || !pass || !name) {
+                alert('الرجاء تعبئة البيانات الأساسية للمتجر!');
+                return;
+            }
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'جاري تسجيل المتجر... ⏳';
+            btn.disabled = true;
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert('✅ تم إضافة المتجر بنجاح!\n(يمكن للتاجر الآن استخدام معرفه للدخول إلى بوابته).');
+                    document.getElementById('new-vnd-id').value = '';
+                    document.getElementById('new-vnd-pass').value = '';
+                    document.getElementById('new-vnd-name').value = '';
+                } else if (data.status === 'exists') {
+                    alert('⚠️ معرف المتجر (ID) موجود مسبقاً، الرجاء اختيار معرف آخر.');
                 } else {
                     alert('❌ حدث خطأ أثناء الإضافة.');
                 }
