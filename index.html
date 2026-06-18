@@ -106,30 +106,22 @@
         .cash-box { background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 20px; border-radius: 16px; margin-bottom: 15px; text-align: center;}
         .driver-price-input { border: 2px solid #2ed573; background: #f1fcf5; text-align: center; font-weight: 800; font-size: 20px; margin-bottom: 10px; color: #2ed573;}
         
-        /* تنسيقات نظام المناوبات الذكي الشبكي */
-        /*.shifts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;}
-        .shift-card { background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s;}
-        .shift-card:hover { transform: translateY(-2px);}
-        .shift-header { font-weight: 800; color: white; padding: 10px; border-radius: 10px; margin-bottom: 12px; text-align: center; font-size: 15px; letter-spacing: 0.5px;}
-        .header-morning { background: linear-gradient(135deg, #74b9ff, #0984e3); } .header-evening { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
-        .delegate-item { background: #f8f9fa; padding: 12px; margin: 8px 0; border-right: 4px solid #00b894; border-radius: 8px; border-left: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
-        .shift-checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;}
-        .shift-checkbox-group label { padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s;}
-
-        .welcome-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 99999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        /* تنسيقات المودال الترحيبي (إن وجد) */
+        /* .welcome-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 99999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .welcome-content { background: #fff; width: 100%; max-width: 400px; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; }
-        .welcome-content h2 { color: var(--text-dark); margin-top: 0; font-weight: 800; font-size: 24px; }*/
+        .welcome-content h2 { color: var(--text-dark); margin-top: 0; font-weight: 800; font-size: 24px; } */
+        
         /* تنسيقات الفوتر وتوسيطه */
-.footer {
-    text-align: center;
-    width: 100%;
-    padding: 20px 15px 30px 15px; /* مسافة سفلية إضافية لترتيب الشاشة */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+        .footer {
+            text-align: center;
+            width: 100%;
+            padding: 20px 15px 30px 15px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -277,7 +269,8 @@
             <div class="admin-top-tabs">
                 <button class="admin-tab-btn active" onclick="switchAdminSubTab('new-orders', this)">🆕 الطلبات الجديدة</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('all-orders', this)">📋 أرشيف الطلبات</button>
-                <!--<button class="admin-tab-btn" onclick="switchAdminSubTab('shifts', this)">🗓️ المناوبات</button>-->
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-drivers', this)">🛵 إدارة المناديب</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-vendors', this)">🏪 إدارة التُجّار</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('settings', this)">⚙️ الإعدادات</button>
             </div>
 
@@ -288,7 +281,7 @@
                 </div>
 
                 <div id="admin-new-orders" class="grid-layout">
-                    </div>
+                </div>
 
                 <h4 class="section-title" style="margin-top: 30px;">🛵 عهدة المناديب المتاحين</h4>
                 <div class="card" style="padding: 20px;">
@@ -313,26 +306,19 @@
                 </div>
             </div>
 
-            <div id="admin-sub-shifts" class="tab-pane">
-                <div class="card" style="background: linear-gradient(to bottom, #fff, #fdfaf0); border: 2px solid var(--primary-gold);">
-                    <h4 style="color: var(--text-dark); text-align: center; margin-top: 0; font-weight: 800; font-size: 20px;">نظام المناوبات الذكي 🗓️</h4>
-                    <p style="text-align:center; color:#666; font-size:13px; margin-top:-5px; margin-bottom:20px;">إدارة فترات عمل المناديب وتوزيعهم</p>
-                    
-                    <div class="shift-controls">
-                        <div class="shift-input-group">
-                            <input type="text" id="delegateName" placeholder="اسم المندوب" style="margin:0; padding:10px;">
-                            <input type="text" id="delegatePhone" placeholder="رقم الواتساب" style="margin:0; padding:10px;">
-                            <button class="btn-shift-add" onclick="addSingleShiftDelegate()" style="border-radius: 8px;">➕ إضافة</button>
-                        </div>
-                        <div class="shift-input-group">
-                            <textarea id="bulkInput" placeholder="لصق (الاسم، الرقم) كل سطر..." style="margin:0; padding:10px; height:80px;"></textarea>
-                            <button class="btn-shift-add" onclick="addBulkShiftDelegates()" style="background:#0984e3; border-radius: 8px;">📋 لصق قائمة</button>
-                        </div>
-                        <button class="btn-shift-rand" onclick="randomizeShiftsDistribution()" style="border-radius: 8px; box-shadow:none;">🎲 توزيع ذكي</button>
-                        <button id="pdfBtn" class="btn-shift-pdf" onclick="downloadShiftsPDF()" style="border-radius: 8px; box-shadow:none; background:#d35400;">📄 تصدير PDF</button>
-                        <button class="btn-danger" style="grid-column: span 2; margin-top: 5px; padding: 12px; border-radius: 8px; box-shadow:none;" onclick="clearAllShifts()">🗑️ تصفير الجدول للبدء بيوم جديد</button>
-                    </div>
-                    <div id="shiftsContainer"></div>
+            <div id="admin-sub-manage-drivers" class="tab-pane">
+                <h4 class="section-title" style="margin-top:0;">🛵 إدارة أسطول المناديب</h4>
+                <button onclick="fetchAdminUsersList()" style="background:#f1f2f6; color:#2c3e50; margin-bottom:15px; font-size:14px; box-shadow:none;">تحديث القائمة 🔄</button>
+                <div id="admin-drivers-list" class="grid-layout">
+                    <p style="text-align:center;">جاري جلب بيانات المناديب...</p>
+                </div>
+            </div>
+
+            <div id="admin-sub-manage-vendors" class="tab-pane">
+                <h4 class="section-title" style="margin-top:0;">🏪 إدارة التُجّار والمطاعم</h4>
+                <button onclick="fetchAdminUsersList()" style="background:#f1f2f6; color:#2c3e50; margin-bottom:15px; font-size:14px; box-shadow:none;">تحديث القائمة 🔄</button>
+                <div id="admin-vendors-list" class="grid-layout">
+                    <p style="text-align:center;">جاري جلب بيانات التُجّار...</p>
                 </div>
             </div>
 
@@ -376,10 +362,6 @@
                     <span class="nav-icon">🏠</span>
                     <span>الرئيسية</span>
                 </div>
-                <!--<div class="nav-item" onclick="switchAdminSubTab('shifts', this, true)">
-                    <span class="nav-icon">🗓️</span>
-                    <span>الجدول</span>
-                </div>-->
                 <div class="nav-item" onclick="logout()">
                     <span class="nav-icon" style="color: #ff4757;">🚪</span>
                     <span style="color: #ff4757;">خروج</span>
@@ -627,6 +609,11 @@
                     botBtn.classList.add('active');
                 }
             }
+
+            // تفعيل جلب قائمة المستخدمين عند فتح التبويبات الجديدة
+            if(tabId === 'manage-drivers' || tabId === 'manage-vendors') {
+                fetchAdminUsersList();
+            }
         }
 
         // ==========================================
@@ -702,7 +689,6 @@
                 }, {enableHighAccuracy: true}); 
             }
         }
-
 
         // ==========================================
         // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
@@ -1320,6 +1306,125 @@
             });
         }
 
+        // ==========================================
+        // ✨ دوال جلب وتعديل بيانات المناديب والتُجّار
+        // ==========================================
+        function fetchAdminUsersList() {
+            const driversContainer = document.getElementById('admin-drivers-list');
+            const vendorsContainer = document.getElementById('admin-vendors-list');
+            
+            if(driversContainer) driversContainer.innerHTML = '<p style="text-align:center;">جاري تحميل المناديب... ⏳</p>';
+            if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center;">جاري تحميل التُجّار... ⏳</p>';
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    renderAdminDrivers(data.drivers);
+                    renderAdminVendors(data.vendors);
+                } else {
+                    if(driversContainer) driversContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات.</p>';
+                    if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات.</p>';
+                }
+            }).catch(e => console.log(e));
+        }
+
+        function renderAdminDrivers(drivers) {
+            const container = document.getElementById('admin-drivers-list');
+            if(!container) return;
+            container.innerHTML = '';
+            if(!drivers || drivers.length === 0) { container.innerHTML = '<p style="text-align:center; font-weight:bold; color:#ff4757;">لا يوجد مناديب مسجلين.</p>'; return; }
+            drivers.forEach(d => {
+                let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
+                container.innerHTML += `
+                <div class="grid-card">
+                    <h4 style="margin-top:0; color:var(--text-dark);">${d.name}</h4>
+                    <p style="margin:5px 0; font-size:14px;"><strong>المعرف (ID):</strong> ${d.id}</p>
+                    <p style="margin:5px 0; font-size:14px;"><strong>رقم الواتساب:</strong> ${d.phone || 'غير محدد'}</p>
+                    <p style="margin:5px 0; font-size:14px;"><strong>الحالة الحالية:</strong> <span style="color:${statusColor}; font-weight:bold;">${d.status || 'غير متاح'}</span></p>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:15px;">
+                        <button onclick="updateAdminDriverPhone('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#17a2b8; color:white; border-radius:6px; box-shadow:none;">📱 الرقم</button>
+                        <button onclick="updateAdminDriverPassword('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#f39c12; color:white; border-radius:6px; box-shadow:none;">🔑 المرور</button>
+                        <button onclick="toggleAdminDriverStatus('${d.id}', '${d.status}')" style="flex:1; padding:8px; font-size:12px; background:#34495e; color:white; border-radius:6px; box-shadow:none;">🔄 الحالة</button>
+                        <button onclick="deleteAdminDriver('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#e74c3c; color:white; border-radius:6px; box-shadow:none;">🗑️ حذف</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function renderAdminVendors(vendors) {
+            const container = document.getElementById('admin-vendors-list');
+            if(!container) return;
+            container.innerHTML = '';
+            if(!vendors || vendors.length === 0) { container.innerHTML = '<p style="text-align:center; font-weight:bold; color:#ff4757;">لا يوجد تُجّار مسجلين.</p>'; return; }
+            vendors.forEach(v => {
+                container.innerHTML += `
+                <div class="grid-card">
+                    <h4 style="margin-top:0; color:var(--text-dark);">${v.name}</h4>
+                    <p style="margin:5px 0; font-size:14px;"><strong>المعرف (ID):</strong> ${v.id}</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:15px;">
+                        <button onclick="updateAdminVendorId('${v.id}')" style="flex:1; padding:8px; font-size:12px; background:#17a2b8; color:white; border-radius:6px; box-shadow:none;">🆔 المعرف</button>
+                        <button onclick="updateAdminVendorPassword('${v.id}')" style="flex:1; padding:8px; font-size:12px; background:#f39c12; color:white; border-radius:6px; box-shadow:none;">🔑 المرور</button>
+                        <button onclick="deleteAdminVendor('${v.id}')" style="flex:1; padding:8px; font-size:12px; background:#e74c3c; color:white; border-radius:6px; box-shadow:none;">🗑️ حذف</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // --- دوال إجراءات المناديب ---
+        function deleteAdminDriver(id) {
+            if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً من النظام؟\nلن يتمكن من الدخول مجدداً.')) {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
+                .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
+            }
+        }
+        function updateAdminDriverPassword(id) {
+            let newPass = prompt('أدخل كلمة المرور الجديدة للمندوب (ID: '+id+'):');
+            if(newPass && newPass.trim() !== "") {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_pass', id: id, pass: newPass }) })
+                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم تحديث كلمة المرور بنجاح.'); });
+            }
+        }
+        function updateAdminDriverPhone(id) {
+            let newPhone = prompt('أدخل رقم الواتساب الجديد للمندوب (ID: '+id+'):');
+            if(newPhone && newPhone.trim() !== "") {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_phone', id: id, phone: newPhone }) })
+                .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
+            }
+        }
+        function toggleAdminDriverStatus(id, currentStatus) {
+            let newStatus = currentStatus === 'متصل' ? 'غير متاح' : 'متصل';
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_driver_status', driverId: id, status: newStatus }) })
+            .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
+        }
+
+        // --- دوال إجراءات التُجّار ---
+        function deleteAdminVendor(id) {
+            if(confirm('⚠️ هل أنت متأكد من حذف هذا التاجر نهائياً من النظام؟')) {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_vendor', id: id }) })
+                .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
+            }
+        }
+        function updateAdminVendorPassword(id) {
+            let newPass = prompt('أدخل كلمة المرور الجديدة للتاجر (ID: '+id+'):');
+            if(newPass && newPass.trim() !== "") {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_pass', id: id, pass: newPass }) })
+                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم تحديث كلمة المرور بنجاح.'); });
+            }
+        }
+        function updateAdminVendorId(oldId) {
+            let newId = prompt('أدخل المعرف (ID) الجديد للتاجر:');
+            if(newId && newId.trim() !== "") {
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_id', oldId: oldId, newId: newId }) })
+                .then(res => res.json()).then(data => { 
+                    if(data.status === 'success') fetchAdminUsersList(); 
+                    else if(data.status === 'exists') alert('المعرف الجديد موجود مسبقاً، يرجى اختيار معرف آخر.');
+                });
+            }
+        }
+        // ==========================================
+
+
         function updateCashView() {
             const select = document.getElementById('admin-cash-select');
             const actionBox = document.getElementById('cash-action-box');
@@ -1469,235 +1574,6 @@
             });
         }
 
-        // ==========================================
-        // ✨ نظام المناوبات الذكي ✨
-        // ==========================================
-        const shiftsConfig = [
-            { id: 1, time: "08:00 ص → 11:00 ص", type: "morning" },
-            { id: 2, time: "11:00 ص → 02:00 م", type: "morning" },
-            { id: 3, time: "02:00 م → 05:00 م", type: "morning" },
-            { id: 4, time: "05:00 م → 07:30 م", type: "evening" },
-            { id: 5, time: "07:30 م → 10:00 م", type: "evening" },
-            { id: 6, time: "10:00 م → 01:00 ص", type: "evening" }
-        ];
-
-        let allDelegates = [];
-
-        function fetchShifts() {
-            document.getElementById('shiftsContainer').innerHTML = '<p style="text-align:center;">جاري التحميل... ⏳</p>';
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_shifts' }) })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    allDelegates = data.delegates || [];
-                    renderShiftsUI();
-                }
-            });
-        }
-
-        function saveShiftsToServer() {
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_shifts', delegates: allDelegates }) });
-        }
-
-        function renderShiftsUI() {
-            const container = document.getElementById('shiftsContainer');
-            container.innerHTML = '';
-            
-            const gridWrapper = document.createElement('div');
-            gridWrapper.className = 'shifts-grid';
-
-            shiftsConfig.forEach(shift => {
-                const delegatesInShift = allDelegates.filter(d => d.shiftIds.includes(shift.id));
-                const headerClass = shift.type === 'morning' ? 'header-morning' : 'header-evening';
-                const shiftLabel = shift.type === 'morning' ? 'صباحي' : 'مسائي';
-                
-                const card = document.createElement('div');
-                card.className = 'shift-card';
-                card.innerHTML = `
-                    <div class="shift-header ${headerClass}">
-                        الفترة ${shift.id} (${shiftLabel}) - العدد: ${delegatesInShift.length}<br>
-                        <span style="font-size:12px;" dir="ltr">${shift.time}</span>
-                    </div>
-                    <div>
-                        ${delegatesInShift.map(d => `
-                            <div class="delegate-item">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span class="delegate-name">${d.name}</span>
-                                    <div style="display:flex; gap:5px;">
-                                        <button class="btn-shift-wa" onclick="sendShiftWhatsApp('${d.id}')">💬</button>
-                                        <button style="background:none; color:#ff4757; cursor:pointer; font-size:20px; font-weight:bold; border:none; margin:0; padding:0 5px;" onclick="removeShiftDelegate('${d.id}')">×</button>
-                                    </div>
-                                </div>
-                                <div class="shift-checkbox-group">
-                                    ${shiftsConfig.map(s => `
-                                        <label style="background: ${d.shiftIds.includes(s.id) ? '#2ed573' : '#e0e0e0'}; color: ${d.shiftIds.includes(s.id) ? 'white' : '#555'}">
-                                            <input type="checkbox" style="display:none" onchange="toggleShiftSelection('${d.id}', ${s.id})" ${d.shiftIds.includes(s.id) ? 'checked' : ''}>
-                                            ${s.id}
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                gridWrapper.appendChild(card);
-            });
-
-            const unassigned = allDelegates.filter(d => d.shiftIds.length === 0);
-            const unCard = document.createElement('div');
-            unCard.className = 'shift-card';
-            unCard.style.border = '2px dashed #f39c12';
-            unCard.innerHTML = `
-                <div class="shift-header" style="background: #f39c12;">قائمة الانتظار</div>
-                <div>
-                    ${unassigned.map(d => `
-                        <div class="delegate-item" style="border-right-color: #f39c12;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="delegate-name">${d.name}</span>
-                                <div style="display:flex; gap:5px;">
-                                    <button class="btn-shift-wa" onclick="sendShiftWhatsApp('${d.id}')">💬</button>
-                                    <button style="background:none; color:#ff4757; cursor:pointer; font-size:20px; font-weight:bold; border:none; margin:0; padding:0 5px;" onclick="removeShiftDelegate('${d.id}')">×</button>
-                                </div>
-                            </div>
-                            <div class="shift-checkbox-group">
-                                ${shiftsConfig.map(s => `
-                                    <label style="background: #e0e0e0; color: #555">
-                                        <input type="checkbox" style="display:none" onchange="toggleShiftSelection('${d.id}', ${s.id})">
-                                        ${s.id}
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            gridWrapper.appendChild(unCard);
-            container.appendChild(gridWrapper);
-        }
-
-        function addSingleShiftDelegate() {
-            const name = document.getElementById('delegateName').value;
-            const phone = document.getElementById('delegatePhone').value;
-            if (!name) return;
-            allDelegates.push({ id: Date.now().toString(), name: name, phone: phone, shiftIds: [] });
-            document.getElementById('delegateName').value = ''; document.getElementById('delegatePhone').value = '';
-            renderShiftsUI(); saveShiftsToServer();
-        }
-
-        function addBulkShiftDelegates() {
-            const raw = document.getElementById('bulkInput').value;
-            const lines = raw.split('\n').filter(l => l.trim() !== "");
-            lines.forEach(line => {
-                const parts = line.split(/[،,]/);
-                allDelegates.push({ id: Math.random().toString(36).substr(2, 9), name: parts[0].trim(), phone: parts[1] ? parts[1].trim() : "", shiftIds: [] });
-            });
-            document.getElementById('bulkInput').value = '';
-            renderShiftsUI(); saveShiftsToServer();
-        }
-
-        function sendShiftWhatsApp(delegateId) {
-            const delegate = allDelegates.find(d => d.id === delegateId);
-            if (!delegate.phone) { alert("يرجى إضافة رقم جوال لهذا المندوب أولاً"); return; }
-            let message = "";
-            if (delegate.shiftIds && delegate.shiftIds.length > 0) {
-                const sortedShifts = [...delegate.shiftIds].sort((a, b) => a - b);
-                let shiftsText = sortedShifts.map(id => {
-                    const shift = shiftsConfig.find(s => s.id === id);
-                    return `▪️ الفترة رقم (${shift.id}): من ${shift.time}`;
-                }).join('\n');
-                message = `أهلاً ${delegate.name} \nلديك مناوبات في الفترات التالية:\n\n${shiftsText}\n\nبالتوفيق!`;
-            } else {
-                message = `أهلاً ${delegate.name} \nأنت حالياً في قائمة الانتظار. سنقوم بالتواصل معك قريباً لتحديد موعد مناوبتك!`;
-            }
-            window.open(`https://wa.me/${delegate.phone}?text=${encodeURIComponent(message)}`, '_blank');
-        }
-
-        function toggleShiftSelection(delegateId, shiftId) {
-            const delegate = allDelegates.find(d => d.id === delegateId);
-            if (delegate) {
-                if (delegate.shiftIds.includes(shiftId)) delegate.shiftIds = delegate.shiftIds.filter(id => id !== shiftId);
-                else delegate.shiftIds.push(shiftId);
-                renderShiftsUI(); saveShiftsToServer();
-            }
-        }
-
-        function removeShiftDelegate(id) {
-            if(confirm("هل أنت متأكد من حذف المندوب من الجدول؟")) {
-                allDelegates = allDelegates.filter(d => d.id !== id);
-                renderShiftsUI(); saveShiftsToServer();
-            }
-        }
-
-        function clearAllShifts() {
-            if(confirm("⚠️ مسح جميع المناديب للبدء بيوم جديد؟")) {
-                allDelegates = []; renderShiftsUI(); saveShiftsToServer();
-            }
-        }
-
-        function randomizeShiftsDistribution() {
-            if (allDelegates.length === 0) return alert("أضف مناديب أولاً!");
-            allDelegates.forEach(d => d.shiftIds = []);
-            let delegates = [...allDelegates];
-
-            delegates.forEach(delegate => {
-                let assigned = 0; let attempts = 0;
-                while(assigned < 2 && attempts < 20) {
-                    attempts++;
-                    let shiftNeeds = shiftsConfig.map(s => {
-                        let currentCount = allDelegates.filter(d => d.shiftIds.includes(s.id)).length;
-                        let target = (s.type === 'evening') ? 5 : 3;
-                        return { id: s.id, need: target - currentCount };
-                    });
-                    shiftNeeds.sort((a,b) => (b.need - a.need) || (Math.random() - 0.5));
-
-                    for (let s of shiftNeeds) {
-                        if (assigned >= 2) break;
-                        let sId = s.id;
-                        if (delegate.shiftIds.includes(sId)) continue;
-                        if (delegate.shiftIds.length === 1) { if (Math.abs(delegate.shiftIds[0] - sId) <= 1) continue; }
-                        delegate.shiftIds.push(sId); assigned++; break; 
-                    }
-                }
-                delegate.shiftIds.sort((a,b) => a - b);
-            });
-            renderShiftsUI(); saveShiftsToServer();
-        }
-
-        function downloadShiftsPDF() {
-            const pdfBtn = document.getElementById('pdfBtn');
-            const originalText = pdfBtn.innerHTML;
-            pdfBtn.innerHTML = '⏳ جاري...'; pdfBtn.disabled = true;
-
-            let printHTML = `<div style="font-family: 'Cairo', sans-serif; direction: rtl; width: 1000px; padding: 20px; background: #fff; color: #000;"><h1 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #27ae60; padding-bottom: 10px; margin-bottom: 30px;">جدول مناوبات فريق نعاون</h1>`;
-            for (let i = 0; i < shiftsConfig.length; i += 2) {
-                if (i > 0) { printHTML += `<div class="html2pdf__page-break"></div><div style="height: 10px;"></div>`; }
-                printHTML += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 20px;">`;
-                for(let j = 0; j < 2; j++) {
-                    if (i + j < shiftsConfig.length) {
-                        const shift = shiftsConfig[i + j];
-                        const delegatesInShift = allDelegates.filter(d => {
-                            if (!d.shiftIds) return false;
-                            let ids = Array.isArray(d.shiftIds) ? d.shiftIds : String(d.shiftIds).split(',');
-                            return ids.some(id => String(id).trim() === String(shift.id).trim());
-                        });
-                        const headerBg = shift.type === 'morning' ? '#3498db' : '#8e44ad';
-                        let delegatesHTML = delegatesInShift.map(d => `<div style="background: #f9f9f9; padding: 12px; margin: 8px 0; border-right: 4px solid ${headerBg}; border-radius: 4px; border-left: 1px solid #eee; font-weight: bold; color: #333; font-size: 16px;">${d.name}</div>`).join('');
-                        if(delegatesInShift.length === 0) delegatesHTML = `<div style="text-align:center; color:#999; padding: 20px; font-size: 14px;">لا يوجد مناديب في هذه الفترة</div>`;
-                        printHTML += `<div style="flex: 1; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-sizing: border-box; background: #fff;"><div style="font-weight: bold; background: ${headerBg}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 18px;">الفترة ${shift.id} - المجموع: ${delegatesInShift.length}<br><span style="font-size: 14px;" dir="ltr">${shift.time}</span></div><div>${delegatesHTML}</div></div>`;
-                    }
-                }
-                printHTML += `</div>`; 
-            }
-            printHTML += `</div>`;
-
-            const opt = { margin: 10, filename: 'جدول_المناوبات_نعاون.pdf', image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['css', 'legacy'] } };
-            html2pdf().set(opt).from(printHTML).save().then(() => {
-                pdfBtn.innerHTML = originalText; pdfBtn.disabled = false;
-            }).catch(err => {
-                pdfBtn.innerHTML = originalText; pdfBtn.disabled = false; alert("خطأ.");
-            });
-        }
-
         function deleteOrderAdmin(orderId) {
             if(!confirm(`⚠️ هل أنت متأكد من حذف الطلب (${orderId}) نهائياً؟`)) return;
             window.pauseRefresh = true; 
@@ -1714,7 +1590,7 @@
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'add_new_driver', id: id, name: name, phone: phone, pass: pass }) })
             .then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-drv-id').value=''; document.getElementById('new-drv-pass').value=''; document.getElementById('new-drv-name').value=''; document.getElementById('new-drv-phone').value=''; fetchAdminData(); } 
+                if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-drv-id').value=''; document.getElementById('new-drv-pass').value=''; document.getElementById('new-drv-name').value=''; document.getElementById('new-drv-phone').value=''; fetchAdminUsersList(); } 
                 else if (data.status === 'exists') alert('⚠️ المعرف موجود مسبقاً.');
             }).finally(() => { btn.innerText = 'إضافة المندوب ✅'; btn.disabled = false; });
         }
@@ -1725,7 +1601,7 @@
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass }) })
             .then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-vnd-id').value=''; document.getElementById('new-vnd-pass').value=''; document.getElementById('new-vnd-name').value=''; } 
+                if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-vnd-id').value=''; document.getElementById('new-vnd-pass').value=''; document.getElementById('new-vnd-name').value=''; fetchAdminUsersList(); } 
                 else if (data.status === 'exists') alert('⚠️ المعرف موجود.');
             }).finally(() => { btn.innerText = 'اعتماد المتجر ✅'; btn.disabled = false; });
         }
