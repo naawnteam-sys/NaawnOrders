@@ -106,11 +106,6 @@
         .cash-box { background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 20px; border-radius: 16px; margin-bottom: 15px; text-align: center;}
         .driver-price-input { border: 2px solid #2ed573; background: #f1fcf5; text-align: center; font-weight: 800; font-size: 20px; margin-bottom: 10px; color: #2ed573;}
         
-        /* تنسيقات المودال الترحيبي (إن وجد) */
-        /* .welcome-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 99999; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .welcome-content { background: #fff; width: 100%; max-width: 400px; padding: 30px 25px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; }
-        .welcome-content h2 { color: var(--text-dark); margin-top: 0; font-weight: 800; font-size: 24px; } */
-        
         /* تنسيقات الفوتر وتوسيطه */
         .footer {
             text-align: center;
@@ -121,6 +116,53 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+
+        /* -------------------------------------- */
+        /* التعديلات الجديدة: التصنيفات البصرية   */
+        /* -------------------------------------- */
+        .categories-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 5px 0 20px 0;
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .categories-carousel::-webkit-scrollbar { display: none; }
+        .category-card {
+            flex: 0 0 auto;
+            width: 85px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .category-img-box {
+            width: 75px;
+            height: 75px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 2px solid #fff;
+            transition: transform 0.3s, border-color 0.3s;
+            background: #eee;
+        }
+        .category-card:hover .category-img-box { 
+            transform: scale(1.05); 
+            border-color: var(--primary-gold); 
+        }
+        .category-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .category-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-align: center;
         }
     </style>
 </head>
@@ -158,6 +200,42 @@
         <div id="customer-dashboard" class="section hidden" style="background: transparent; box-shadow: none; padding: 0;">
             
             <div id="cust-tab-order" class="tab-pane active">
+                
+                <div class="categories-section" style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--text-dark); font-weight: 800;">ماذا تريد أن تطلب؟ 🤔</h4>
+                    <div class="categories-carousel">
+                        <div class="category-card">
+                            <div class="category-img-box">
+                                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80" alt="مطاعم">
+                            </div>
+                            <span class="category-title">مطاعم</span>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-img-box">
+                                <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80" alt="تسوق">
+                            </div>
+                            <span class="category-title">تسوق</span>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-img-box">
+                                <img src="https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&q=80" alt="صيدليات">
+                            </div>
+                            <span class="category-title">صيدليات</span>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-img-box">
+                                <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&q=80" alt="هدايا">
+                            </div>
+                            <span class="category-title">هدايا</span>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-img-box">
+                                <img src="https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=400&q=80" alt="نقل عام">
+                            </div>
+                            <span class="category-title">نقل عام</span>
+                        </div>
+                    </div>
+                </div>
                 <div id="location-picker-section">
                     <div class="saved-location-card" id="saved-loc-display" style="display: none;">
                         <div class="saved-loc-details">
@@ -226,7 +304,24 @@
                     <h3 style="margin: 0 0 5px 0;">حسابي</h3>
                     <p style="color: #888; font-size: 16px; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px;" id="profile-phone-display"></p>
                     
-                    <div class="feedback-box" style="text-align: right; background: #fff; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
+                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">📍 عناويني المحفوظة</h4>
+                        <div style="background: #fdfaf0; padding: 15px; border-radius: 12px; border: 1px solid var(--primary-gold);">
+                            <p style="margin: 0; color: #888; font-size: 13px; font-weight: bold;">موقع التوصيل الافتراضي:</p>
+                            <p id="profile-loc-text" style="margin: 5px 0 0 0; color: var(--text-dark); font-weight: bold; font-size: 16px;">لم يتم تحديد موقع بعد</p>
+                            <button onclick="switchTab('cust', 'order', document.querySelector('#cust-bottom-nav .nav-item:nth-child(1)')); openLocationEditor();" style="background: transparent; color: var(--primary-gold); border: 1px solid var(--primary-gold); box-shadow: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px; width: auto;">تعديل الموقع ✏️</button>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
+                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">🎧 الدعم الفني والمساعدة</h4>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">هل تواجه مشكلة أو لديك استفسار؟ نحن هنا لخدمتك.</p>
+                        <button onclick="contactSupport()" style="background: #25D366; color: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">
+                            <span style="font-size: 20px;">💬</span> تواصل معنا عبر الواتساب
+                        </button>
+                    </div>
+                    
+                    <div class="feedback-box" style="text-align: right; background: #fff; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.02); padding: 15px; border-radius: 12px; margin-top: 20px;">
                         <h4 style="margin-top:0; color:var(--text-dark); font-weight:800;">⭐ التقييم والشكاوى</h4>
                         <select id="cust-rating" style="background: #fdfdfd;">
                             <option value="5">⭐⭐⭐⭐⭐ ممتاز جداً</option>
@@ -252,7 +347,7 @@
                     <span class="nav-icon">📍</span>
                     <span>تتبعي</span>
                 </div>
-                <div class="nav-item" onclick="switchTab('cust', 'profile', this); document.getElementById('profile-phone-display').innerText = localStorage.getItem('customerPhone');">
+                <div class="nav-item" onclick="switchTab('cust', 'profile', this); updateProfileData();">
                     <span class="nav-icon">👤</span>
                     <span>حسابي</span>
                 </div>
@@ -617,6 +712,20 @@
         }
 
         // ==========================================
+        // ✨ دالة تحديث بيانات حساب الزبون (الملف الشخصي)
+        // ==========================================
+        function updateProfileData() {
+            document.getElementById('profile-phone-display').innerText = localStorage.getItem('customerPhone');
+            let savedCity = localStorage.getItem('savedCustCity');
+            let savedArea = localStorage.getItem('savedCustArea');
+            if(savedCity && savedArea) {
+                document.getElementById('profile-loc-text').innerText = `${savedCity}، ${savedArea}`;
+            } else {
+                document.getElementById('profile-loc-text').innerText = "لم يتم تحديد موقع بعد";
+            }
+        }
+
+        // ==========================================
         // ✨ نظام حفظ موقع الزبون (Smart Persistence)
         // ==========================================
         function initCustomerLocation() {
@@ -745,6 +854,7 @@
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
         let chart1, chart2; let availableDriversData = [];
         let currentDriverStatus = "متصل";
+        let globalAdminPhone = ""; // متغير لحفظ رقم الإدارة للاستخدام في الدعم الفني
 
         const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
         const driverAudio = new Audio('https://actions.google.com/sounds/v1/communications/incoming_phone_call.ogg');
@@ -846,6 +956,7 @@
             .then(res => res.json()).then(data => {
                 if(data.status === 'success' && data.settings) {
                     if(data.settings.banner) { document.getElementById('promo-text').innerText = data.settings.banner; document.getElementById('promo-banner-container').classList.remove('hidden'); }
+                    if(data.settings.adminPhone) globalAdminPhone = data.settings.adminPhone;
                 }
             });
         }
@@ -870,6 +981,15 @@
                 if(data.status === 'valid') { msgBox.innerText = `✅ تم تفعيل خصم ${data.discount}%!`; activePromoCode = code; document.getElementById('promo-code').disabled = true;}
                 else { msgBox.innerText = '❌ الكود غير صحيح.'; msgBox.style.color = '#ff4757'; activePromoCode = ""; }
             }).finally(() => { btn.innerText = 'تطبيق'; btn.disabled = false; });
+        }
+
+        function contactSupport() {
+            if(globalAdminPhone) {
+                let msg = encodeURIComponent("أهلاً إدارة فريق نعاون، أحتاج إلى مساعدة.");
+                window.open(`https://wa.me/${globalAdminPhone}?text=${msg}`, '_blank');
+            } else {
+                alert("جاري الاتصال بالنظام لجلب بيانات الدعم، يرجى المحاولة بعد قليل.");
+            }
         }
 
         let customerMap, customerMarker; let customerMapInterval;
