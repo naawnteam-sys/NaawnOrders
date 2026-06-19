@@ -22,8 +22,8 @@
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #2c3e50; --light-gray: #f4f7f6; --app-bg: #f8f9fa; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        /* شريط علوي عصري */
-        .header { background-color: var(--bg-white); color: var(--text-dark); text-align: center; padding: 12px 15px; font-size: 22px; font-weight: 800; box-shadow: 0 2px 15px rgba(0,0,0,0.04); border-bottom: 2px solid var(--primary-gold); position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; letter-spacing: -0.5px;}
+        /* شريط علوي عصري مع تأثير الزجاج */
+        .header { background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.3); color: var(--text-dark); text-align: center; padding: 12px 15px; font-size: 22px; font-weight: 800; box-shadow: 0 2px 15px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; letter-spacing: -0.5px;}
         .header img { height: 35px; margin-left: 10px; border-radius: 8px; }
         
         #promo-banner-container { background: #1a1a1a; color: var(--primary-gold); overflow: hidden; white-space: nowrap; padding: 8px 0; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--primary-gold); width: 100%; box-sizing: border-box; }
@@ -33,10 +33,11 @@
         /* الحاوية الرئيسية للتطبيق */
         .container { padding: 15px; max-width: 800px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box; padding-bottom: 85px; /* مساحة للشريط السفلي */ }
         
-        /* البطاقات العصرية */
-        .card { background: var(--bg-white); border-radius: 16px; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); }
-        .grid-card { border: 1px solid #eee; padding: 15px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
-        .grid-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(212,175,55,0.1); }
+        /* البطاقات العصرية مع التفاعلات الحركية */
+        .card { background: var(--bg-white); border-radius: 16px; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important; -webkit-tap-highlight-color: transparent;}
+        .grid-card { border: 1px solid #eee; padding: 15px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important; -webkit-tap-highlight-color: transparent;}
+        .grid-card:hover { box-shadow: 0 6px 15px rgba(212,175,55,0.1); }
+        .card:active, .grid-card:active { transform: scale(0.97) !important; }
         
         /* التخطيط الشبكي */
         .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
@@ -44,9 +45,9 @@
         input, select, textarea { width: 100%; padding: 14px 16px; margin: 8px 0 15px 0; border-radius: 10px; border: 1px solid #e0e0e0; font-family: 'Cairo', sans-serif; box-sizing: border-box; font-size: 15px; background: #fdfdfd; transition: all 0.3s ease; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-gold); background: #fff; box-shadow: 0 0 0 3px rgba(212,175,55,0.15); }
         
-        button { background-color: var(--primary-gold); color: var(--text-dark); border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 5px; border-radius: 10px; padding: 14px; width: 100%; box-shadow: 0 4px 10px rgba(212,175,55,0.2); }
+        button { -webkit-tap-highlight-color: transparent; background-color: var(--primary-gold); color: var(--text-dark); border: none; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 5px; border-radius: 10px; padding: 14px; width: 100%; box-shadow: 0 4px 10px rgba(212,175,55,0.2); }
         button:hover { background-color: var(--dark-gold); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(212,175,55,0.3); }
-        button:active { transform: translateY(0); }
+        button:active { transform: translateY(0) scale(0.95); }
         button:disabled { background-color: #ddd; cursor: not-allowed; box-shadow: none; color: #888; transform: none;}
         
         .btn-danger { background-color: #ff4757; color: white; box-shadow: 0 4px 10px rgba(255,71,87,0.2);} .btn-danger:hover { background-color: #ff6b81; color: white;}
@@ -60,9 +61,9 @@
         .tab-pane { display: none; opacity: 0; transform: translateY(15px); transition: opacity 0.4s ease, transform 0.4s ease; }
         .tab-pane.active { display: block; opacity: 1; transform: translateY(0); }
         
-        /* شريط التنقل السفلي كالتطبيقات العالمية */
-        .app-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; align-items: center; padding: 10px 5px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
-        .nav-item { flex: 1; text-align: center; color: #a4b0be; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; }
+        /* شريط التنقل السفلي مع تأثير الزجاج */
+        .app-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.5); display: flex; justify-content: space-around; align-items: center; padding: 10px 5px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
+        .nav-item { flex: 1; text-align: center; color: #a4b0be; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; -webkit-tap-highlight-color: transparent;}
         .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-item.active { color: var(--primary-gold); }
         .nav-item.active .nav-icon { transform: translateY(-3px) scale(1.1); color: var(--primary-gold); }
@@ -118,9 +119,7 @@
             justify-content: center;
         }
 
-        /* -------------------------------------- */
-        /* التعديلات الجديدة: التصنيفات البصرية   */
-        /* -------------------------------------- */
+        /* التصنيفات البصرية */
         .categories-carousel {
             display: flex;
             overflow-x: auto;
@@ -138,6 +137,7 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .category-img-box {
             width: 75px;
@@ -150,9 +150,9 @@
             background: #eee;
         }
         .category-card:hover .category-img-box { 
-            transform: scale(1.05); 
             border-color: var(--primary-gold); 
         }
+        .category-card:active { transform: scale(0.95) !important; }
         .category-img-box img {
             width: 100%;
             height: 100%;
@@ -163,6 +163,74 @@
             font-weight: 800;
             color: var(--text-dark);
             text-align: center;
+        }
+
+        /* -------------------------------------- */
+        /* التعديلات الجديدة (Skeleton, Ripple, Empty) */
+        /* -------------------------------------- */
+        /* تأثير التموج المائي (Ripple Effect) */
+        .ripple-target {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-span {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-anim 600ms linear;
+            pointer-events: none;
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        @keyframes ripple-anim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* التحميل الهيكلي (Skeleton Loading) */
+        .skeleton-box {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            border-radius: 8px;
+            background-size: 200% 100%;
+            animation: 1.5s skeleton-shine linear infinite;
+        }
+        .skel-text { height: 16px; margin-bottom: 10px; }
+        .skel-title { height: 24px; width: 60%; margin-bottom: 15px; }
+        .skel-btn { height: 45px; width: 100%; border-radius: 10px; margin-top: 15px;}
+        @keyframes skeleton-shine {
+            to { background-position-x: -200%; }
+        }
+
+        /* شاشات الحالة الفارغة (Empty States) */
+        .empty-state-container {
+            text-align: center;
+            padding: 40px 20px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px dashed #ddd;
+            margin-top: 10px;
+        }
+        .empty-state-icon {
+            font-size: 65px;
+            display: inline-block;
+            margin-bottom: 15px;
+            animation: float-anim 3s ease-in-out infinite;
+        }
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0 0 8px 0;
+        }
+        .empty-state-desc {
+            font-size: 14px;
+            color: #888;
+            margin: 0;
+            line-height: 1.6;
+        }
+        @keyframes float-anim {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
     </style>
 </head>
@@ -637,6 +705,36 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // ==========================================
+        // ✨ نظام التفاعلات الحركية الدقيقة (Ripple)
+        // ==========================================
+        document.addEventListener('mousedown', function(e) { createRipple(e); });
+        document.addEventListener('touchstart', function(e) { createRipple(e.touches[0]); }, {passive: true});
+
+        function createRipple(e) {
+            let target = e.target.closest('button, .nav-item, .category-card');
+            if (!target || target.disabled) return;
+            
+            target.classList.add('ripple-target');
+            const rect = target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const span = document.createElement('span');
+            span.classList.add('ripple-span');
+            span.style.left = `${x}px`;
+            span.style.top = `${y}px`;
+            
+            // Dynamic ripple color
+            const bg = window.getComputedStyle(target).backgroundColor;
+            if(bg === 'rgb(255, 255, 255)' || bg === 'rgba(0, 0, 0, 0)' || target.classList.contains('nav-item')) {
+                span.style.backgroundColor = 'rgba(212,175,55,0.3)';
+            }
+            
+            target.appendChild(span);
+            setTimeout(() => span.remove(), 600);
+        }
+
         const SCRIPT_URL = 'https://lightgreen-squirrel-796252.hostingersite.com/api.php'; 
 
         // ==========================================
@@ -994,7 +1092,9 @@
 
         let customerMap, customerMarker; let customerMapInterval;
         function checkMyOrder() {
-            const phone = localStorage.getItem('customerPhone'); const statusArea = document.getElementById('customer-status-area'); statusArea.innerHTML = 'جاري البحث عن طلبك... ⏳';
+            const phone = localStorage.getItem('customerPhone'); const statusArea = document.getElementById('customer-status-area'); 
+            statusArea.innerHTML = '<div class="skeleton-box skel-title" style="margin: 0 auto 15px auto;"></div><div class="skeleton-box skel-text" style="width:80%; margin: 0 auto;"></div><div class="skeleton-box skel-text" style="width:60%; margin: 10px auto 0 auto;"></div>';
+            
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) })
             .then(res => res.json()).then(data => {
                 if(data.status === "success" && data.activeOrder) {
@@ -1014,7 +1114,11 @@
                         }, 300);
                         if(!customerMapInterval) customerMapInterval = setInterval(refreshCustomerMapOnly, 5000);
                     } else { document.getElementById('customer-map-container').classList.add('hidden'); if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } }
-                } else { statusArea.innerHTML = '<div style="color:#2ed573; font-weight:800; font-size:18px; margin-bottom:10px;">لا توجد طلبات نشطة حالياً</div><p style="margin:0; color:#666;">يمكنك البدء بطلب جديد من تبويب (طلب جديد)</p>'; document.getElementById('customer-map-container').classList.add('hidden'); if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } }
+                } else { 
+                    statusArea.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🛒</span><h4 class="empty-state-title">سلتك فارغة</h4><p class="empty-state-desc">لا توجد طلبات نشطة حالياً، يمكنك البدء بطلب جديد من تبويب (طلب جديد)</p></div>'; 
+                    document.getElementById('customer-map-container').classList.add('hidden'); 
+                    if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } 
+                }
             }).catch(e => { statusArea.innerHTML = "⚠️ خطأ في الاتصال بالسيرفر."; });
         }
 
@@ -1113,7 +1217,7 @@
         function fetchVendorOrders() {
             const vName = localStorage.getItem('vendorName'); 
             const container = document.getElementById('vendor-orders-list'); 
-            container.innerHTML = '<p>جاري البحث... ⏳</p>';
+            container.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:70%"></div><div class="skeleton-box skel-text" style="width:50%; margin-top:15px;"></div></div>';
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_vendor_data', vendorName: vName }) })
             .then(res => res.json()).then(data => {
@@ -1122,7 +1226,7 @@
                 let t = v_translations[currentVLang];
                 
                 if(data.orders.length === 0) { 
-                    container.innerHTML = `<p style="color:#2ed573; font-weight:bold; font-size:14px; text-align:center; width:100%;">${t.v_dyn_no_orders}</p>`; 
+                    container.innerHTML = `<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">📋</span><h4 class="empty-state-title">لا توجد طلبات</h4><p class="empty-state-desc">${t.v_dyn_no_orders}</p></div>`; 
                     return; 
                 }
                 data.orders.forEach(o => {
@@ -1188,7 +1292,8 @@
         }
 
         function fetchDriverOrders(userClicked = false) {
-            if(userClicked) { isAudioAllowed = true; } const id = localStorage.getItem('driverId'); const container = document.getElementById('driver-orders-list'); container.innerHTML = '<p style="text-align:center;">جاري البحث عن طلباتك... ⏳</p>';
+            if(userClicked) { isAudioAllowed = true; } const id = localStorage.getItem('driverId'); const container = document.getElementById('driver-orders-list'); 
+            container.innerHTML = '<div class="card" style="padding:15px;"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text" style="width:100%"></div><div class="skeleton-box skel-text" style="width:80%"></div><div class="skeleton-box skel-btn"></div></div>';
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_driver_data', driverId: id }) })
             .then(res => res.json()).then(data => {
                 if(data.status === "expired") { showSection('driver-expired-dashboard'); return; }
@@ -1202,7 +1307,7 @@
                 if(assignedOnly.length > lastAssignedOrdersCount && isAudioAllowed) { driverAudio.play().catch(e=>console.log(e)); }
                 lastAssignedOrdersCount = assignedOnly.length;
 
-                if(data.orders.length === 0) { container.innerHTML = '<div style="background:#fff; padding:20px; border-radius:16px; text-align:center;"><p style="color:#2ed573; font-weight:800; font-size:16px; margin:0;">✅ لا توجد طلبات مسندة لك حالياً.</p></div>'; document.getElementById('map-container').classList.add('hidden'); return; }
+                if(data.orders.length === 0) { container.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">☕</span><h4 class="empty-state-title">حان وقت الاستراحة</h4><p class="empty-state-desc">لا توجد طلبات مسندة لك حالياً. سنقوم بتنبيهك فور وصول طلب جديد.</p></div>'; document.getElementById('map-container').classList.add('hidden'); return; }
 
                 data.orders.forEach(order => {
                     let actionsHtml = '';
@@ -1334,7 +1439,7 @@
                                         </div>`;
                                 });
                             } else {
-                                renContainer.innerHTML = '<p style="color:#2ed573; font-size:14px; font-weight:bold; text-align:center;">لا توجد طلبات تجديد معلقة.</p>';
+                                renContainer.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🏦</span><h4 class="empty-state-title">لا يوجد إيصالات</h4><p class="empty-state-desc">لا توجد طلبات تجديد معلقة حالياً.</p></div>';
                             }
                         }
                     } catch(e) {}
@@ -1350,7 +1455,7 @@
                         if(newContainer) {
                             newContainer.innerHTML = '';
                             if(!data.newOrders || data.newOrders.length === 0) {
-                                newContainer.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:30px; background:#fff; border-radius:16px;"><p style="color:#2ed573; font-weight:bold; font-size:16px; margin:0;">لا توجد طلبات جديدة معلقة.</p></div>';
+                                newContainer.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛡️</span><h4 class="empty-state-title">الوضع مستقر</h4><p class="empty-state-desc">لا توجد طلبات جديدة معلقة حالياً.</p></div>';
                             } else {
                                 data.newOrders.forEach(o => {
                                     let encArea = encodeURIComponent(o.area || ''); let encDetails = encodeURIComponent(o.details || '');
@@ -1433,8 +1538,8 @@
             const driversContainer = document.getElementById('admin-drivers-list');
             const vendorsContainer = document.getElementById('admin-vendors-list');
             
-            if(driversContainer) driversContainer.innerHTML = '<p style="text-align:center;">جاري تحميل المناديب... ⏳</p>';
-            if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center;">جاري تحميل التُجّار... ⏳</p>';
+            if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div><div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
+            if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div><div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
             .then(res => res.json())
@@ -1453,7 +1558,7 @@
             const container = document.getElementById('admin-drivers-list');
             if(!container) return;
             container.innerHTML = '';
-            if(!drivers || drivers.length === 0) { container.innerHTML = '<p style="text-align:center; font-weight:bold; color:#ff4757;">لا يوجد مناديب مسجلين.</p>'; return; }
+            if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4><p class="empty-state-desc">لم يتم تسجيل أي مندوب بعد.</p></div>'; return; }
             drivers.forEach(d => {
                 let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
                 container.innerHTML += `
@@ -1476,7 +1581,7 @@
             const container = document.getElementById('admin-vendors-list');
             if(!container) return;
             container.innerHTML = '';
-            if(!vendors || vendors.length === 0) { container.innerHTML = '<p style="text-align:center; font-weight:bold; color:#ff4757;">لا يوجد تُجّار مسجلين.</p>'; return; }
+            if(!vendors || vendors.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🏪</span><h4 class="empty-state-title">لا يوجد تجار</h4><p class="empty-state-desc">لم يتم تسجيل أي تاجر بعد.</p></div>'; return; }
             vendors.forEach(v => {
                 container.innerHTML += `
                 <div class="grid-card">
@@ -1674,7 +1779,7 @@
         }
 
         function fetchAdminRenewals() {
-            const container = document.getElementById('renewals-container'); container.innerHTML = '<p style="text-align:center; font-size:13px;">جاري جلب الإيصالات... ⏳</p>';
+            const container = document.getElementById('renewals-container'); container.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🏦</span><h4 class="empty-state-title">جاري البحث</h4><p class="empty-state-desc">جاري جلب الإيصالات... ⏳</p></div>';
             fetchAdminData(); 
         }
 
