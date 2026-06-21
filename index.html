@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#D4AF37">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Na'awen">
+    <meta name="apple-mobile-web-app-title" content="Na'awan">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -265,6 +265,14 @@
             </div>
         </div>
 
+        <div id="customer-email-capture" class="card section hidden">
+            <h3 style="text-align:center; color:var(--text-dark); font-weight:800;">خطوة أخيرة لتجربة أفضل 📩</h3>
+            <p style="text-align:center; color:#666; font-size:14px;">أدخل بريدك الإلكتروني لتصلك أحدث العروض وكوبونات الخصم الحصرية من نعاون!</p>
+            <input type="email" id="cust-email-input" placeholder="example@email.com" style="text-align:center; font-size:16px;" dir="ltr">
+            <button onclick="saveEmailAndContinue()" class="btn-success">حفظ ومتابعة ✅</button>
+            <button onclick="skipEmailStep()" class="btn-back" style="margin-top:10px; background:transparent; border:1px solid #ccc; width: 100%;">تخطي هذه الخطوة ⏭️</button>
+        </div>
+
         <div id="customer-dashboard" class="section hidden" style="background: transparent; box-shadow: none; padding: 0;">
             
             <div id="cust-tab-order" class="tab-pane active">
@@ -432,8 +440,9 @@
             <div class="admin-top-tabs">
                 <button class="admin-tab-btn active" onclick="switchAdminSubTab('new-orders', this)">🆕 الطلبات الجديدة</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('all-orders', this)">📋 أرشيف الطلبات</button>
-                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-drivers', this)">🛵 إدارة المناديب</button>
-                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-vendors', this)">🏪 إدارة التُجّار</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-drivers', this)">🛵 المناديب</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-vendors', this)">🏪 التُجّار</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('marketing', this)" style="background:#8e44ad; color:white; border:none;">📢 التسويق</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('settings', this)">⚙️ الإعدادات</button>
             </div>
 
@@ -482,6 +491,18 @@
                 <button onclick="fetchAdminUsersList()" style="background:#f1f2f6; color:#2c3e50; margin-bottom:15px; font-size:14px; box-shadow:none;">تحديث القائمة 🔄</button>
                 <div id="admin-vendors-list" class="grid-layout">
                     <p style="text-align:center;">جاري جلب بيانات التُجّار...</p>
+                </div>
+            </div>
+
+            <div id="admin-sub-marketing" class="tab-pane">
+                <h4 class="section-title" style="margin-top:0;">📢 مركز التسويق والإشعارات</h4>
+                <p style="font-size:13px; color:#666;">سيتم إرسال هذا العرض عبر البريد الإلكتروني الرسمي لجميع الزبائن المسجلين.</p>
+                <div class="card" style="padding:20px;">
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة الترويجية:</label>
+                    <input type="text" id="promo-subject" placeholder="مثال: خصم 50% على طلبك الأول!">
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">محتوى العرض:</label>
+                    <textarea id="promo-message" placeholder="اكتب تفاصيل العرض الجذاب هنا..." style="height:150px;"></textarea>
+                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال العرض لجميع الزبائن 🚀</button>
                 </div>
             </div>
 
@@ -760,14 +781,11 @@
         // ✨ نظام التنقل والتبويبات العصرية
         // ==========================================
         function switchTab(group, tabId, element) {
-            // إخفاء كل التبويبات في المجموعة
             document.querySelectorAll(`[id^="${group}-tab-"]`).forEach(el => {
                 el.classList.remove('active');
             });
-            // إظهار التبويب المطلوب
             document.getElementById(`${group}-tab-${tabId}`).classList.add('active');
             
-            // تحديث حالة الأزرار في الشريط السفلي
             if(element) {
                 let navContainer = element.parentElement;
                 navContainer.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -776,26 +794,20 @@
         }
 
         function switchAdminSubTab(tabId, element, isBottomNav = false) {
-            // إخفاء كل تبويبات الإدارة
             document.querySelectorAll('[id^="admin-sub-"]').forEach(el => el.classList.remove('active'));
-            // إظهار التبويب المطلوب
             let targetTab = document.getElementById(`admin-sub-${tabId}`);
             if(targetTab) targetTab.classList.add('active');
 
-            // تحديث الأزرار العلوية
             document.querySelectorAll('.admin-tab-btn').forEach(el => el.classList.remove('active'));
             if(!isBottomNav && element) element.classList.add('active');
 
-            // تحديث الأزرار السفلية
             if(isBottomNav && element) {
                 document.querySelectorAll('#admin-bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
                 element.classList.add('active');
                 
-                // مزامنة الزر العلوي لو وجد
                 let topBtn = document.querySelector(`.admin-tab-btn[onclick*="'${tabId}'"]`);
                 if(topBtn) topBtn.classList.add('active');
             } else if (!isBottomNav) {
-                // مزامنة الزر السفلي لو وجد
                 let botBtn = document.querySelector(`#admin-bottom-nav .nav-item[onclick*="'${tabId}'"]`);
                 if(botBtn) {
                     document.querySelectorAll('#admin-bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
@@ -803,15 +815,11 @@
                 }
             }
 
-            // تفعيل جلب قائمة المستخدمين عند فتح التبويبات الجديدة
             if(tabId === 'manage-drivers' || tabId === 'manage-vendors') {
                 fetchAdminUsersList();
             }
         }
 
-        // ==========================================
-        // ✨ دالة تحديث بيانات حساب الزبون (الملف الشخصي)
-        // ==========================================
         function updateProfileData() {
             document.getElementById('profile-phone-display').innerText = localStorage.getItem('customerPhone');
             let savedCity = localStorage.getItem('savedCustCity');
@@ -823,9 +831,6 @@
             }
         }
 
-        // ==========================================
-        // ✨ نظام حفظ موقع الزبون (Smart Persistence)
-        // ==========================================
         function initCustomerLocation() {
             const savedLat = localStorage.getItem('savedCustLat');
             const savedLng = localStorage.getItem('savedCustLng');
@@ -833,17 +838,14 @@
             const savedCity = localStorage.getItem('savedCustCity');
 
             if(savedLat && savedLng && savedArea) {
-                // استرجاع المتغيرات المؤقتة المستخدمة في إرسال الطلب
                 tempCustLat = parseFloat(savedLat);
                 tempCustLng = parseFloat(savedLng);
                 
-                // تحديث الواجهة
                 document.getElementById('display-cust-area').innerText = `${savedCity}، ${savedArea}`;
                 document.getElementById('loc-editor-card').style.display = 'none';
                 document.getElementById('saved-loc-display').style.display = 'flex';
                 document.getElementById('order-form-card').style.display = 'block';
                 
-                // تعبئة الحقول المخفية أو الموجودة
                 document.getElementById('cust-city').value = savedCity;
                 document.getElementById('cust-area').value = savedArea;
             } else {
@@ -869,13 +871,11 @@
                 if(!confirm('لم تقم بتحديد موقعك بالـ GPS الدقيق. هل تريد المتابعة بكتابة المنطقة فقط؟ (قد يؤخر ذلك التوصيل)')) return;
             }
 
-            // حفظ في الذاكرة
             localStorage.setItem('savedCustCity', city);
             localStorage.setItem('savedCustArea', area);
             if(tempCustLat) localStorage.setItem('savedCustLat', tempCustLat);
             if(tempCustLng) localStorage.setItem('savedCustLng', tempCustLng);
 
-            // تحديث الواجهة وإظهار نموذج الطلب
             document.getElementById('display-cust-area').innerText = `${city}، ${area}`;
             document.getElementById('loc-editor-card').style.display = 'none';
             document.getElementById('saved-loc-display').style.display = 'flex';
@@ -897,9 +897,6 @@
             }
         }
 
-        // ==========================================
-        // ✨ نظام ثنائية اللغة (عربي/إنجليزي) للتُجّار فقط
-        // ==========================================
         const v_translations = {
             ar: {
                 v_login_title: "بوابة التُجّار والمطاعم", v_id_ph: "رقم التاجر (ID)", v_pass_ph: "كلمة المرور", v_login_btn: "دخول التاجر",
@@ -945,14 +942,11 @@
         }
         window.addEventListener('DOMContentLoaded', applyVendorLang);
 
-        // ==========================================
-        // متغيرات النظام الأساسية
-        // ==========================================
         let watchId; let adminRefreshInterval; 
         let tempCustLat = null; let tempCustLng = null; let activePromoCode = "";
         let chart1, chart2; let availableDriversData = [];
         let currentDriverStatus = "متصل";
-        let globalAdminPhone = ""; // متغير لحفظ رقم الإدارة للاستخدام في الدعم الفني
+        let globalAdminPhone = ""; 
 
         const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
         const driverAudio = new Audio('https://actions.google.com/sounds/v1/communications/incoming_phone_call.ogg');
@@ -999,10 +993,7 @@
                 showSection('vendor-dashboard'); fetchVendorOrders();
             }
             else if (localStorage.getItem('customerPhone')) { 
-                showSection('customer-dashboard'); 
-                initCustomerLocation(); // تهيئة الموقع الذكي
-                checkMyOrder(); 
-                checkAndFillMagicVendor(); 
+                proceedToCustomerDashboard();
             }
         });
 
@@ -1018,7 +1009,6 @@
             document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
             document.getElementById(sectionId).classList.remove('hidden');
             
-            // التحكم بظهور التذييل (مخفي في لوحات التحكم التي تحتوي شريط سفلي)
             if(sectionId.includes('dashboard') && (sectionId === 'customer-dashboard' || sectionId === 'admin-dashboard')) {
                 document.getElementById('main-footer').classList.add('hidden');
             } else if (sectionId !== 'driver-dashboard' && sectionId !== 'vendor-dashboard') {
@@ -1032,7 +1022,9 @@
 
         function logout() { 
             if(confirm("تسجيل الخروج من الحساب؟")) { 
-                localStorage.removeItem('customerPhone'); // عدم مسح كل شيء للحفاظ على الموقع المحفوظ
+                localStorage.removeItem('customerPhone'); 
+                localStorage.removeItem('customerEmail');
+                localStorage.removeItem('customerEmailSkipped');
                 localStorage.removeItem('adminLogged');
                 localStorage.removeItem('driverId');
                 localStorage.removeItem('vendorId');
@@ -1059,15 +1051,44 @@
             });
         }
 
+        // ==========================================
+        // ✨ نظام الدخول وطلب البريد الإلكتروني
+        // ==========================================
         function loginCustomer() { 
             const p = document.getElementById('cust-phone').value; 
             if(p.length >= 8) { 
                 localStorage.setItem('customerPhone', p); 
-                showSection('customer-dashboard'); 
-                initCustomerLocation(); 
-                checkMyOrder(); 
-                checkAndFillMagicVendor(); 
+                
+                if(localStorage.getItem('customerEmailSkipped') || localStorage.getItem('customerEmail')) {
+                    proceedToCustomerDashboard();
+                } else {
+                    showSection('customer-email-capture');
+                }
             } else { alert('رقم هاتف غير صحيح'); }
+        }
+
+        function saveEmailAndContinue() {
+            const email = document.getElementById('cust-email-input').value;
+            const phone = localStorage.getItem('customerPhone');
+            if(email && email.includes('@')) {
+                localStorage.setItem('customerEmail', email);
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) });
+                proceedToCustomerDashboard();
+            } else {
+                alert('يرجى إدخال بريد إلكتروني صحيح أو الضغط على تخطي.');
+            }
+        }
+
+        function skipEmailStep() {
+            localStorage.setItem('customerEmailSkipped', 'true');
+            proceedToCustomerDashboard();
+        }
+
+        function proceedToCustomerDashboard() {
+            showSection('customer-dashboard'); 
+            initCustomerLocation(); 
+            checkMyOrder(); 
+            checkAndFillMagicVendor(); 
         }
 
         function applyCoupon(event) {
@@ -1161,7 +1182,6 @@
                 document.getElementById('pickup-loc').value = ''; document.getElementById('order-details').value = ''; document.getElementById('promo-code').value = ''; 
                 activePromoCode = ""; document.getElementById('coupon-msg').classList.add('hidden'); document.getElementById('promo-code').disabled = false;
                 
-                // التبديل التلقائي لتبويب التتبع
                 let trackNavBtn = document.querySelector('#cust-bottom-nav .nav-item:nth-child(2)');
                 if(trackNavBtn) { switchTab('cust', 'track', trackNavBtn); checkMyOrder(); }
                 
@@ -1381,6 +1401,27 @@
             cards.forEach(card => { if(card.innerText.toLowerCase().includes(input)) card.style.display = ''; else card.style.display = 'none'; });
         }
 
+        // --- دالة إرسال الترويج من لوحة الإدارة ---
+        function sendPromoBroadcast(event) {
+            const subject = document.getElementById('promo-subject').value;
+            const message = document.getElementById('promo-message').value;
+            if(!subject || !message) { alert("يرجى تعبئة عنوان ومحتوى العرض."); return; }
+            if(!confirm("هل أنت متأكد من رغبتك في إرسال هذا العرض لجميع الزبائن المسجلين؟")) return;
+            
+            const btn = event.target; btn.innerText = 'جاري الإرسال الجماعي... ⏳'; btn.disabled = true;
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'send_broadcast', subject: subject, message: message }) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    alert(`✅ تم إرسال العرض الترويجي بنجاح إلى (${data.sentCount}) زبون!`);
+                    document.getElementById('promo-subject').value = '';
+                    document.getElementById('promo-message').value = '';
+                } else {
+                    alert('حدث خطأ أثناء الإرسال.');
+                }
+            }).finally(() => { btn.innerText = 'إرسال العرض لجميع الزبائن 🚀'; btn.disabled = false; });
+        }
+
         let isFetchingAdmin = false;
         function fetchAdminData() {
             if(isFetchingAdmin || window.pauseRefresh) return; 
@@ -1531,15 +1572,12 @@
             });
         }
 
-        // ==========================================
-        // ✨ دوال جلب وتعديل بيانات المناديب والتُجّار
-        // ==========================================
         function fetchAdminUsersList() {
             const driversContainer = document.getElementById('admin-drivers-list');
             const vendorsContainer = document.getElementById('admin-vendors-list');
             
-            if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div><div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
-            if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div><div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
+            if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
+            if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
             .then(res => res.json())
@@ -1596,7 +1634,7 @@
             });
         }
 
-        // --- دوال إجراءات المناديب ---
+        // --- دوال إجراءات المناديب والتُجّار بقيت كما هي دون حذف ---
         function deleteAdminDriver(id) {
             if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً من النظام؟\nلن يتمكن من الدخول مجدداً.')) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
@@ -1623,7 +1661,6 @@
             .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
         }
 
-        // --- دوال إجراءات التُجّار ---
         function deleteAdminVendor(id) {
             if(confirm('⚠️ هل أنت متأكد من حذف هذا التاجر نهائياً من النظام؟')) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_vendor', id: id }) })
@@ -1647,8 +1684,6 @@
                 });
             }
         }
-        // ==========================================
-
 
         function updateCashView() {
             const select = document.getElementById('admin-cash-select');
