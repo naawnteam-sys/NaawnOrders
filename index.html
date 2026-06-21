@@ -165,9 +165,6 @@
             text-align: center;
         }
 
-        /* -------------------------------------- */
-        /* التعديلات الجديدة (Skeleton, Ripple, Empty) */
-        /* -------------------------------------- */
         /* تأثير التموج المائي (Ripple Effect) */
         .ripple-target {
             position: relative;
@@ -380,6 +377,14 @@
                     <h3 style="margin: 0 0 5px 0;">حسابي</h3>
                     <p style="color: #888; font-size: 16px; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px;" id="profile-phone-display"></p>
                     
+                    <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
+                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">📩 البريد الإلكتروني</h4>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="email" id="profile-email-input" placeholder="لم يتم تسجيل بريد إلكتروني بعد" style="margin:0; font-size:15px; background:#fff; text-align: left;" dir="ltr">
+                            <button onclick="updateProfileEmail(event)" style="margin:0; width:auto; white-space:nowrap; padding:12px 20px; background:var(--text-dark); color:var(--primary-gold);">حفظ 💾</button>
+                        </div>
+                    </div>
+
                     <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
                         <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">📍 عناويني المحفوظة</h4>
                         <div style="background: #fdfaf0; padding: 15px; border-radius: 12px; border: 1px solid var(--primary-gold);">
@@ -617,7 +622,7 @@
                 <option value="">نوع المركبة...</option>
                 <option value="سيارة خاصة">سيارة خاصة 🚗</option>
             </select>
-            <button onclick="submitDriverApplication(event)">إرسال طلب الالتحاق 🚀</button>
+            <button onclick="submitDriverApplication(event)">إرسال طلب الالعتحاق 🚀</button>
         </div>
 
       <div id="vendor-login" class="card section hidden">
@@ -726,9 +731,6 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // ==========================================
-        // ✨ نظام التفاعلات الحركية الدقيقة (Ripple)
-        // ==========================================
         document.addEventListener('mousedown', function(e) { createRipple(e); });
         document.addEventListener('touchstart', function(e) { createRipple(e.touches[0]); }, {passive: true});
 
@@ -746,7 +748,6 @@
             span.style.left = `${x}px`;
             span.style.top = `${y}px`;
             
-            // Dynamic ripple color
             const bg = window.getComputedStyle(target).backgroundColor;
             if(bg === 'rgb(255, 255, 255)' || bg === 'rgba(0, 0, 0, 0)' || target.classList.contains('nav-item')) {
                 span.style.backgroundColor = 'rgba(212,175,55,0.3)';
@@ -758,9 +759,6 @@
 
         const SCRIPT_URL = 'https://lightgreen-squirrel-796252.hostingersite.com/api.php'; 
 
-        // ==========================================
-        // ⏱️ أداة التحكم بساعات عمل فريق نعاون
-        // ==========================================
         const workStartTime = "08:00"; 
         const workEndTime = "23:00";   
 
@@ -777,9 +775,6 @@
             else return currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes;
         }
 
-        // ==========================================
-        // ✨ نظام التنقل والتبويبات العصرية
-        // ==========================================
         function switchTab(group, tabId, element) {
             document.querySelectorAll(`[id^="${group}-tab-"]`).forEach(el => {
                 el.classList.remove('active');
@@ -828,6 +823,27 @@
                 document.getElementById('profile-loc-text').innerText = `${savedCity}، ${savedArea}`;
             } else {
                 document.getElementById('profile-loc-text').innerText = "لم يتم تحديد موقع بعد";
+            }
+            
+            // تعبئة حقل البريد الإلكتروني المحفوظ في صفحة حسابي
+            document.getElementById('profile-email-input').value = localStorage.getItem('customerEmail') || '';
+        }
+
+        // دالة تحديث البريد الإلكتروني من داخل صفحة حسابي
+        function updateProfileEmail(e) {
+            const email = document.getElementById('profile-email-input').value;
+            const phone = localStorage.getItem('customerPhone');
+            if(email && email.includes('@')) {
+                const btn = e.target; btn.innerText = '⏳'; btn.disabled = true;
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) })
+                .then(res => res.json()).then(data => {
+                    if(data.status === 'success') {
+                        localStorage.setItem('customerEmail', email);
+                        alert('✅ تم تحديث وحفظ البريد الإلكتروني بنجاح!');
+                    }
+                }).finally(() => { btn.innerText = 'حفظ 💾'; btn.disabled = false; });
+            } else {
+                alert('يرجى إدخال بريد إلكتروني صحيح وصالح.');
             }
         }
 
@@ -1051,19 +1067,28 @@
             });
         }
 
-        // ==========================================
-        // ✨ نظام الدخول وطلب البريد الإلكتروني
-        // ==========================================
+        // تسجيل الدخول مع الفحص التلقائي لوجود البريد في قاعدة البيانات
         function loginCustomer() { 
             const p = document.getElementById('cust-phone').value; 
             if(p.length >= 8) { 
                 localStorage.setItem('customerPhone', p); 
                 
-                if(localStorage.getItem('customerEmailSkipped') || localStorage.getItem('customerEmail')) {
+                // جلب حالة وحساب البريد الإلكتروني الفعلي المخزن مسبقاً في السيرفر لعدم تكرار الطلب
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: p }) })
+                .then(res => res.json()).then(data => {
+                    if(data.status === 'success' && data.email) {
+                        localStorage.setItem('customerEmail', data.email);
+                        proceedToCustomerDashboard();
+                    } else {
+                        if(localStorage.getItem('customerEmailSkipped') || localStorage.getItem('customerEmail')) {
+                            proceedToCustomerDashboard();
+                        } else {
+                            showSection('customer-email-capture');
+                        }
+                    }
+                }).catch(() => {
                     proceedToCustomerDashboard();
-                } else {
-                    showSection('customer-email-capture');
-                }
+                });
             } else { alert('رقم هاتف غير صحيح'); }
         }
 
@@ -1118,27 +1143,32 @@
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) })
             .then(res => res.json()).then(data => {
-                if(data.status === "success" && data.activeOrder) {
-                    let bc = data.activeOrder.status.includes('انتظار') || data.activeOrder.status.includes('مراجعة') ? 'badge-wait' : 'badge-prog';
-                    statusArea.innerHTML = `<h4 style="margin:0 0 10px 0; color:var(--primary-gold);">رقم الطلب: ${data.activeOrder.id}</h4><strong style="font-size:14px;">الحالة:</strong> <span class="badge ${bc}" style="font-size:14px;">${data.activeOrder.status}</span><br><div style="font-size:13px; color:#666; margin-top:15px; background:#fff; padding:10px; border-radius:8px; text-align:right;"><strong>التفاصيل:</strong> ${data.activeOrder.details}</div>`;
-                    if(data.activeOrder.status.includes('توصيل')) {
-                        const mapCont = document.getElementById('customer-map-container'); mapCont.classList.remove('hidden');
-                        if(data.activeOrder.lat && data.activeOrder.lng && data.activeOrder.custLat && data.activeOrder.custLng) {
-                            let dist = calculateDistance(data.activeOrder.lat, data.activeOrder.lng, data.activeOrder.custLat, data.activeOrder.custLng);
-                            if(dist) { document.getElementById('eta-display').classList.remove('hidden'); document.getElementById('eta-display').innerHTML = `المسافة: ${dist} كم 🛵 | الوقت المتوقع: ${Math.ceil((dist/40)*60)} دقيقة ⏱️`; }
-                        }
-                        setTimeout(() => {
-                            let initLat = data.activeOrder.lat || data.activeOrder.custLat || 23.2255; let initLng = data.activeOrder.lng || data.activeOrder.custLng || 56.5165;
-                            if(!customerMap) { customerMap = L.map('customer-map').setView([initLat, initLng], 15); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(customerMap); customerMarker = L.marker([initLat, initLng]).addTo(customerMap).bindPopup('موقع المندوب 🛵').openPopup(); } 
-                            else { customerMarker.setLatLng([initLat, initLng]); customerMap.setView([initLat, initLng]); }
-                            customerMap.invalidateSize(); 
-                        }, 300);
-                        if(!customerMapInterval) customerMapInterval = setInterval(refreshCustomerMapOnly, 5000);
-                    } else { document.getElementById('customer-map-container').classList.add('hidden'); if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } }
-                } else { 
-                    statusArea.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🛒</span><h4 class="empty-state-title">سلتك فارغة</h4><p class="empty-state-desc">لا توجد طلبات نشطة حالياً، يمكنك البدء بطلب جديد من تبويب (طلب جديد)</p></div>'; 
-                    document.getElementById('customer-map-container').classList.add('hidden'); 
-                    if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } 
+                if(data.status === "success") {
+                    if(data.email) {
+                        localStorage.setItem('customerEmail', data.email);
+                    }
+                    if(data.activeOrder) {
+                        let bc = data.activeOrder.status.includes('انتظار') || data.activeOrder.status.includes('مراجعة') ? 'badge-wait' : 'badge-prog';
+                        statusArea.innerHTML = `<h4 style="margin:0 0 10px 0; color:var(--primary-gold);">رقم الطلب: ${data.activeOrder.id}</h4><strong style="font-size:14px;">الحالة:</strong> <span class="badge ${bc}" style="font-size:14px;">${data.activeOrder.status}</span><br><div style="font-size:13px; color:#666; margin-top:15px; background:#fff; padding:10px; border-radius:8px; text-align:right;"><strong>التفاصيل:</strong> ${data.activeOrder.details}</div>`;
+                        if(data.activeOrder.status.includes('توصيل')) {
+                            const mapCont = document.getElementById('customer-map-container'); mapCont.classList.remove('hidden');
+                            if(data.activeOrder.lat && data.activeOrder.lng && data.activeOrder.custLat && data.activeOrder.custLng) {
+                                let dist = calculateDistance(data.activeOrder.lat, data.activeOrder.lng, data.activeOrder.custLat, data.activeOrder.custLng);
+                                if(dist) { document.getElementById('eta-display').classList.remove('hidden'); document.getElementById('eta-display').innerHTML = `المسافة: ${dist} كم 🛵 | الوقت المتوقع: ${Math.ceil((dist/40)*60)} دقيقة ⏱️`; }
+                            }
+                            setTimeout(() => {
+                                let initLat = data.activeOrder.lat || data.activeOrder.custLat || 23.2255; let initLng = data.activeOrder.lng || data.activeOrder.custLng || 56.5165;
+                                if(!customerMap) { customerMap = L.map('customer-map').setView([initLat, initLng], 15); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(customerMap); customerMarker = L.marker([initLat, initLng]).addTo(customerMap).bindPopup('موقع المندوب 🛵').openPopup(); } 
+                                else { customerMarker.setLatLng([initLat, initLng]); customerMap.setView([initLat, initLng]); }
+                                customerMap.invalidateSize(); 
+                            }, 300);
+                            if(!customerMapInterval) customerMapInterval = setInterval(refreshCustomerMapOnly, 5000);
+                        } else { document.getElementById('customer-map-container').classList.add('hidden'); if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } }
+                    } else { 
+                        statusArea.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🛒</span><h4 class="empty-state-title">سلتك فارغة</h4><p class="empty-state-desc">لا توجد طلبات نشطة حالياً، يمكنك البدء بطلب جديد من تبويب (طلب جديد)</p></div>'; 
+                        document.getElementById('customer-map-container').classList.add('hidden'); 
+                        if(customerMapInterval) { clearInterval(customerMapInterval); customerMapInterval = null; } 
+                    }
                 }
             }).catch(e => { statusArea.innerHTML = "⚠️ خطأ في الاتصال بالسيرفر."; });
         }
@@ -1401,7 +1431,6 @@
             cards.forEach(card => { if(card.innerText.toLowerCase().includes(input)) card.style.display = ''; else card.style.display = 'none'; });
         }
 
-        // --- دالة إرسال الترويج من لوحة الإدارة ---
         function sendPromoBroadcast(event) {
             const subject = document.getElementById('promo-subject').value;
             const message = document.getElementById('promo-message').value;
@@ -1634,7 +1663,6 @@
             });
         }
 
-        // --- دوال إجراءات المناديب والتُجّار بقيت كما هي دون حذف ---
         function deleteAdminDriver(id) {
             if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً من النظام؟\nلن يتمكن من الدخول مجدداً.')) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
@@ -1713,25 +1741,16 @@
 
        function archiveCompletedOrders() {
             if(confirm('⚠️ هل أنت متأكد من إغلاق اليوم؟\nسيتم أرشفة كافة الطلبات بشكل نهائي لتصفير لوحة العمليات.')) {
-                
                 const btn = document.querySelector('button[onclick="archiveCompletedOrders()"]');
-                const originalText = btn.innerText;
-                btn.innerText = "جاري الإغلاق... ⏳";
+                const originalText = btn.innerText; btn.innerText = "جاري الإغلاق... ⏳";
                 
-                fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'force_archive_all' }) 
-                })
+                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'force_archive_all' }) })
                 .then(res => res.json()).then(data => {
                     if(data.status === 'success') { 
                         alert(`✅ تم إغلاق اليوم وتصفير النظام بنجاح!\nتمت أرشفة (${data.archivedCount}) طلب.`); 
                         fetchAdminData(); 
-                    } else {
-                        alert('حدث خطأ أثناء الأرشفة.');
-                    }
-                }).finally(() => { 
-                    btn.innerText = originalText; 
-                });
+                    } else { alert('حدث خطأ أثناء الأرشفة.'); }
+                }).finally(() => { btn.innerText = originalText; });
             }
         }
         function changeAdminPhone(event) {
