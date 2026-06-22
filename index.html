@@ -17,12 +17,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #2c3e50; --light-gray: #f4f7f6; --app-bg: #f8f9fa; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        /* شريط علوي عصري مع تأثير الزجاج */
         .header { background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.3); color: var(--text-dark); text-align: center; padding: 12px 15px; font-size: 22px; font-weight: 800; box-shadow: 0 2px 15px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; letter-spacing: -0.5px;}
         .header img { height: 35px; margin-left: 10px; border-radius: 8px; }
         
@@ -30,16 +29,13 @@
         .scrolling-text { display: inline-block; will-change: transform; animation: scroll-smooth 20s linear infinite; }
         @keyframes scroll-smooth { 0% { transform: translate3d(100vw, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* الحاوية الرئيسية للتطبيق */
-        .container { padding: 15px; max-width: 800px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box; padding-bottom: 85px; /* مساحة للشريط السفلي */ }
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box; padding-bottom: 85px; }
         
-        /* البطاقات العصرية مع التفاعلات الحركية */
         .card { background: var(--bg-white); border-radius: 16px; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important; -webkit-tap-highlight-color: transparent;}
         .grid-card { border: 1px solid #eee; padding: 15px; border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important; -webkit-tap-highlight-color: transparent;}
         .grid-card:hover { box-shadow: 0 6px 15px rgba(212,175,55,0.1); }
         .card:active, .grid-card:active { transform: scale(0.97) !important; }
         
-        /* التخطيط الشبكي */
         .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
 
         input, select, textarea { width: 100%; padding: 14px 16px; margin: 8px 0 15px 0; border-radius: 10px; border: 1px solid #e0e0e0; font-family: 'Cairo', sans-serif; box-sizing: border-box; font-size: 15px; background: #fdfdfd; transition: all 0.3s ease; }
@@ -56,12 +52,10 @@
         .btn-location { background-color: #3742fa; color: white; box-shadow: 0 4px 10px rgba(55,66,250,0.2);} .btn-location:hover { background-color: #5352ed; color:white;}
         .btn-smart { background-color: #8e44ad; color: white; box-shadow: 0 4px 10px rgba(142,68,173,0.2);} .btn-smart:hover { background-color: #9b59b6; color:white;}
         
-        /* الانتقالات السلسة والتبويبات */
         .hidden { display: none !important; }
         .tab-pane { display: none; opacity: 0; transform: translateY(15px); transition: opacity 0.4s ease, transform 0.4s ease; }
         .tab-pane.active { display: block; opacity: 1; transform: translateY(0); }
         
-        /* شريط التنقل السفلي مع تأثير الزجاج */
         .app-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.5); display: flex; justify-content: space-around; align-items: center; padding: 10px 5px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 9999; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
         .nav-item { flex: 1; text-align: center; color: #a4b0be; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; -webkit-tap-highlight-color: transparent;}
         .nav-item .nav-icon { font-size: 22px; margin-bottom: 2px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -70,13 +64,11 @@
         .nav-item::after { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 3px; background: var(--primary-gold); border-radius: 0 0 5px 5px; transition: width 0.3s ease; }
         .nav-item.active::after { width: 30px; }
 
-        /* شريط التنقل العلوي للإدارة */
         .admin-top-tabs { display: flex; overflow-x: auto; gap: 10px; padding: 5px 0 15px 0; margin-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .admin-top-tabs::-webkit-scrollbar { display: none; }
         .admin-tab-btn { flex: 0 0 auto; background: #fff; border: 1px solid #eee; color: #7f8c8d; border-radius: 20px; padding: 8px 18px; font-size: 13px; font-weight: bold; white-space: nowrap; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-top:0; width: auto;}
         .admin-tab-btn.active { background: var(--text-dark); color: var(--primary-gold); border-color: var(--text-dark); transform: scale(1.05); }
 
-        /* بطاقة الموقع المحفوظ للزبون */
         .saved-location-card { background: linear-gradient(145deg, #ffffff, #fdfaf0); border: 2px solid var(--primary-gold); border-radius: 16px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(212,175,55,0.1); position: relative; overflow: hidden; }
         .saved-location-card::before { content: '📍'; position: absolute; right: -15px; top: -15px; font-size: 60px; opacity: 0.1; }
         .saved-loc-details { flex: 1; margin-right: 15px; z-index: 1;}
@@ -107,128 +99,32 @@
         .cash-box { background: #fdfaf0; border: 1px solid var(--primary-gold); padding: 20px; border-radius: 16px; margin-bottom: 15px; text-align: center;}
         .driver-price-input { border: 2px solid #2ed573; background: #f1fcf5; text-align: center; font-weight: 800; font-size: 20px; margin-bottom: 10px; color: #2ed573;}
         
-        /* تنسيقات الفوتر وتوسيطه */
-        .footer {
-            text-align: center;
-            width: 100%;
-            padding: 20px 15px 30px 15px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+        .footer { text-align: center; width: 100%; padding: 20px 15px 30px 15px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-        /* التصنيفات البصرية */
-        .categories-carousel {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 5px 0 20px 0;
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch;
-        }
+        .categories-carousel { display: flex; overflow-x: auto; gap: 12px; padding: 5px 0 20px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .categories-carousel::-webkit-scrollbar { display: none; }
-        .category-card {
-            flex: 0 0 auto;
-            width: 85px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .category-img-box {
-            width: 75px;
-            height: 75px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            border: 2px solid #fff;
-            transition: transform 0.3s, border-color 0.3s;
-            background: #eee;
-        }
-        .category-card:hover .category-img-box { 
-            border-color: var(--primary-gold); 
-        }
+        .category-card { flex: 0 0 auto; width: 85px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .category-img-box { width: 75px; height: 75px; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 2px solid #fff; transition: transform 0.3s, border-color 0.3s; background: #eee; }
+        .category-card:hover .category-img-box { border-color: var(--primary-gold); }
         .category-card:active { transform: scale(0.95) !important; }
-        .category-img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .category-title {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--text-dark);
-            text-align: center;
-        }
+        .category-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .category-title { font-size: 13px; font-weight: 800; color: var(--text-dark); text-align: center; }
 
-        /* تأثير التموج المائي (Ripple Effect) */
-        .ripple-target {
-            position: relative;
-            overflow: hidden;
-        }
-        .ripple-span {
-            position: absolute;
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple-anim 600ms linear;
-            pointer-events: none;
-            background-color: rgba(255, 255, 255, 0.4);
-        }
-        @keyframes ripple-anim {
-            to { transform: scale(4); opacity: 0; }
-        }
+        .ripple-target { position: relative; overflow: hidden; }
+        .ripple-span { position: absolute; border-radius: 50%; transform: scale(0); animation: ripple-anim 600ms linear; pointer-events: none; background-color: rgba(255, 255, 255, 0.4); }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-        /* التحميل الهيكلي (Skeleton Loading) */
-        .skeleton-box {
-            background: #eee;
-            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
-            border-radius: 8px;
-            background-size: 200% 100%;
-            animation: 1.5s skeleton-shine linear infinite;
-        }
+        .skeleton-box { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 8px; background-size: 200% 100%; animation: 1.5s skeleton-shine linear infinite; }
         .skel-text { height: 16px; margin-bottom: 10px; }
         .skel-title { height: 24px; width: 60%; margin-bottom: 15px; }
         .skel-btn { height: 45px; width: 100%; border-radius: 10px; margin-top: 15px;}
-        @keyframes skeleton-shine {
-            to { background-position-x: -200%; }
-        }
+        @keyframes skeleton-shine { to { background-position-x: -200%; } }
 
-        /* شاشات الحالة الفارغة (Empty States) */
-        .empty-state-container {
-            text-align: center;
-            padding: 40px 20px;
-            background: #fff;
-            border-radius: 16px;
-            border: 1px dashed #ddd;
-            margin-top: 10px;
-        }
-        .empty-state-icon {
-            font-size: 65px;
-            display: inline-block;
-            margin-bottom: 15px;
-            animation: float-anim 3s ease-in-out infinite;
-        }
-        .empty-state-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin: 0 0 8px 0;
-        }
-        .empty-state-desc {
-            font-size: 14px;
-            color: #888;
-            margin: 0;
-            line-height: 1.6;
-        }
-        @keyframes float-anim {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+        .empty-state-container { text-align: center; padding: 40px 20px; background: #fff; border-radius: 16px; border: 1px dashed #ddd; margin-top: 10px; }
+        .empty-state-icon { font-size: 65px; display: inline-block; margin-bottom: 15px; animation: float-anim 3s ease-in-out infinite; }
+        .empty-state-title { font-size: 18px; font-weight: 800; color: var(--text-dark); margin: 0 0 8px 0; }
+        .empty-state-desc { font-size: 14px; color: #888; margin: 0; line-height: 1.6; }
+        @keyframes float-anim { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
     </style>
 </head>
 <body>
@@ -263,7 +159,7 @@
         </div>
 
         <div id="customer-email-capture" class="card section hidden">
-            <h3 style="text-align:center; color:var(--text-dark); font-weight:800;">خطوة أخيرة لتجربة أفضل </h3>
+            <h3 style="text-align:center; color:var(--text-dark); font-weight:800;">خطوة أخيرة لتجربة أفضل 📩</h3>
             <p style="text-align:center; color:#666; font-size:14px;">أدخل بريدك الإلكتروني لتصلك أحدث العروض وكوبونات الخصم الحصرية من نعاون!</p>
             <input type="email" id="cust-email-input" placeholder="example@email.com" style="text-align:center; font-size:16px;" dir="ltr">
             <button onclick="saveEmailAndContinue()" class="btn-success">حفظ ومتابعة </button>
@@ -323,9 +219,9 @@
                         <p style="font-size: 13px; color: #666; text-align:center; margin-top:-5px;">سيتم حفظ الموقع لطلباتك القادمة لتسريع العملية</p>
                         <input type="text" id="cust-city" placeholder="الولاية (مثال: عبري، نزوى)">
                         <input type="text" id="cust-area" placeholder="المنطقة / الحي (مثال: السوق، المرتفع)">
-                        <button onclick="getCustomerLocation(event)" class="btn-location" id="btn-get-loc"> التحديد التلقائي بالـ GPS</button>
+                        <button onclick="getCustomerLocation(event)" class="btn-location" id="btn-get-loc">🎯 التحديد التلقائي بالـ GPS</button>
                         <p id="loc-status" style="font-size: 13px; color: #2ed573; margin: 5px 0 15px 0; text-align: center; font-weight:bold; display: none;">✅ تم التقاط الإحداثيات الدقيقة بنجاح</p>
-                        <button onclick="saveCustomerLocation()" style="background: var(--text-dark); color: var(--primary-gold);">حفظ الموقع ومتابعة الطلب </button>
+                        <button onclick="saveCustomerLocation()" style="background: var(--text-dark); color: var(--primary-gold);">حفظ الموقع ومتابعة الطلب ✨</button>
                     </div>
                 </div>
 
@@ -381,7 +277,7 @@
                         <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">📩 البريد الإلكتروني</h4>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="email" id="profile-email-input" placeholder="لم يتم تسجيل بريد إلكتروني بعد" style="margin:0; font-size:15px; background:#fff; text-align: left;" dir="ltr">
-                            <button onclick="updateProfileEmail(event)" style="margin:0; width:auto; white-space:nowrap; padding:12px 20px; background:var(--text-dark); color:var(--primary-gold);">حفظ 💾</button>
+                            <button onclick="updateProfileEmail(event)" style="margin:0; width:auto; white-space:nowrap; padding:12px 20px; background:var(--text-dark); color:var(--primary-gold);">حفظ </button>
                         </div>
                     </div>
 
@@ -395,7 +291,7 @@
                     </div>
 
                     <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
-                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">🎧 الدعم الفني والمساعدة</h4>
+                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;"> الدعم الفني والمساعدة</h4>
                         <p style="font-size: 14px; color: #666; margin-bottom: 15px;">هل تواجه مشكلة أو لديك استفسار؟ نحن هنا لخدمتك.</p>
                         <button onclick="contactSupport()" style="background: #25D366; color: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">
                             <span style="font-size: 20px;">💬</span> تواصل معنا عبر الواتساب
@@ -457,8 +353,7 @@
                     <input type="text" id="admin-search-bar" onkeyup="filterAdminOrders()" placeholder="ابحث برقم الطلب، العميل، المندوب...">
                 </div>
 
-                <div id="admin-new-orders" class="grid-layout">
-                </div>
+                <div id="admin-new-orders" class="grid-layout"></div>
 
                 <h4 class="section-title" style="margin-top: 30px;">🛵 عهدة المناديب المتاحين</h4>
                 <div class="card" style="padding: 20px;">
@@ -500,20 +395,39 @@
             </div>
 
             <div id="admin-sub-marketing" class="tab-pane">
-                <h4 class="section-title" style="margin-top:0;">📢 مركز التسويق والإشعارات</h4>
+                <h4 class="section-title" style="margin-top:0;">📢 مركز الإشعارات</h4>
                 <p style="font-size:13px; color:#666;">سيتم إرسال هذا العرض عبر البريد الإلكتروني الرسمي لجميع الزبائن المسجلين.</p>
                 <div class="card" style="padding:20px;">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة الترويجية:</label>
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة :</label>
                     <input type="text" id="promo-subject" placeholder="مثال: خصم 50% على طلبك الأول!">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">محتوى العرض:</label>
-                    <textarea id="promo-message" placeholder="اكتب تفاصيل العرض الجذاب هنا..." style="height:150px;"></textarea>
-                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال العرض لجميع الزبائن 🚀</button>
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">المحتوى :</label>
+                    <textarea id="promo-message" placeholder="اكتب تفاصيل هنا..." style="height:150px;"></textarea>
+                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال لجميع الزبائن 🚀</button>
                 </div>
             </div>
 
             <div id="admin-sub-settings" class="tab-pane">
                 
-                <h4 class="section-title" style="color: #ff4757; margin-top:0;">🏦 الإيصالات والتجديد</h4>
+                <h4 class="section-title">📊 سجل عملاء نعاون والمناديب</h4>
+                <div class="card" style="padding: 20px;">
+                    <p style="font-size: 13px; color:#666; margin-top:0;">استعراض شامل لجميع أرقام الهواتف السابقة مع تفاصيل مكان الشراء والمندوب المسؤول.</p>
+                    <button onclick="fetchCustomersHistory()" style="background: #2c3e50; color: var(--primary-gold); font-size: 14px; margin-bottom: 15px; border-radius: 10px;">📋 عرض سجل طلبات الزبائن السابقين</button>
+                    <div id="customers-history-container" class="hidden" style="overflow-x: auto; max-height: 400px; border: 1px solid #eee; border-radius: 8px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 14px;">
+                            <thead>
+                                <tr style="background: var(--text-dark); color: var(--primary-gold); position: sticky; top:0;">
+                                    <th style="padding: 12px; border: 1px solid #ddd;">رقم الزبون</th>
+                                    <th style="padding: 12px; border: 1px solid #ddd;">من أين طلب (المحل)</th>
+                                    <th style="padding: 12px; border: 1px solid #ddd;">المندوب المسؤول</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-history-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h4 class="section-title" style="color: #ff4757;">🏦 الإيصالات والتجديد</h4>
                 <div class="card" style="border: 1px solid #ffcecc; background: #fff5f5;">
                     <button onclick="fetchAdminRenewals()" style="background: var(--text-dark); color: var(--primary-gold); font-size: 14px; margin-bottom: 15px; border-radius: 10px;">🔄 تحديث طلبات التجديد المعلقة</button>
                     <div id="renewals-container"></div>
@@ -625,7 +539,7 @@
             <button onclick="submitDriverApplication(event)">إرسال طلب الالعتحاق 🚀</button>
         </div>
 
-      <div id="vendor-login" class="card section hidden">
+        <div id="vendor-login" class="card section hidden">
            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
              <button class="btn-back" onclick="showSection('customer-login')" style="margin:0; width: auto; padding: 6px 16px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; box-shadow:none;">🔙 العودة</button>
              <button onclick="toggleVendorLang()" id="v-lang-btn1" style="margin:0; width: auto; background: var(--text-dark); color: var(--primary-gold); border: none; padding: 6px 16px; font-size: 13px; border-radius: 20px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">🌐 English</button>
@@ -824,12 +738,9 @@
             } else {
                 document.getElementById('profile-loc-text').innerText = "لم يتم تحديد موقع بعد";
             }
-            
-            // تعبئة حقل البريد الإلكتروني المحفوظ في صفحة حسابي
             document.getElementById('profile-email-input').value = localStorage.getItem('customerEmail') || '';
         }
 
-        // دالة تحديث البريد الإلكتروني من داخل صفحة حسابي
         function updateProfileEmail(e) {
             const email = document.getElementById('profile-email-input').value;
             const phone = localStorage.getItem('customerPhone');
@@ -845,6 +756,44 @@
             } else {
                 alert('يرجى إدخال بريد إلكتروني صحيح وصالح.');
             }
+        }
+
+        // دالة جلب سجل الزبائن والمناديب وعرضها في لوحة التحكم (الميزة المضافة)
+        function fetchCustomersHistory() {
+            const container = document.getElementById('customers-history-container');
+            const tbody = document.getElementById('customers-history-table-body');
+            
+            // تفعيل نظام الإخفاء والإظهار التلقائي
+            if(!container.classList.contains('hidden')) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; font-weight:bold;">جاري استدعاء سجل العمليات من السيرفر... ⏳</td></tr>';
+            container.classList.remove('hidden');
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_customers_history' }) })
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    tbody.innerHTML = '';
+                    if(!data.history || data.history.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:#888;">لا توجد عمليات توصيل مكتملة في السيرفر حالياً.</td></tr>';
+                        return;
+                    }
+                    data.history.forEach(row => {
+                        tbody.innerHTML += `
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:12px; border:1px solid #ddd; font-weight:bold; color:var(--text-dark);">${row.phone}</td>
+                                <td style="padding:12px; border:1px solid #ddd;">${row.pickup}</td>
+                                <td style="padding:12px; border:1px solid #ddd; font-weight:bold; color:var(--dark-gold);">${row.driverName ? row.driverName : 'الإدارة / غير محدد'}</td>
+                            </tr>`;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:red;">فشل السيرفر في جلب السجل الداخلي.</td></tr>';
+                }
+            }).catch(() => {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; color:red;">خطأ في الاتصال بالشبكة.</td></tr>';
+            });
         }
 
         function initCustomerLocation() {
@@ -1067,13 +1016,10 @@
             });
         }
 
-        // تسجيل الدخول مع الفحص التلقائي لوجود البريد في قاعدة البيانات
         function loginCustomer() { 
             const p = document.getElementById('cust-phone').value; 
             if(p.length >= 8) { 
                 localStorage.setItem('customerPhone', p); 
-                
-                // جلب حالة وحساب البريد الإلكتروني الفعلي المخزن مسبقاً في السيرفر لعدم تكرار الطلب
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: p }) })
                 .then(res => res.json()).then(data => {
                     if(data.status === 'success' && data.email) {
@@ -1144,9 +1090,7 @@
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) })
             .then(res => res.json()).then(data => {
                 if(data.status === "success") {
-                    if(data.email) {
-                        localStorage.setItem('customerEmail', data.email);
-                    }
+                    if(data.email) { localStorage.setItem('customerEmail', data.email); }
                     if(data.activeOrder) {
                         let bc = data.activeOrder.status.includes('انتظار') || data.activeOrder.status.includes('مراجعة') ? 'badge-wait' : 'badge-prog';
                         statusArea.innerHTML = `<h4 style="margin:0 0 10px 0; color:var(--primary-gold);">رقم الطلب: ${data.activeOrder.id}</h4><strong style="font-size:14px;">الحالة:</strong> <span class="badge ${bc}" style="font-size:14px;">${data.activeOrder.status}</span><br><div style="font-size:13px; color:#666; margin-top:15px; background:#fff; padding:10px; border-radius:8px; text-align:right;"><strong>التفاصيل:</strong> ${data.activeOrder.details}</div>`;
@@ -1329,10 +1273,8 @@
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { 
                     localStorage.setItem('driverId', id); localStorage.setItem('driverName', data.name); 
-                    
-                    if (data.isExpired) {
-                        showSection('driver-expired-dashboard');
-                    } else {
+                    if (data.isExpired) { showSection('driver-expired-dashboard'); } 
+                    else {
                         localStorage.setItem('driverStatus', data.drvStatus);
                         document.getElementById('driver-welcome-msg').innerText = `أهلاً بك، ${data.name} 🛵`; applyDriverStatusUI(data.drvStatus);
                         showSection('driver-dashboard'); fetchDriverOrders(true); 
@@ -1445,9 +1387,7 @@
                     alert(`✅ تم إرسال العرض الترويجي بنجاح إلى (${data.sentCount}) زبون!`);
                     document.getElementById('promo-subject').value = '';
                     document.getElementById('promo-message').value = '';
-                } else {
-                    alert('حدث خطأ أثناء الإرسال.');
-                }
+                } else { alert('حدث خطأ أثناء الإرسال.'); }
             }).finally(() => { btn.innerText = 'إرسال العرض لجميع الزبائن 🚀'; btn.disabled = false; });
         }
 
@@ -1457,8 +1397,7 @@
             isFetchingAdmin = true;
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.json()).then(data => {
                 if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
                     
                     try {
@@ -1477,17 +1416,12 @@
                                     let c = d.cash || 0;
                                     optionsHtml += `<option value="${d.id}" data-name="${d.name}" data-cash="${c}">🛵 ${d.name} (الكاش: ${c} ر.ع)</option>`;
                                 });
-                            } else {
-                                optionsHtml = '<option value="">لا يوجد مناديب متاحين حالياً</option>';
-                            }
+                            } else { optionsHtml = '<option value="">لا يوجد مناديب متاحين حالياً</option>'; }
                             
                             let currentVal = cashSelect.value;
                             cashSelect.innerHTML = optionsHtml;
-                            if(currentVal && cashSelect.querySelector(`option[value="${currentVal}"]`)) {
-                                cashSelect.value = currentVal;
-                            } else {
-                                document.getElementById('cash-action-box').classList.add('hidden');
-                            }
+                            if(currentVal && cashSelect.querySelector(`option[value="${currentVal}"]`)) { cashSelect.value = currentVal; } 
+                            else { document.getElementById('cash-action-box').classList.add('hidden'); }
                             updateCashView();
                         }
                     } catch(e) {}
@@ -1499,18 +1433,16 @@
                             if(data.renewals && data.renewals.length > 0) {
                                 data.renewals.forEach(r => {
                                     renContainer.innerHTML += `
-                                        <div style="background: #fff; border: 1px solid #ffcecc; padding: 15px; margin-bottom: 10px; border-radius: 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
-                                            <strong style="color:var(--text-dark);">المندوب:</strong> ${r.driverName} <br>
-                                            <strong style="color:var(--text-dark);">رقم الإيصال:</strong> <span style="color:#ff4757; letter-spacing:1px; font-weight:bold; font-size:16px;">${r.receipt}</span> <br>
+                                        <div style="background: #fff; border: 1px solid #ffcecc; padding: 15px; margin-bottom: 10px; border-radius: 12px;">
+                                            <strong>المندوب:</strong> ${r.driverName} <br>
+                                            <strong>رقم الإيصال:</strong> <span style="color:#ff4757; letter-spacing:1px; font-weight:bold; font-size:16px;">${r.receipt}</span> <br>
                                             <div style="display:flex; gap:10px; margin-top:10px;">
                                                 <button onclick="approveDriverRenewal('${r.driverId}')" class="btn-success" style="padding:10px; font-size:13px; margin:0;">تأكيد وتجديد ✅</button>
                                                 <button onclick="deleteDriverReceipt('${r.driverId}')" class="btn-danger" style="padding:10px; font-size:13px; margin:0;">رفض وحذف ❌</button>
                                             </div>
                                         </div>`;
                                 });
-                            } else {
-                                renContainer.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🏦</span><h4 class="empty-state-title">لا يوجد إيصالات</h4><p class="empty-state-desc">لا توجد طلبات تجديد معلقة حالياً.</p></div>';
-                            }
+                            } else { renContainer.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🏦</span><h4 class="empty-state-title">لا يوجد إيصالات</h4><p class="empty-state-desc">لا توجد طلبات تجديد معلقة حالياً.</p></div>'; }
                         }
                     } catch(e) {}
 
@@ -1533,7 +1465,7 @@
                                         <div class="grid-card admin-order-card" style="border-right: 4px solid var(--primary-gold);">
                                             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                                                 <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; font-size:16px;">طلب: ${o.id}</h4>
-                                                <button onclick="deleteOrderAdmin('${o.id}')" style="background:transparent; border:none; font-size:18px; cursor:pointer; padding:0; margin:0; width:auto; box-shadow:none;" title="حذف نهائي">🗑️</button>
+                                                <button onclick="deleteOrderAdmin('${o.id}')" style="background:transparent; border:none; font-size:18px; cursor:pointer; padding:0; margin:0; width:auto; box-shadow:none;">🗑️</button>
                                             </div>
                                             <p style="margin:0 0 10px 0; font-size:12px; color:#888; background:#f9f9f9; padding:6px; border-radius:6px; font-weight:bold;">🕒 ${formatTime(o.date)}</p>
                                             <p style="margin:5px 0; font-size:14px;"><strong style="color:#888;">المنطقة:</strong> ${o.area}</p>
@@ -1563,7 +1495,6 @@
                             allContainer.innerHTML = '';
                             data.allOrders.reverse().forEach(o => {
                                 let badgeClass = o.status.includes('انتظار') || o.status.includes('مراجعة') ? 'badge-wait' : (o.status.includes('تم التسليم') ? 'badge-done' : 'badge-prog');
-                                
                                 let reassignBlock = '';
                                 if(!o.status.includes('تم التسليم') && !o.status.includes('ملغي')) {
                                     reassignBlock = `
@@ -1583,7 +1514,7 @@
                                             <strong style="font-size:16px; color:var(--text-dark);">${o.id}</strong>
                                             <span class="badge ${badgeClass}" style="margin-right:10px;">${o.status}</span>
                                         </div>
-                                        <button onclick="deleteOrderAdmin('${o.id}')" style="background:transparent; border:none; font-size:18px; cursor:pointer; padding:0; margin:0; width:auto; box-shadow:none;" title="حذف نهائي">🗑️</button>
+                                        <button onclick="deleteOrderAdmin('${o.id}')" style="background:transparent; border:none; font-size:18px; cursor:pointer; padding:0; margin:0; width:auto; box-shadow:none;">🗑️</button>
                                     </div>
                                     <p style="margin:5px 0; font-size:12px; color:#888; font-weight:bold;">🕒 ${formatTime(o.date)}</p>
                                     <p style="margin:5px 0; color:#555; line-height:1.6;"><strong style="color:#888;">من:</strong> ${o.pickup} | <strong style="color:#888;">إلى:</strong> ${o.area} <br><strong style="color:#888;">هاتف:</strong> ${o.phone} ${o.driverName ? '<br><span style="color:var(--primary-gold); font-weight:bold;">المندوب: '+o.driverName+'</span>' : ''}</p>
@@ -1592,40 +1523,25 @@
                             });
                         }
                     } catch(e) {}
-
                 }
-            })
-            .catch(e => { console.log("Fetch Error", e); })
-            .finally(() => { 
-                isFetchingAdmin = false; 
-            });
+            }).catch(e => { console.log("Fetch Error", e); }).finally(() => { isFetchingAdmin = false; });
         }
 
         function fetchAdminUsersList() {
             const driversContainer = document.getElementById('admin-drivers-list');
             const vendorsContainer = document.getElementById('admin-vendors-list');
-            
-            if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
-            if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:60%"></div></div>';
+            if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
+            if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    renderAdminDrivers(data.drivers);
-                    renderAdminVendors(data.vendors);
-                } else {
-                    if(driversContainer) driversContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات.</p>';
-                    if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات.</p>';
-                }
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') { renderAdminDrivers(data.drivers); renderAdminVendors(data.vendors); }
             }).catch(e => console.log(e));
         }
 
         function renderAdminDrivers(drivers) {
-            const container = document.getElementById('admin-drivers-list');
-            if(!container) return;
-            container.innerHTML = '';
-            if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4><p class="empty-state-desc">لم يتم تسجيل أي مندوب بعد.</p></div>'; return; }
+            const container = document.getElementById('admin-drivers-list'); if(!container) return; container.innerHTML = '';
+            if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4></div>'; return; }
             drivers.forEach(d => {
                 let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
                 container.innerHTML += `
@@ -1645,10 +1561,8 @@
         }
 
         function renderAdminVendors(vendors) {
-            const container = document.getElementById('admin-vendors-list');
-            if(!container) return;
-            container.innerHTML = '';
-            if(!vendors || vendors.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🏪</span><h4 class="empty-state-title">لا يوجد تجار</h4><p class="empty-state-desc">لم يتم تسجيل أي تاجر بعد.</p></div>'; return; }
+            const container = document.getElementById('admin-vendors-list'); if(!container) return; container.innerHTML = '';
+            if(!vendors || vendors.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🏪</span><h4 class="empty-state-title">لا يوجد تجار</h4></div>'; return; }
             vendors.forEach(v => {
                 container.innerHTML += `
                 <div class="grid-card">
@@ -1664,20 +1578,20 @@
         }
 
         function deleteAdminDriver(id) {
-            if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً من النظام؟\nلن يتمكن من الدخول مجدداً.')) {
+            if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً؟')) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
             }
         }
         function updateAdminDriverPassword(id) {
-            let newPass = prompt('أدخل كلمة المرور الجديدة للمندوب (ID: '+id+'):');
+            let newPass = prompt('أدخل كلمة المرور الجديدة للمندوب:');
             if(newPass && newPass.trim() !== "") {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_pass', id: id, pass: newPass }) })
-                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم تحديث كلمة المرور بنجاح.'); });
+                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم التحديث.'); });
             }
         }
         function updateAdminDriverPhone(id) {
-            let newPhone = prompt('أدخل رقم الواتساب الجديد للمندوب (ID: '+id+'):');
+            let newPhone = prompt('أدخل رقم الواتساب الجديد:');
             if(newPhone && newPhone.trim() !== "") {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_phone', id: id, phone: newPhone }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
@@ -1690,25 +1604,25 @@
         }
 
         function deleteAdminVendor(id) {
-            if(confirm('⚠️ هل أنت متأكد من حذف هذا التاجر نهائياً من النظام؟')) {
+            if(confirm('⚠️ هل أنت متأكد من حذف هذا التاجر؟')) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_vendor', id: id }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
             }
         }
         function updateAdminVendorPassword(id) {
-            let newPass = prompt('أدخل كلمة المرور الجديدة للتاجر (ID: '+id+'):');
+            let newPass = prompt('أدخل كلمة المرور الجديدة للتاجر:');
             if(newPass && newPass.trim() !== "") {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_pass', id: id, pass: newPass }) })
-                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم تحديث كلمة المرور بنجاح.'); });
+                .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم التحديث.'); });
             }
         }
         function updateAdminVendorId(oldId) {
-            let newId = prompt('أدخل المعرف (ID) الجديد للتاجر:');
+            let newId = prompt('أدخل المعرف الجديد للتاجر:');
             if(newId && newId.trim() !== "") {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_id', oldId: oldId, newId: newId }) })
                 .then(res => res.json()).then(data => { 
                     if(data.status === 'success') fetchAdminUsersList(); 
-                    else if(data.status === 'exists') alert('المعرف الجديد موجود مسبقاً، يرجى اختيار معرف آخر.');
+                    else if(data.status === 'exists') alert('المعرف الجديد موجود مسبقاً.');
                 });
             }
         }
@@ -1719,38 +1633,32 @@
             const display = document.getElementById('selected-driver-cash');
             const clearBtn = document.getElementById('btn-clear-cash');
             
-            if(select.value) {
+            if(select && select.value) {
                 const opt = select.options[select.selectedIndex];
                 const cash = opt.getAttribute('data-cash');
                 const name = opt.getAttribute('data-name');
                 display.innerText = `${cash} ر.ع`;
                 actionBox.classList.remove('hidden');
                 clearBtn.onclick = () => clearDriverCash(select.value, name, parseFloat(cash));
-            } else {
-                actionBox.classList.add('hidden');
-            }
+            } else if (actionBox) { actionBox.classList.add('hidden'); }
         }
 
         function clearDriverCash(driverId, driverName, amount) {
             if(amount === 0) { alert('العهدة مصفرة بالفعل!'); return; }
-            if(confirm(`هل متأكد أنك استلمت (${amount} ر.ع) كاش من المندوب ${driverName} وتريد تصفية عهدته؟`)) {
+            if(confirm(`هل متأكد أنك استلمت (${amount} ر.ع) كاش من المندوب ${driverName}؟`)) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'clear_driver_cash', driverId: driverId }) })
-                .then(res => res.json()).then(data => { if(data.status === 'success') { alert('تم تصفية العهدة بنجاح!'); fetchAdminData(); } });
+                .then(res => res.json()).then(data => { if(data.status === 'success') { alert('تم تصفية العهدة!'); fetchAdminData(); } });
             }
         }
 
        function archiveCompletedOrders() {
-            if(confirm('⚠️ هل أنت متأكد من إغلاق اليوم؟\nسيتم أرشفة كافة الطلبات بشكل نهائي لتصفير لوحة العمليات.')) {
+            if(confirm('⚠️ هل أنت متأكد من إغلاق اليوم وعمل أرشفة شاملة للمنصة؟')) {
                 const btn = document.querySelector('button[onclick="archiveCompletedOrders()"]');
-                const originalText = btn.innerText; btn.innerText = "جاري الإغلاق... ⏳";
-                
+                btn.innerText = "جاري الإغلاق... ⏳";
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'force_archive_all' }) })
                 .then(res => res.json()).then(data => {
-                    if(data.status === 'success') { 
-                        alert(`✅ تم إغلاق اليوم وتصفير النظام بنجاح!\nتمت أرشفة (${data.archivedCount}) طلب.`); 
-                        fetchAdminData(); 
-                    } else { alert('حدث خطأ أثناء الأرشفة.'); }
-                }).finally(() => { btn.innerText = originalText; });
+                    if(data.status === 'success') { alert(`✅ تم تصفير النظام بنجاح وأرشفة (${data.archivedCount}) طلب.`); fetchAdminData(); }
+                }).finally(() => { btn.innerText = "🗄️ إغلاق اليوم"; });
             }
         }
         function changeAdminPhone(event) {
@@ -1759,14 +1667,14 @@
             let btn = event.target; btn.innerText = "جاري الحفظ... ⏳"; btn.disabled = true;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_admin_phone', phone: newPhone }) })
             .then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert('✅ تم تحديث رقم الإدارة المناوبة بنجاح!'); document.getElementById('admin-notify-phone').value = ''; }
+                if(data.status === 'success') { alert('✅ تم تحديث رقم الإدارة بنجاح!'); document.getElementById('admin-notify-phone').value = ''; }
             }).finally(() => { btn.innerText = "حفظ واعتماد 💾"; btn.disabled = false; });
         }
 
         function autoAssignOrder(orderId, phone, encArea, encDetails) {
             if(availableDriversData.length === 0) { alert('لا يوجد مناديب متاحين حالياً!'); return; }
             let bestDriver = availableDriversData.reduce((prev, curr) => (prev.load < curr.load) ? prev : curr);
-            if(confirm(`سيتم إسناد الطلب ذكياً للمندوب: ${bestDriver.name}\n(لديه ${bestDriver.load} طلبات حالياً).\nهل توافق؟`)) {
+            if(confirm(`سيتم إسناد الطلب ذكياً للمندوب: ${bestDriver.name}. هل توافق؟`)) {
                 fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: bestDriver.id, driverName: bestDriver.name }) }).then(() => fetchAdminData());
             }
         }
@@ -1778,25 +1686,23 @@
         }
 
         function assignOrder(orderId, event) {
-            const select = document.getElementById(`driver-select-${orderId}`); 
-            if(!select.value) { alert('اختر مندوباً أولاً!'); return; }
+            const select = document.getElementById(`driver-select-${orderId}`); if(!select.value) { alert('اختر مندوباً أولاً!'); return; }
             event.target.innerText = 'جاري...';
             let driverName = select.options[select.selectedIndex].getAttribute('data-name'); 
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
         }
 
         function reassignOrder(orderId, event) {
-            const select = document.getElementById(`reassign-select-${orderId}`); 
-            if(!select.value) { alert('اختر المندوب الجديد أولاً!'); return; }
-            if(!confirm('هل أنت متأكد من سحب الطلب من المندوب الحالي ونقله للمندوب الجديد؟')) return;
+            const select = document.getElementById(`reassign-select-${orderId}`); if(!select.value) { alert('اختر المندوب الجديد أولاً!'); return; }
+            if(!confirm('هل أنت متأكد من سحب الطلب ونقله للمندوب الجديد؟')) return;
             event.target.innerText = 'جاري النقل...';
             let driverName = select.options[select.selectedIndex].getAttribute('data-name'); 
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
         }
 
         function assignOrderToAdmin(orderId, phone, encArea, encPickup, encDetails) {
-            if(!confirm('هل ستقوم أنت (الإدارة المناوبة) بتوصيل هذا الطلب بنفسك؟')) return;
-            let adminMessage = `🚗 *استلام طلب للإدارة* 🚗\n\n*رقم الطلب:* ${orderId}\n*هاتف الزبون:* ${phone}\n*الاستلام من:* ${decodeURIComponent(encPickup)}\n*التوصيل إلى:* ${decodeURIComponent(encArea)}\n*التفاصيل:* ${decodeURIComponent(encDetails)}`;
+            if(!confirm('هل ستقوم بتوصيل هذا الطلب بنفسك؟')) return;
+            let adminMessage = `🚗 *استلام طلب للإدارة* \n\n*رقم الطلب:* ${orderId}\n*هاتف الزبون:* ${phone}\n*الاستلام من:* ${decodeURIComponent(encPickup)}\n*التوصيل إلى:* ${decodeURIComponent(encArea)}`;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (الإدارة)', driverId: 'admin_00', driverName: 'الإدارة المناوبة 🚗', adminMsg: adminMessage }) }).then(() => { fetchAdminData(); });
         }
 
@@ -1812,54 +1718,39 @@
         }
 
         function copyVendorLink() {
-            let linkInput = document.getElementById('vendor-magic-link');
-            linkInput.select(); linkInput.setSelectionRange(0, 99999); 
+            let linkInput = document.getElementById('vendor-magic-link'); linkInput.select();
             navigator.clipboard.writeText(linkInput.value).then(() => { alert('✅ تم نسخ الرابط بنجاح!'); });
         }
 
         function submitRealReceipt() {
-            const receipt = document.getElementById('receipt-input').value;
-            if(!receipt || receipt.length < 4) { alert('الرجاء إدخال رقم إيصال صحيح!'); return; }
-            const btn = document.getElementById('submit-receipt-btn');
-            btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
+            const receipt = document.getElementById('receipt-input').value; if(!receipt || receipt.length < 4) { alert('الرجاء إدخال رقم إيصال صحيح!'); return; }
+            const btn = document.getElementById('submit-receipt-btn'); btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
             const payload = { action: 'submit_receipt', driverId: localStorage.getItem('driverId'), driverName: localStorage.getItem('driverName'), receiptNo: receipt };
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
             .then(res => res.json()).then(data => {
-                if(data.status === 'success') {
-                    alert('✅ تم استلام إيصالك! جاري التحقق منه من قبل الإدارة.');
-                    btn.innerText = 'الطلب قيد المراجعة ⏳'; btn.style.background = '#f39c12';
-                }
+                if(data.status === 'success') { alert('✅ تم استلام إيصالك! جاري التحقق منه من قبل الإدارة.'); btn.innerText = 'الطلب قيد المراجعة ⏳'; btn.style.background = '#f39c12'; }
             });
         }
 
-        function fetchAdminRenewals() {
-            const container = document.getElementById('renewals-container'); container.innerHTML = '<div class="empty-state-container"><span class="empty-state-icon">🏦</span><h4 class="empty-state-title">جاري البحث</h4><p class="empty-state-desc">جاري جلب الإيصالات... ⏳</p></div>';
-            fetchAdminData(); 
-        }
+        function fetchAdminRenewals() { fetchAdminData(); }
 
         function approveDriverRenewal(driverId) {
-            if(!confirm('هل أنت متأكد من استلامك لمبلغ 1 ريال من هذا المندوب وتفعيل حسابه؟')) return;
+            if(!confirm('هل أنت متأكد من استلامك للمبلغ وتفعيل حساب المندوب؟')) return;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve_renewal', driverId: driverId }) })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert('✅ تم التجديد بنجاح!'); fetchAdminData(); }
-            });
+            .then(res => res.json()).then(data => { if(data.status === 'success') { alert('✅ تم التجديد بنجاح!'); fetchAdminData(); } });
         }
 
         function deleteDriverReceipt(driverId) {
             if(!confirm('هل أنت متأكد من رفض وحذف هذا الإيصال؟')) return;
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_receipt', driverId: driverId }) })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') { fetchAdminData(); }
-            });
+            .then(res => res.json()).then(data => { if(data.status === 'success') { fetchAdminData(); } });
         }
 
         function deleteOrderAdmin(orderId) {
             if(!confirm(`⚠️ هل أنت متأكد من حذف الطلب (${orderId}) نهائياً؟`)) return;
             window.pauseRefresh = true; 
             fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_order', orderId: orderId }) })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') { fetchAdminData(); } else alert('⚠️ السيرفر رفض الحذف');
-            }).finally(() => { window.pauseRefresh = false; });
+            .then(res => res.json()).then(data => { if(data.status === 'success') { fetchAdminData(); } }).finally(() => { window.pauseRefresh = false; });
         }
 
         function addNewDriverAdmin(event) {
