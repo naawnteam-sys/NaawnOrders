@@ -171,7 +171,10 @@
             <div id="cust-tab-order" class="tab-pane active">
                 
                 <div class="categories-section" style="margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: var(--text-dark); font-weight: 800;">ماذا تريد أن تطلب؟ 🤔</h4>
+                    <div style="margin-bottom: 15px; background: #fff; padding: 15px; border-radius: 12px; border-right: 4px solid var(--primary-gold); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+    <h3 id="dynamic-greet-title" style="margin: 0 0 5px 0; color: var(--text-dark); font-weight: 800;">أهلاً بك 🌟</h3>
+    <p id="dynamic-greet-desc" style="margin: 0; color: #666; font-size: 14px; font-weight: bold;">ماذا تريد أن تطلب؟</p>
+</div>
                     <div class="categories-carousel">
                         <div class="category-card">
                             <div class="category-img-box">
@@ -1059,7 +1062,8 @@
             showSection('customer-dashboard'); 
             initCustomerLocation(); 
             checkMyOrder(); 
-            checkAndFillMagicVendor(); 
+            checkAndFillMagicVendor();
+            setDynamicGreeting();
         }
 
         function applyCoupon(event) {
@@ -1775,6 +1779,43 @@
                 else if (data.status === 'exists') alert('⚠️ المعرف موجود.');
             }).finally(() => { btn.innerText = 'اعتماد المتجر ✅'; btn.disabled = false; });
         }
+        function setDynamicGreeting() {
+    // جلب الوقت الحالي وإجباره على التوقيت المحلي لسلطنة عمان (مسقط)
+    let omanTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Muscat" });
+    let omanDate = new Date(omanTimeStr);
+    let hour = omanDate.getHours();
+    
+    let title = "";
+    let desc = "";
+
+    // تقسيم فترات اليوم
+    if (hour >= 5 && hour < 12) {
+        // من 5 الفجر إلى 11:59 الظهر
+        title = "صباح الخير";
+        desc = "وقت الفطور والقهوة، من وين نطلب لك؟ ";
+    } else if (hour >= 12 && hour < 17) {
+        // من 12 الظهر إلى 4:59 العصر
+        title = "مساء الخير";
+        desc = "وقت الغداء، جاهزين نوصلك أطيب وجبة ";
+    } else if (hour >= 17 && hour < 23) {
+        // من 5 العصر إلى 10:59 المساء
+        title = "مساء الخير ";
+        desc = "عشاء خفيف ولا سهرة طويلة؟ ";
+    } else {
+        // من 11 المساء إلى 4:59 الفجر
+        title = "سهران؟ ";
+        desc = "فريق نعاون موجود لجوع آخر الليل ";
+    }
+
+    // زرع النصوص في الواجهة
+    let titleElement = document.getElementById('dynamic-greet-title');
+    let descElement = document.getElementById('dynamic-greet-desc');
+    
+    if (titleElement && descElement) {
+        titleElement.innerText = title;
+        descElement.innerText = desc;
+    }
+}
     </script>
 </body>
 </html>
