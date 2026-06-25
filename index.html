@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #2c3e50; --light-gray: #f4f7f6; --app-bg: #f8f9fa; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
@@ -346,6 +346,7 @@
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('all-orders', this)">📋 أرشيف الطلبات</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-drivers', this)">🛵 المناديب</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-vendors', this)">🏪 التُجّار</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-shifts', this)">⏱️ المناوبات</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('marketing', this)" style="background:#8e44ad; color:white; border:none;">📢 التسويق</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('settings', this)">⚙️ الإعدادات</button>
             </div>
@@ -459,6 +460,34 @@
                         <input type="text" id="new-vnd-pass" placeholder="كلمة المرور">
                         <input type="text" id="new-vnd-name" placeholder="اسم المتجر التجاري">
                         <button onclick="addNewVendorAdmin(event)" style="background: #e67e22; color:white;">اعتماد المتجر ✅</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-sub-manage-shifts" class="tab-pane">
+                <h4 class="section-title" style="margin-top:0;">⏱️ نظام المناوبات الذكي</h4>
+                <div class="card" style="padding: 20px;">
+                    <p style="font-size: 13px; color: #666; margin-top: 0; margin-bottom: 20px;">قم بسحب قائمة المناديب المتاحين وتوزيعهم آلياً بناءً على خوارزمية منع التتالي.</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button onclick="generateSmartShifts()" style="flex: 1; background: var(--text-dark); color: var(--primary-gold); padding: 12px; font-size: 14px;">🎲 التوزيع الآلي الذكي</button>
+                        <button onclick="saveNativeShifts()" class="btn-success" style="flex: 1; padding: 12px; font-size: 14px;">💾 حفظ واعتماد للجميع</button>
+                        <button onclick="exportShiftsToPDF()" style="flex: 1; background: #e74c3c; color: white; padding: 12px; font-size: 14px;">📄 تصدير PDF للمشرفين</button>
+                    </div>
+                    
+                    <div id="shift-schedule-wrapper" style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee;">
+                        <div style="text-align: center; margin-bottom: 20px; display: none;" id="pdf-header">
+                            <img src="https://i.imgur.com/OqQuD0p.png" style="width: 80px; border-radius: 12px;">
+                            <h2 style="margin: 10px 0 5px 0; color: #2c3e50;">فريق نعاون لخدمات التوصيل - سلطنة عمان</h2>
+                            <h3 style="margin: 5px 0 10px 0; color: #D4AF37;">الجدول الإداري للمناوبات اليومية</h3>
+                            <p style="margin: 0; color: #666; font-weight: bold; font-size: 14px;" id="pdf-date-display"></p>
+                        </div>
+                        <div id="shifts-container" class="grid-layout">
+                            <div class="empty-state-container" style="grid-column: 1/-1;">
+                                <span class="empty-state-icon">📋</span>
+                                <h4 class="empty-state-title">لا يوجد جدول مفعل</h4>
+                                <p class="empty-state-desc">اضغط على "التوزيع الآلي" أو جاري جلب الجدول المعتمد من السيرفر...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -730,6 +759,10 @@
             if(tabId === 'manage-drivers' || tabId === 'manage-vendors') {
                 fetchAdminUsersList();
             }
+            // جلب جدول المناوبات عند فتح التبويب الخاص به
+            if(tabId === 'manage-shifts') {
+                fetchNativeShifts();
+            }
         }
 
         function updateProfileData() {
@@ -761,12 +794,10 @@
             }
         }
 
-        // دالة جلب سجل الزبائن والمناديب وعرضها في لوحة التحكم (الميزة المضافة)
         function fetchCustomersHistory() {
             const container = document.getElementById('customers-history-container');
             const tbody = document.getElementById('customers-history-table-body');
             
-            // تفعيل نظام الإخفاء والإظهار التلقائي
             if(!container.classList.contains('hidden')) {
                 container.classList.add('hidden');
                 return;
@@ -1780,42 +1811,192 @@
             }).finally(() => { btn.innerText = 'اعتماد المتجر ✅'; btn.disabled = false; });
         }
         function setDynamicGreeting() {
-    // جلب الوقت الحالي وإجباره على التوقيت المحلي لسلطنة عمان (مسقط)
-    let omanTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Muscat" });
-    let omanDate = new Date(omanTimeStr);
-    let hour = omanDate.getHours();
-    
-    let title = "";
-    let desc = "";
+            let omanTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Muscat" });
+            let omanDate = new Date(omanTimeStr);
+            let hour = omanDate.getHours();
+            
+            let title = "";
+            let desc = "";
 
-    // تقسيم فترات اليوم
-    if (hour >= 5 && hour < 12) {
-        // من 5 الفجر إلى 11:59 الظهر
-        title = "صباح الخير";
-        desc = "وقت الفطور والقهوة، من وين نطلب لك؟ ";
-    } else if (hour >= 12 && hour < 17) {
-        // من 12 الظهر إلى 4:59 العصر
-        title = "مساء الخير";
-        desc = "وقت الغداء، جاهزين نوصلك أطيب وجبة ";
-    } else if (hour >= 17 && hour < 23) {
-        // من 5 العصر إلى 10:59 المساء
-        title = "مساء الخير ";
-        desc = "عشاء خفيف ولا سهرة طويلة؟ ";
-    } else {
-        // من 11 المساء إلى 4:59 الفجر
-        title = "سهران؟ ";
-        desc = "فريق نعاون موجود لجوع آخر الليل ";
-    }
+            if (hour >= 5 && hour < 12) {
+                title = "صباح الخير";
+                desc = "وقت الفطور والقهوة، من وين نطلب لك؟ ";
+            } else if (hour >= 12 && hour < 17) {
+                title = "مساء الخير";
+                desc = "وقت الغداء، جاهزين نوصلك أطيب وجبة ";
+            } else if (hour >= 17 && hour < 23) {
+                title = "مساء الخير ";
+                desc = "عشاء خفيف ولا سهرة طويلة؟ ";
+            } else {
+                title = "سهران؟ ";
+                desc = "فريق نعاون موجود لجوع آخر الليل ";
+            }
 
-    // زرع النصوص في الواجهة
-    let titleElement = document.getElementById('dynamic-greet-title');
-    let descElement = document.getElementById('dynamic-greet-desc');
-    
-    if (titleElement && descElement) {
-        titleElement.innerText = title;
-        descElement.innerText = desc;
-    }
-}
+            let titleElement = document.getElementById('dynamic-greet-title');
+            let descElement = document.getElementById('dynamic-greet-desc');
+            
+            if (titleElement && descElement) {
+                titleElement.innerText = title;
+                descElement.innerText = desc;
+            }
+        }
+
+        // =========================================
+        // وظائف نظام المناوبات الذكي المضافة حديثاً
+        // =========================================
+        const shiftPeriods = [
+            { id: 1, time: "08:00 ص - 11:00 ص", notify: "07:35" },
+            { id: 2, time: "11:00 ص - 02:00 م", notify: "10:35" },
+            { id: 3, time: "02:00 م - 05:00 م", notify: "13:35" },
+            { id: 4, time: "05:00 م - 07:30 م", notify: "16:35" },
+            { id: 5, time: "07:30 م - 10:00 م", notify: "19:05" },
+            { id: 6, time: "10:00 م - 12:00 ص", notify: "21:35" }
+        ];
+
+        let currentGeneratedShifts = [];
+
+        function generateSmartShifts() {
+            if(!availableDriversData || availableDriversData.length === 0) {
+                alert("لا يوجد مناديب متاحين للتوزيع. يرجى التأكد من اتصال المناديب وجلب البيانات.");
+                return;
+            }
+
+            let activeDrivers = availableDriversData.filter(d => d.status !== 'غير متاح');
+            if(activeDrivers.length < 3) {
+                alert("عدد المناديب المتاحين قليل جداً لتوليد جدول عادل. يرجى توفير 3 مناديب على الأقل.");
+                return;
+            }
+
+            currentGeneratedShifts = [];
+            let driverShiftCounts = {};
+            activeDrivers.forEach(d => driverShiftCounts[d.id] = 0);
+
+            shiftPeriods.forEach(period => {
+                // ترتيب المناديب عشوائياً لضمان التوزيع العادل
+                let shuffled = [...activeDrivers].sort(() => 0.5 - Math.random());
+
+                // اختيار الأساسيين: أقصى حد شفتين، ولا يعملون في الشفت الذي يسبقه مباشرة
+                let eligiblePrimary = shuffled.filter(d => {
+                    let prevShift = currentGeneratedShifts.find(s => s.shiftId === period.id - 1 && s.driverId === d.id);
+                    return driverShiftCounts[d.id] < 2 && !prevShift;
+                });
+
+                // تقليل القيود في حال عدم وجود عدد كافي
+                if(eligiblePrimary.length < 2) {
+                    eligiblePrimary = shuffled.filter(d => driverShiftCounts[d.id] < 2);
+                }
+
+                if(eligiblePrimary.length > 0) {
+                    let primary1 = eligiblePrimary[0];
+                    currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: primary1.id, name: primary1.name, phone: primary1.phone, isBackup: false });
+                    driverShiftCounts[primary1.id]++;
+
+                    if(eligiblePrimary.length > 1) {
+                        let primary2 = eligiblePrimary[1];
+                        currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: primary2.id, name: primary2.name, phone: primary2.phone, isBackup: false });
+                        driverShiftCounts[primary2.id]++;
+                    }
+                }
+
+                // اختيار الاحتياطي: أقصى حد شفتين، وغير موجود في نفس الشفت كأساسي
+                let eligibleBackup = shuffled.filter(d => driverShiftCounts[d.id] < 2 && !currentGeneratedShifts.some(s => s.shiftId === period.id && s.driverId === d.id));
+                if(eligibleBackup.length > 0) {
+                    let backup = eligibleBackup[0];
+                    currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: backup.id, name: backup.name, phone: backup.phone, isBackup: true });
+                    driverShiftCounts[backup.id]++; 
+                }
+            });
+
+            renderShiftsUI(currentGeneratedShifts);
+        }
+
+        function renderShiftsUI(shiftsData) {
+            const container = document.getElementById('shifts-container');
+            container.innerHTML = '';
+            
+            shiftPeriods.forEach(period => {
+                let periodShifts = shiftsData.filter(s => s.shiftId === period.id);
+                let primaryHTML = periodShifts.filter(s => !s.isBackup).map(s => `<p style="margin:5px 0; font-size: 14px;">✅ ${s.name} <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></p>`).join('');
+                let backupHTML = periodShifts.filter(s => s.isBackup).map(s => `<p style="margin:5px 0; font-size: 14px; color:#e67e22;">🛡️ ${s.name} (احتياطي) <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></p>`).join('');
+
+                container.innerHTML += `
+                    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 12px; background: #fafafa; position: relative;">
+                        <span style="position: absolute; top: -10px; right: 15px; background: var(--text-dark); color: var(--primary-gold); padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">الفترة ${period.id}</span>
+                        <h4 style="margin: 10px 0 10px 0; color: #333; font-size: 14px; text-align: center;">🕒 ${period.time}</h4>
+                        <div style="background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                            <strong style="font-size: 12px; color: #888;">الأساسيين:</strong>
+                            ${primaryHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد مندوب</p>'}
+                        </div>
+                        <div style="background: #fff9eb; border: 1px solid #fdebd0; padding: 10px; border-radius: 8px;">
+                            <strong style="font-size: 12px; color: #888;">الاحتياط (Standby):</strong>
+                            ${backupHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد احتياطي</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function saveNativeShifts() {
+            if(!currentGeneratedShifts || currentGeneratedShifts.length === 0) {
+                alert('لا يوجد جدول لحفظه. قم بالتوزيع الآلي أولاً.'); return;
+            }
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'save_native_shifts', shifts: currentGeneratedShifts }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert('✅ تم حفظ واعتماد جدول المناوبات في السيرفر بنجاح!');
+                } else {
+                    alert('❌ حدث خطأ أثناء الحفظ.');
+                }
+            });
+        }
+
+        function fetchNativeShifts() {
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_native_shifts' }) })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success' && data.shifts && data.shifts.length > 0) {
+                    currentGeneratedShifts = data.shifts.map(s => ({
+                        shiftId: parseInt(s.shift_id),
+                        shiftTime: s.shift_time,
+                        notifyTime: s.notify_time,
+                        driverId: s.driver_id,
+                        name: s.driver_name,
+                        phone: s.driver_phone,
+                        isBackup: s.is_backup == 1
+                    }));
+                    renderShiftsUI(currentGeneratedShifts);
+                }
+            });
+        }
+
+        function exportShiftsToPDF() {
+            const wrapper = document.getElementById('shift-schedule-wrapper');
+            const pdfHeader = document.getElementById('pdf-header');
+            const dateDisplay = document.getElementById('pdf-date-display');
+            
+            let d = new Date();
+            dateDisplay.innerText = "التاريخ المعتمد: " + d.toLocaleDateString('ar-OM') + " | " + d.toLocaleDateString('en-GB');
+            
+            pdfHeader.style.display = 'block'; 
+            wrapper.style.border = 'none'; 
+            
+            const opt = {
+                margin:       [10, 10, 10, 10], 
+                filename:     'جدول_مناوبات_نعاون_' + d.toLocaleDateString('en-GB').replace(/\//g, '-') + '.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(wrapper).save().then(() => {
+                pdfHeader.style.display = 'none'; 
+                wrapper.style.border = '1px solid #eee'; 
+            });
+        }
     </script>
 </body>
 </html>
