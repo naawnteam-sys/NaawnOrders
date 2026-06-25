@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #2c3e50; --light-gray: #f4f7f6; --app-bg: #f8f9fa; }
         body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
@@ -162,8 +162,8 @@
             <h3 style="text-align:center; color:var(--text-dark); font-weight:800;">خطوة أخيرة لتجربة أفضل 📩</h3>
             <p style="text-align:center; color:#666; font-size:14px;">أدخل بريدك الإلكتروني لتصلك أحدث العروض وكوبونات الخصم الحصرية من نعاون!</p>
             <input type="email" id="cust-email-input" placeholder="example@email.com" style="text-align:center; font-size:16px;" dir="ltr">
-            <button onclick="saveEmailAndContinue()" class="btn-success">حفظ ومتابعة ✅</button>
-            <button onclick="skipEmailStep()" class="btn-back" style="margin-top:10px; background:transparent; border:1px solid #ccc; width: 100%;">تخطي هذه الخطوة ⏭️</button>
+            <button onclick="saveEmailAndContinue()" class="btn-success">حفظ ومتابعة </button>
+            <button onclick="skipEmailStep()" class="btn-back" style="margin-top:10px; background:transparent; border:1px solid #ccc; width: 100%;">تخطي هذه الخطوة </button>
         </div>
 
         <div id="customer-dashboard" class="section hidden" style="background: transparent; box-shadow: none; padding: 0;">
@@ -280,7 +280,7 @@
                         <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">📩 البريد الإلكتروني</h4>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="email" id="profile-email-input" placeholder="لم يتم تسجيل بريد إلكتروني بعد" style="margin:0; font-size:15px; background:#fff; text-align: left;" dir="ltr">
-                            <button onclick="updateProfileEmail(event)" style="margin:0; width:auto; white-space:nowrap; padding:12px 20px; background:var(--text-dark); color:var(--primary-gold);">حفظ 💾</button>
+                            <button onclick="updateProfileEmail(event)" style="margin:0; width:auto; white-space:nowrap; padding:12px 20px; background:var(--text-dark); color:var(--primary-gold);">حفظ </button>
                         </div>
                     </div>
 
@@ -294,7 +294,7 @@
                     </div>
 
                     <div style="text-align: right; margin-bottom: 25px; padding-top: 15px; border-top: 1px dashed #eee;">
-                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;">🎧 الدعم الفني والمساعدة</h4>
+                        <h4 style="margin-top:0; color:var(--text-dark); font-weight:800; margin-bottom: 10px;"> الدعم الفني والمساعدة</h4>
                         <p style="font-size: 14px; color: #666; margin-bottom: 15px;">هل تواجه مشكلة أو لديك استفسار؟ نحن هنا لخدمتك.</p>
                         <button onclick="contactSupport()" style="background: #25D366; color: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">
                             <span style="font-size: 20px;">💬</span> تواصل معنا عبر الواتساب
@@ -346,6 +346,7 @@
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('all-orders', this)">📋 أرشيف الطلبات</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-drivers', this)">🛵 المناديب</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-vendors', this)">🏪 التُجّار</button>
+                <button class="admin-tab-btn" onclick="switchAdminSubTab('manage-shifts', this)">⏱️ المناوبات</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('marketing', this)" style="background:#8e44ad; color:white; border:none;">📢 التسويق</button>
                 <button class="admin-tab-btn" onclick="switchAdminSubTab('settings', this)">⚙️ الإعدادات</button>
             </div>
@@ -398,14 +399,14 @@
             </div>
 
             <div id="admin-sub-marketing" class="tab-pane">
-                <h4 class="section-title" style="margin-top:0;">📢 مركز التسويق والإشعارات</h4>
+                <h4 class="section-title" style="margin-top:0;">📢 مركز الإشعارات</h4>
                 <p style="font-size:13px; color:#666;">سيتم إرسال هذا العرض عبر البريد الإلكتروني الرسمي لجميع الزبائن المسجلين.</p>
                 <div class="card" style="padding:20px;">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة الترويجية:</label>
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة :</label>
                     <input type="text" id="promo-subject" placeholder="مثال: خصم 50% على طلبك الأول!">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">محتوى العرض:</label>
-                    <textarea id="promo-message" placeholder="اكتب تفاصيل العرض الجذاب هنا..." style="height:150px;"></textarea>
-                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال العرض لجميع الزبائن 🚀</button>
+                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">المحتوى :</label>
+                    <textarea id="promo-message" placeholder="اكتب تفاصيل هنا..." style="height:150px;"></textarea>
+                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال لجميع الزبائن 🚀</button>
                 </div>
             </div>
 
@@ -459,6 +460,65 @@
                         <input type="text" id="new-vnd-pass" placeholder="كلمة المرور">
                         <input type="text" id="new-vnd-name" placeholder="اسم المتجر التجاري">
                         <button onclick="addNewVendorAdmin(event)" style="background: #e67e22; color:white;">اعتماد المتجر ✅</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-sub-manage-shifts" class="tab-pane">
+                <h4 class="section-title" style="margin-top:0;">⏱️ نظام المناوبات الذكي</h4>
+                <div class="card" style="padding: 20px;">
+                    <p style="font-size: 13px; color: #666; margin-top: 0; margin-bottom: 20px;">قم بسحب قائمة المناديب المتاحين وتوزيعهم آلياً بناءً على خوارزمية منع التتالي.</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button onclick="generateSmartShifts()" style="flex: 1; background: var(--text-dark); color: var(--primary-gold); padding: 12px; font-size: 14px;">🎲 التوزيع الآلي الذكي</button>
+                        <button onclick="saveNativeShifts()" class="btn-success" style="flex: 1; padding: 12px; font-size: 14px;">💾 حفظ واعتماد للجميع</button>
+                        <button onclick="exportShiftsToPDF()" style="flex: 1; background: #e74c3c; color: white; padding: 12px; font-size: 14px;">📄 تصدير PDF للمشرفين</button>
+                    </div>
+                    
+                    <div id="shift-schedule-wrapper" style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee;">
+                        <div style="text-align: center; margin-bottom: 20px; display: none;" id="pdf-header">
+                            <img src="https://i.imgur.com/OqQuD0p.png" style="width: 80px; border-radius: 12px;">
+                            <h2 style="margin: 10px 0 5px 0; color: #2c3e50;">فريق نعاون لخدمات التوصيل - سلطنة عمان</h2>
+                            <h3 style="margin: 5px 0 10px 0; color: #D4AF37;">الجدول الإداري للمناوبات اليومية</h3>
+                            <p style="margin: 0; color: #666; font-weight: bold; font-size: 14px;" id="pdf-date-display"></p>
+                        </div>
+                        <div id="manual-add-section" style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;" class="hide-on-pdf">
+                            <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                                <button onclick="saveShiftsDraft()" style="background: #f39c12; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">💾 حفظ التوزيع كمسودة للغد</button>
+                                <button onclick="loadShiftsDraft()" style="background: #34495e; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">📂 استرجاع مسودة الأمس</button>
+                            </div>
+                            <h4 style="margin-top:0; color:#2c3e50;">➕ إضافة كابتن يدوياً للمناوبة</h4>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="text" id="manual-name" placeholder="اسم الكابتن" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+                                <input type="number" id="manual-phone" placeholder="رقم الهاتف (بدون 968)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+                                
+                                <select id="manual-shift" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="1">الفترة 1</option>
+                                    <option value="2">الفترة 2</option>
+                                    <option value="3">الفترة 3</option>
+                                    <option value="4">الفترة 4</option>
+                                    <option value="5">الفترة 5</option>
+                                    <option value="6">الفترة 6</option>
+                                </select>
+                                
+                                <select id="manual-type" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="false">أساسي ✅</option>
+                                    <option value="true">احتياطي 🛡️</option>
+                                </select>
+                                
+                                <button onclick="addManualDriver()" style="background: #27ae60; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">إضافة للجدول</button>
+                            </div>
+                            
+                            <h4 style="margin-top:15px; color:#2c3e50;">📥 إضافة جماعية للمناديب (نسخ ولصق)</h4>
+                            <textarea id="bulk-drivers" placeholder="الاسم, 99000000&#10;الاسم, 99111111" style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: none; margin-bottom: 10px;"></textarea>
+                            <button onclick="addBulkDrivers()" style="background: #8e44ad; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold; width: 100%;">إضافة القائمة للجدول 📋</button>
+                        </div>
+                        <div id="shifts-container" class="grid-layout">
+                            <div class="empty-state-container" style="grid-column: 1/-1;">
+                                <span class="empty-state-icon">📋</span>
+                                <h4 class="empty-state-title">لا يوجد جدول مفعل</h4>
+                                <p class="empty-state-desc">اضغط على "التوزيع الآلي" أو جاري جلب الجدول المعتمد من السيرفر...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -730,6 +790,10 @@
             if(tabId === 'manage-drivers' || tabId === 'manage-vendors') {
                 fetchAdminUsersList();
             }
+            // جلب جدول المناوبات عند فتح التبويب الخاص به
+            if(tabId === 'manage-shifts') {
+                fetchNativeShifts();
+            }
         }
 
         function updateProfileData() {
@@ -761,12 +825,10 @@
             }
         }
 
-        // دالة جلب سجل الزبائن والمناديب وعرضها في لوحة التحكم (الميزة المضافة)
         function fetchCustomersHistory() {
             const container = document.getElementById('customers-history-container');
             const tbody = document.getElementById('customers-history-table-body');
             
-            // تفعيل نظام الإخفاء والإظهار التلقائي
             if(!container.classList.contains('hidden')) {
                 container.classList.add('hidden');
                 return;
@@ -1062,7 +1124,7 @@
             showSection('customer-dashboard'); 
             initCustomerLocation(); 
             checkMyOrder(); 
-            checkAndFillMagicVendor(); 
+            checkAndFillMagicVendor();
             setDynamicGreeting();
         }
 
@@ -1780,42 +1842,390 @@
             }).finally(() => { btn.innerText = 'اعتماد المتجر ✅'; btn.disabled = false; });
         }
         function setDynamicGreeting() {
-    // جلب الوقت الحالي وإجباره على التوقيت المحلي لسلطنة عمان (مسقط)
-    let omanTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Muscat" });
-    let omanDate = new Date(omanTimeStr);
-    let hour = omanDate.getHours();
-    
-    let title = "";
-    let desc = "";
+            let omanTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Muscat" });
+            let omanDate = new Date(omanTimeStr);
+            let hour = omanDate.getHours();
+            
+            let title = "";
+            let desc = "";
 
-    // تقسيم فترات اليوم
-    if (hour >= 5 && hour < 12) {
-        // من 5 الفجر إلى 11:59 الظهر
-        title = "صباح الخير ☀️";
-        desc = "وقت الفطور والقهوة، من وين نطلب لك؟ ☕";
-    } else if (hour >= 12 && hour < 17) {
-        // من 12 الظهر إلى 4:59 العصر
-        title = "مساء الخير 🌤️";
-        desc = "وقت الغداء، جاهزين نوصلك أطيب وجبة 🍛";
-    } else if (hour >= 17 && hour < 23) {
-        // من 5 العصر إلى 10:59 المساء
-        title = "مساء الخير ✨";
-        desc = "عشاء خفيف ولا سهرة طويلة؟ 🍕";
-    } else {
-        // من 11 المساء إلى 4:59 الفجر
-        title = "سهران؟ 🌙";
-        desc = "فريق نعاون موجود لجوع آخر الليل 🍔";
-    }
+            if (hour >= 5 && hour < 12) {
+                title = "صباح الخير";
+                desc = "وقت الفطور والقهوة، من وين نطلب لك؟ ";
+            } else if (hour >= 12 && hour < 17) {
+                title = "مساء الخير";
+                desc = "وقت الغداء، جاهزين نوصلك أطيب وجبة ";
+            } else if (hour >= 17 && hour < 23) {
+                title = "مساء الخير ";
+                desc = "عشاء خفيف ولا سهرة طويلة؟ ";
+            } else {
+                title = "سهران؟ ";
+                desc = "فريق نعاون موجود لجوع آخر الليل ";
+            }
 
-    // زرع النصوص في الواجهة
-    let titleElement = document.getElementById('dynamic-greet-title');
-    let descElement = document.getElementById('dynamic-greet-desc');
-    
-    if (titleElement && descElement) {
-        titleElement.innerText = title;
-        descElement.innerText = desc;
-    }
-}
+            let titleElement = document.getElementById('dynamic-greet-title');
+            let descElement = document.getElementById('dynamic-greet-desc');
+            
+            if (titleElement && descElement) {
+                titleElement.innerText = title;
+                descElement.innerText = desc;
+            }
+        }
+
+        // =========================================
+        // وظائف نظام المناوبات الذكي المضافة حديثاً
+        // =========================================
+        const shiftPeriods = [
+            { id: 1, time: "08:00 ص - 11:00 ص", notify: "07:35" },
+            { id: 2, time: "11:00 ص - 02:00 م", notify: "10:35" },
+            { id: 3, time: "02:00 م - 05:00 م", notify: "13:35" },
+            { id: 4, time: "05:00 م - 07:30 م", notify: "16:35" },
+            { id: 5, time: "07:30 م - 10:00 م", notify: "19:05" },
+            { id: 6, time: "10:00 م - 12:00 ص", notify: "21:35" }
+        ];
+
+        let currentGeneratedShifts = [];
+
+        // دالة الإضافة الجماعية للمناديب
+        function addBulkDrivers() {
+            const text = document.getElementById('bulk-drivers').value.trim();
+            if(!text) { alert('الرجاء نسخ ولصق بيانات المناديب أولاً!'); return; }
+            
+            let lines = text.split('\n');
+            let addedCount = 0;
+            
+            lines.forEach(line => {
+                let parts = line.split(',');
+                if(parts.length >= 2) {
+                    let name = parts[0].trim();
+                    let phone = parts[1].trim().replace(/\D/g, '');
+                    
+                    if(phone.length === 8) phone = "968" + phone; // إضافة فتح الخط العماني إذا تم نسيانه
+                    
+                    // توليد ID مؤقت للمندوب المضاف يدوياً
+                    let tempDriverId = 'MB-' + Math.floor(Math.random() * 100000); 
+                    
+                    currentGeneratedShifts.push({
+                        shiftId: 1, // إضافته مبدئياً للفترة الأولى ليتم خلطه لاحقاً
+                        driverId: tempDriverId,
+                        name: name,
+                        phone: phone,
+                        isBackup: false
+                    });
+                    addedCount++;
+                }
+            });
+            
+            if(addedCount > 0) {
+                document.getElementById('bulk-drivers').value = '';
+                renderShiftsUI(currentGeneratedShifts);
+                alert(`✅ تم قراءة وإضافة ${addedCount} مندوب بنجاح! يمكنك الآن الضغط على "التوزيع الآلي الذكي" لترتيبهم.`);
+            } else {
+                alert('❌ لم يتم التعرف على الصيغة. الرجاء التأكد من أن الصيغة: الاسم, رقم الهاتف');
+            }
+        }
+
+        function generateSmartShifts() {
+            if(!availableDriversData || availableDriversData.length === 0) {
+                // إذا لم يكن هناك مناديب مجلوبة من قاعدة البيانات، نقوم بالتوزيع على الأسماء المضافة يدوياً
+                if(currentGeneratedShifts.length > 0) {
+                    shuffleAndDistributeDrivers(); // استخدام دالتنا القديمة إذا كانت الأسماء مدخلة يدوياً/جماعياً
+                    return;
+                } else {
+                    alert("لا يوجد مناديب متاحين للتوزيع. يرجى التأكد من اتصال المناديب أو إضافة مناديب يدوياً.");
+                    return;
+                }
+            }
+
+            let activeDrivers = availableDriversData.filter(d => d.status !== 'غير متاح');
+            if(activeDrivers.length < 3) {
+                alert("عدد المناديب المتاحين قليل جداً لتوليد جدول عادل. يرجى توفير 3 مناديب على الأقل.");
+                return;
+            }
+
+            currentGeneratedShifts = [];
+            let driverShiftCounts = {};
+            activeDrivers.forEach(d => driverShiftCounts[d.id] = 0);
+
+            shiftPeriods.forEach(period => {
+                let shuffled = [...activeDrivers].sort(() => 0.5 - Math.random());
+                let eligiblePrimary = shuffled.filter(d => {
+                    let prevShift = currentGeneratedShifts.find(s => s.shiftId === period.id - 1 && s.driverId === d.id);
+                    return driverShiftCounts[d.id] < 2 && !prevShift;
+                });
+                if(eligiblePrimary.length < 2) {
+                    eligiblePrimary = shuffled.filter(d => driverShiftCounts[d.id] < 2);
+                }
+
+                if(eligiblePrimary.length > 0) {
+                    let primary1 = eligiblePrimary[0];
+                    currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: primary1.id, name: primary1.name, phone: primary1.phone, isBackup: false });
+                    driverShiftCounts[primary1.id]++;
+
+                    if(eligiblePrimary.length > 1) {
+                        let primary2 = eligiblePrimary[1];
+                        currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: primary2.id, name: primary2.name, phone: primary2.phone, isBackup: false });
+                        driverShiftCounts[primary2.id]++;
+                    }
+                }
+
+                let eligibleBackup = shuffled.filter(d => driverShiftCounts[d.id] < 2 && !currentGeneratedShifts.some(s => s.shiftId === period.id && s.driverId === d.id));
+                if(eligibleBackup.length > 0) {
+                    let backup = eligibleBackup[0];
+                    currentGeneratedShifts.push({ shiftId: period.id, shiftTime: period.time, notifyTime: period.notify, driverId: backup.id, name: backup.name, phone: backup.phone, isBackup: true });
+                    driverShiftCounts[backup.id]++; 
+                }
+            });
+
+            renderShiftsUI(currentGeneratedShifts);
+        }
+
+        function renderShiftsUI(shiftsData) {
+            const container = document.getElementById('shifts-container');
+            container.innerHTML = '';
+            
+            const moveOptions = `
+                <option value="">🔄 نقل..</option>
+                <option value="1">فترة 1</option><option value="2">فترة 2</option><option value="3">فترة 3</option>
+                <option value="4">فترة 4</option><option value="5">فترة 5</option><option value="6">فترة 6</option>
+            `;
+
+            shiftPeriods.forEach(period => {
+                let periodShifts = shiftsData.filter(s => s.shiftId === period.id);
+                
+                let primaryHTML = periodShifts.filter(s => !s.isBackup).map(s => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 5px; margin-bottom: 5px;">
+                        <span style="font-size: 14px; font-weight: bold;">✅ ${s.name} <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></span>
+                        <div class="hide-on-pdf" style="display:flex; gap:5px;">
+                            <select onchange="moveDriver(this.value, '${s.driverId}', false)" style="padding: 2px; font-size: 12px; border-radius: 4px;">${moveOptions}</select>
+                            <button onclick="removeDriverFromShift(${s.shiftId}, '${s.driverId}', false)" style="background: transparent; border: none; color: #ff4757; font-size: 12px; font-weight:bold; cursor: pointer;">❌</button>
+                        </div>
+                    </div>`).join('');
+                    
+                let backupHTML = periodShifts.filter(s => s.isBackup).map(s => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #fdebd0; padding-bottom: 5px; margin-bottom: 5px;">
+                        <span style="font-size: 14px; color:#e67e22; font-weight: bold;">🛡️ ${s.name} (احتياط)</span>
+                        <div class="hide-on-pdf" style="display:flex; gap:5px;">
+                            <select onchange="moveDriver(this.value, '${s.driverId}', true)" style="padding: 2px; font-size: 12px; border-radius: 4px;">${moveOptions}</select>
+                            <button onclick="removeDriverFromShift(${s.shiftId}, '${s.driverId}', true)" style="background: transparent; border: none; color: #ff4757; font-size: 12px; font-weight:bold; cursor: pointer;">❌</button>
+                        </div>
+                    </div>`).join('');
+
+                container.innerHTML += `
+                    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 12px; background: #fafafa; position: relative;">
+                        <span style="position: absolute; top: -10px; right: 15px; background: var(--text-dark); color: var(--primary-gold); padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">الفترة ${period.id}</span>
+                        <h4 style="margin: 10px 0 10px 0; color: #333; text-align: center;">🕒 ${period.time}</h4>
+                        <div style="background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                            <strong style="font-size: 12px; color: #888; display:block; margin-bottom:8px;">الأساسيين:</strong>
+                            ${primaryHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد مندوب</p>'}
+                        </div>
+                        <div style="background: #fff9eb; border: 1px solid #fdebd0; padding: 10px; border-radius: 8px;">
+                            <strong style="font-size: 12px; color: #888; display:block; margin-bottom:8px;">الاحتياط (Standby):</strong>
+                            ${backupHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد احتياطي</p>'}
+                        </div>
+                    </div>
+                `;
+
+                // إضافة فاصل صفحات للـ PDF بعد الفترة الثالثة لعدم انقسام الجدول
+                if(period.id === 3) {
+                    container.innerHTML += `<div class="html2pdf__page-break" style="width: 100%; height: 0;"></div>`;
+                }
+            });
+        }
+
+        function removeDriverFromShift(shiftId, driverId, isBackup) {
+            currentGeneratedShifts = currentGeneratedShifts.filter(s => !(s.shiftId === shiftId && s.driverId === driverId && s.isBackup === isBackup));
+            renderShiftsUI(currentGeneratedShifts);
+        }
+
+        function saveNativeShifts() {
+            if(!currentGeneratedShifts || currentGeneratedShifts.length === 0) {
+                alert('لا يوجد جدول لحفظه. قم بالتوزيع الآلي أولاً.'); return;
+            }
+            const btn = document.querySelector('button[onclick="saveNativeShifts()"]');
+            btn.innerText = 'جاري الحفظ وإرسال الرسائل... ⏳';
+            btn.disabled = true;
+
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'save_native_shifts', shifts: currentGeneratedShifts }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // إرسال طلب جديد لـ Webhook لإرسال رسائل التنبيه الآلية للمناديب
+                    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'notify_tomorrow_shifts' }) })
+                    .then(r => r.json())
+                    .then(d => {
+                        alert(`✅ تم الاعتماد بنجاح وتم إرسال الإشعارات إلى ${d.notified} مندوب!`);
+                    }).catch(()=> alert('تم الحفظ، لكن حدث خطأ في إرسال الإشعارات.'));
+                } else {
+                    alert('❌ حدث خطأ أثناء الحفظ.');
+                }
+            }).finally(() => { btn.innerText = '💾 حفظ واعتماد للجميع'; btn.disabled = false; });
+        }
+
+        function fetchNativeShifts() {
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_native_shifts' }) })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success' && data.shifts && data.shifts.length > 0) {
+                    currentGeneratedShifts = data.shifts.map(s => ({
+                        shiftId: parseInt(s.shift_id),
+                        shiftTime: s.shift_time,
+                        notifyTime: s.notify_time,
+                        driverId: s.driver_id,
+                        name: s.driver_name,
+                        phone: s.driver_phone,
+                        isBackup: s.is_backup == 1
+                    }));
+                    renderShiftsUI(currentGeneratedShifts);
+                }
+            });
+        }
+
+        function exportShiftsToPDF() {
+            const wrapper = document.getElementById('shift-schedule-wrapper');
+            const hiddenElements = document.querySelectorAll('.hide-on-pdf'); 
+            
+            // إخفاء الأزرار وقوائم النقل والترويسة قبل التصدير حسب الطلب
+            hiddenElements.forEach(el => el.style.display = 'none'); 
+            wrapper.style.border = 'none'; 
+            
+            const opt = {
+                margin:       [10, 10, 10, 10], 
+                filename:     'جدول_مناوبات_نعاون.pdf',
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak:    { mode: ['css', 'legacy'] } // تفعيل الفواصل
+            };
+
+            html2pdf().set(opt).from(wrapper).save().then(() => {
+                wrapper.style.border = '1px solid #eee'; 
+                hiddenElements.forEach(el => el.style.display = ''); 
+            });
+        }
+        
+        function addManualDriver() {
+            const name = document.getElementById('manual-name').value;
+            const phone = document.getElementById('manual-phone').value;
+            const shiftId = parseInt(document.getElementById('manual-shift').value);
+            const isBackup = document.getElementById('manual-type').value === 'true';
+
+            if(!name || !phone) { alert('الرجاء إدخال الاسم ورقم الهاتف!'); return; }
+
+            const tempDriverId = 'M-' + Math.floor(Math.random() * 100000); 
+
+            currentGeneratedShifts.push({
+                shiftId: shiftId,
+                driverId: tempDriverId,
+                name: name,
+                phone: phone,
+                isBackup: isBackup
+            });
+
+            document.getElementById('manual-name').value = '';
+            document.getElementById('manual-phone').value = '';
+            renderShiftsUI(currentGeneratedShifts);
+        }
+
+        function moveDriver(newShiftId, driverId, isBackup) {
+            if(!newShiftId) return;
+            let driverIndex = currentGeneratedShifts.findIndex(s => s.driverId === driverId && s.isBackup === isBackup);
+            if(driverIndex !== -1) {
+                currentGeneratedShifts[driverIndex].shiftId = parseInt(newShiftId);
+                renderShiftsUI(currentGeneratedShifts); 
+            }
+        }
+        
+        function saveShiftsDraft() {
+            if (currentGeneratedShifts.length === 0) {
+                alert("⚠️ الجدول فارغ! أضف كباتن أولاً قبل الحفظ.");
+                return;
+            }
+            localStorage.setItem('naawenShiftsDraft', JSON.stringify(currentGeneratedShifts));
+            alert("✅ تم حفظ التوزيع الحالي كمسودة بنجاح!\n(ملاحظة: المسودة محفوظة في هذا المتصفح والجهاز ولن تضيع عند التحديث)");
+        }
+
+        function loadShiftsDraft() {
+            let savedDraft = localStorage.getItem('naawenShiftsDraft');
+            if (savedDraft) {
+                if(confirm("هل أنت متأكد من رغبتك في استرجاع مسودة الأمس؟ (سيتم استبدال الجدول الحالي)")) {
+                    currentGeneratedShifts = JSON.parse(savedDraft);
+                    renderShiftsUI(currentGeneratedShifts);
+                }
+            } else {
+                alert("⚠️ لا توجد مسودة محفوظة حالياً في هذا المتصفح.");
+            }
+        }       
+        
+        function shuffleAndDistributeDrivers() {
+            if (currentGeneratedShifts.length === 0) {
+                alert("⚠️ لا يوجد كباتن في الجدول لتوزيعهم!");
+                return;
+            }
+
+            if (!confirm("هل أنت متأكد من رغبتك في إعادة توزيع الكباتن عشوائياً؟")) return;
+
+            let unassignedDrivers = currentGeneratedShifts.map(d => ({ ...d }));
+            for (let i = unassignedDrivers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [unassignedDrivers[i], unassignedDrivers[j]] = [unassignedDrivers[j], unassignedDrivers[i]];
+            }
+
+            let newDistributedShifts = [];
+            let currentShift = 1;
+            let isBackup = false;
+            let driverAssignedShifts = {}; 
+
+            let totalSlots = unassignedDrivers.length;
+
+            for (let i = 0; i < totalSlots; i++) {
+                let selectedIndex = -1;
+
+                for (let j = 0; j < unassignedDrivers.length; j++) {
+                    let drvId = unassignedDrivers[j].driverId;
+                    let assigned = driverAssignedShifts[drvId] || [];
+                    
+                    if (!assigned.includes(currentShift) && 
+                        !assigned.includes(currentShift - 1) && 
+                        !assigned.includes(currentShift + 1)) {
+                        selectedIndex = j;
+                        break;
+                    }
+                }
+
+                if (selectedIndex === -1) {
+                    selectedIndex = 0;
+                }
+
+                let selectedDriver = unassignedDrivers.splice(selectedIndex, 1)[0];
+
+                newDistributedShifts.push({
+                    shiftId: currentShift,
+                    driverId: selectedDriver.driverId,
+                    name: selectedDriver.name,
+                    phone: selectedDriver.phone,
+                    isBackup: isBackup
+                });
+
+                if (!driverAssignedShifts[selectedDriver.driverId]) {
+                    driverAssignedShifts[selectedDriver.driverId] = [];
+                }
+                driverAssignedShifts[selectedDriver.driverId].push(currentShift);
+
+                currentShift++;
+                
+                if (currentShift > 6) {
+                    currentShift = 1;
+                    isBackup = !isBackup; 
+                }
+            }
+
+            currentGeneratedShifts = newDistributedShifts;
+            renderShiftsUI(currentGeneratedShifts);
+        }
     </script>
 </body>
 </html>
