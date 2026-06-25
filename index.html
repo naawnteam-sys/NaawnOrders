@@ -481,6 +481,33 @@
                             <h3 style="margin: 5px 0 10px 0; color: #D4AF37;">الجدول الإداري للمناوبات اليومية</h3>
                             <p style="margin: 0; color: #666; font-weight: bold; font-size: 14px;" id="pdf-date-display"></p>
                         </div>
+                        <div id="manual-add-section" style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;" class="hide-on-pdf">
+                            <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+    <button onclick="saveShiftsDraft()" style="background: #f39c12; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">💾 حفظ التوزيع كمسودة للغد</button>
+    <button onclick="loadShiftsDraft()" style="background: #34495e; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">📂 استرجاع مسودة الأمس</button>
+</div>
+    <h4 style="margin-top:0; color:#2c3e50;">➕ إضافة كابتن يدوياً للمناوبة</h4>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="manual-name" placeholder="اسم الكابتن" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="number" id="manual-phone" placeholder="رقم الهاتف (بدون 968)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+        
+        <select id="manual-shift" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="1">الفترة 1</option>
+            <option value="2">الفترة 2</option>
+            <option value="3">الفترة 3</option>
+            <option value="4">الفترة 4</option>
+            <option value="5">الفترة 5</option>
+            <option value="6">الفترة 6</option>
+        </select>
+        
+        <select id="manual-type" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="false">أساسي ✅</option>
+            <option value="true">احتياطي 🛡️</option>
+        </select>
+        
+        <button onclick="addManualDriver()" style="background: #27ae60; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight:bold;">إضافة للجدول</button>
+    </div>
+</div>
                         <div id="shifts-container" class="grid-layout">
                             <div class="empty-state-container" style="grid-column: 1/-1;">
                                 <span class="empty-state-icon">📋</span>
@@ -1911,30 +1938,58 @@
         }
 
         function renderShiftsUI(shiftsData) {
-            const container = document.getElementById('shifts-container');
-            container.innerHTML = '';
-            
-            shiftPeriods.forEach(period => {
-                let periodShifts = shiftsData.filter(s => s.shiftId === period.id);
-                let primaryHTML = periodShifts.filter(s => !s.isBackup).map(s => `<p style="margin:5px 0; font-size: 14px;">✅ ${s.name} <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></p>`).join('');
-                let backupHTML = periodShifts.filter(s => s.isBackup).map(s => `<p style="margin:5px 0; font-size: 14px; color:#e67e22;">🛡️ ${s.name} (احتياطي) <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></p>`).join('');
+    const container = document.getElementById('shifts-container');
+    container.innerHTML = '';
+    
+    // خيارات النقل
+    const moveOptions = `
+        <option value="">🔄 نقل..</option>
+        <option value="1">فترة 1</option><option value="2">فترة 2</option><option value="3">فترة 3</option>
+        <option value="4">فترة 4</option><option value="5">فترة 5</option><option value="6">فترة 6</option>
+    `;
 
-                container.innerHTML += `
-                    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 12px; background: #fafafa; position: relative;">
-                        <span style="position: absolute; top: -10px; right: 15px; background: var(--text-dark); color: var(--primary-gold); padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">الفترة ${period.id}</span>
-                        <h4 style="margin: 10px 0 10px 0; color: #333; font-size: 14px; text-align: center;">🕒 ${period.time}</h4>
-                        <div style="background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                            <strong style="font-size: 12px; color: #888;">الأساسيين:</strong>
-                            ${primaryHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد مندوب</p>'}
-                        </div>
-                        <div style="background: #fff9eb; border: 1px solid #fdebd0; padding: 10px; border-radius: 8px;">
-                            <strong style="font-size: 12px; color: #888;">الاحتياط (Standby):</strong>
-                            ${backupHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد احتياطي</p>'}
-                        </div>
-                    </div>
-                `;
-            });
+    shiftPeriods.forEach(period => {
+        let periodShifts = shiftsData.filter(s => s.shiftId === period.id);
+        
+        let primaryHTML = periodShifts.filter(s => !s.isBackup).map(s => `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 5px; margin-bottom: 5px;">
+                <span style="font-size: 14px; font-weight: bold;">✅ ${s.name} <a href="https://wa.me/968${s.phone}" target="_blank" style="text-decoration:none;">💬</a></span>
+                <div class="hide-on-pdf" style="display:flex; gap:5px;">
+                    <select onchange="moveDriver(this.value, '${s.driverId}', false)" style="padding: 2px; font-size: 12px; border-radius: 4px;">${moveOptions}</select>
+                    <button onclick="removeDriverFromShift(${s.shiftId}, '${s.driverId}', false)" style="background: transparent; border: none; color: #ff4757; font-size: 12px; font-weight:bold; cursor: pointer;">❌</button>
+                </div>
+            </div>`).join('');
+            
+        let backupHTML = periodShifts.filter(s => s.isBackup).map(s => `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #fdebd0; padding-bottom: 5px; margin-bottom: 5px;">
+                <span style="font-size: 14px; color:#e67e22; font-weight: bold;">🛡️ ${s.name} (احتياط)</span>
+                <div class="hide-on-pdf" style="display:flex; gap:5px;">
+                    <select onchange="moveDriver(this.value, '${s.driverId}', true)" style="padding: 2px; font-size: 12px; border-radius: 4px;">${moveOptions}</select>
+                    <button onclick="removeDriverFromShift(${s.shiftId}, '${s.driverId}', true)" style="background: transparent; border: none; color: #ff4757; font-size: 12px; font-weight:bold; cursor: pointer;">❌</button>
+                </div>
+            </div>`).join('');
+
+        container.innerHTML += `
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 12px; background: #fafafa; position: relative;">
+                <span style="position: absolute; top: -10px; right: 15px; background: var(--text-dark); color: var(--primary-gold); padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">الفترة ${period.id}</span>
+                <h4 style="margin: 10px 0 10px 0; color: #333; text-align: center;">🕒 ${period.time}</h4>
+                <div style="background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <strong style="font-size: 12px; color: #888; display:block; margin-bottom:8px;">الأساسيين:</strong>
+                    ${primaryHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد مندوب</p>'}
+                </div>
+                <div style="background: #fff9eb; border: 1px solid #fdebd0; padding: 10px; border-radius: 8px;">
+                    <strong style="font-size: 12px; color: #888; display:block; margin-bottom:8px;">الاحتياط (Standby):</strong>
+                    ${backupHTML || '<p style="margin:5px 0; font-size:12px; color:red;">لا يوجد احتياطي</p>'}
+                </div>
+            </div>
+        `;
+
+        // إضافة فاصل صفحات للـ PDF بعد الفترة الثالثة لعدم انقسام الجدول
+        if(period.id === 3) {
+            container.innerHTML += `<div class="html2pdf__page-break" style="width: 100%; height: 0;"></div>`;
         }
+    });
+}
 
         function saveNativeShifts() {
             if(!currentGeneratedShifts || currentGeneratedShifts.length === 0) {
@@ -1974,29 +2029,172 @@
         }
 
         function exportShiftsToPDF() {
-            const wrapper = document.getElementById('shift-schedule-wrapper');
-            const pdfHeader = document.getElementById('pdf-header');
-            const dateDisplay = document.getElementById('pdf-date-display');
-            
-            let d = new Date();
-            dateDisplay.innerText = "التاريخ المعتمد: " + d.toLocaleDateString('ar-OM') + " | " + d.toLocaleDateString('en-GB');
-            
-            pdfHeader.style.display = 'block'; 
-            wrapper.style.border = 'none'; 
-            
-            const opt = {
-                margin:       [10, 10, 10, 10], 
-                filename:     'جدول_مناوبات_نعاون_' + d.toLocaleDateString('en-GB').replace(/\//g, '-') + '.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
+    const wrapper = document.getElementById('shift-schedule-wrapper');
+    const pdfHeader = document.getElementById('pdf-header');
+    const dateDisplay = document.getElementById('pdf-date-display');
+    const hiddenElements = document.querySelectorAll('.hide-on-pdf'); // التقاط كل الأزرار وحقول الإدخال
+    
+    let d = new Date();
+    dateDisplay.innerText = "التاريخ المعتمد: " + d.toLocaleDateString('ar-OM');
+    
+    pdfHeader.style.display = 'block'; 
+    wrapper.style.border = 'none'; 
+    
+    // إخفاء الأزرار وقوائم النقل قبل التصدير
+    hiddenElements.forEach(el => el.style.display = 'none'); 
+    
+    const opt = {
+        margin:       [10, 10, 10, 10], 
+        filename:     'جدول_مناوبات_نعاون.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak:    { mode: ['css', 'legacy'] } // تفعيل خاصية كسر الصفحة التي أضفناها
+    };
 
-            html2pdf().set(opt).from(wrapper).save().then(() => {
-                pdfHeader.style.display = 'none'; 
-                wrapper.style.border = '1px solid #eee'; 
-            });
+    html2pdf().set(opt).from(wrapper).save().then(() => {
+        pdfHeader.style.display = 'none'; 
+        wrapper.style.border = '1px solid #eee'; 
+        
+        // إرجاع الأزرار والقوائم للعمل بعد الانتهاء
+        hiddenElements.forEach(el => el.style.display = ''); 
+    });
+}
+        // دالة إضافة المندوب يدوياً
+function addManualDriver() {
+    const name = document.getElementById('manual-name').value;
+    const phone = document.getElementById('manual-phone').value;
+    const shiftId = parseInt(document.getElementById('manual-shift').value);
+    const isBackup = document.getElementById('manual-type').value === 'true';
+
+    if(!name || !phone) { alert('الرجاء إدخال الاسم ورقم الهاتف!'); return; }
+
+    // إنشاء ID وهمي لتسهيل تتبع المندوب عند الحذف والنقل
+    const tempDriverId = 'M-' + Math.floor(Math.random() * 100000); 
+
+    currentGeneratedShifts.push({
+        shiftId: shiftId,
+        driverId: tempDriverId,
+        name: name,
+        phone: phone,
+        isBackup: isBackup
+    });
+
+    document.getElementById('manual-name').value = '';
+    document.getElementById('manual-phone').value = '';
+    renderShiftsUI(currentGeneratedShifts);
+}
+
+// دالة نقل المندوب من فترة لأخرى
+function moveDriver(newShiftId, driverId, isBackup) {
+    if(!newShiftId) return;
+    let driverIndex = currentGeneratedShifts.findIndex(s => s.driverId === driverId && s.isBackup === isBackup);
+    if(driverIndex !== -1) {
+        currentGeneratedShifts[driverIndex].shiftId = parseInt(newShiftId);
+        renderShiftsUI(currentGeneratedShifts); // إعادة رسم الجدول فوراً
+    }
+}
+ // دالة حفظ الجدول الحالي كمسودة في المتصفح
+function saveShiftsDraft() {
+    if (currentGeneratedShifts.length === 0) {
+        alert("⚠️ الجدول فارغ! أضف كباتن أولاً قبل الحفظ.");
+        return;
+    }
+    // حفظ البيانات في ذاكرة المتصفح المحلية
+    localStorage.setItem('naawenShiftsDraft', JSON.stringify(currentGeneratedShifts));
+    alert("✅ تم حفظ التوزيع الحالي كمسودة بنجاح!\n(ملاحظة: المسودة محفوظة في هذا المتصفح والجهاز ولن تضيع عند التحديث)");
+}
+
+// دالة استرجاع المسودة المحفوظة
+function loadShiftsDraft() {
+    let savedDraft = localStorage.getItem('naawenShiftsDraft');
+    
+    if (savedDraft) {
+        if(confirm("هل أنت متأكد من رغبتك في استرجاع مسودة الأمس؟ (سيتم استبدال الجدول الحالي)")) {
+            currentGeneratedShifts = JSON.parse(savedDraft);
+            renderShiftsUI(currentGeneratedShifts);
         }
+    } else {
+        alert("⚠️ لا توجد مسودة محفوظة حالياً في هذا المتصفح.");
+    }
+}       
+        // دالة خلط وتوزيع الكباتن عشوائياً بذكاء (مع مراعاة منع الفترات المتتالية لنفس المندوب)
+function shuffleAndDistributeDrivers() {
+    if (currentGeneratedShifts.length === 0) {
+        alert("⚠️ لا يوجد كباتن في الجدول لتوزيعهم!");
+        return;
+    }
+
+    if (!confirm("هل أنت متأكد من رغبتك في إعادة توزيع الكباتن عشوائياً؟")) return;
+
+    // 1. أخذ نسخة من الكباتن الحاليين وخلطهم عشوائياً تماماً
+    let unassignedDrivers = currentGeneratedShifts.map(d => ({ ...d }));
+    for (let i = unassignedDrivers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unassignedDrivers[i], unassignedDrivers[j]] = [unassignedDrivers[j], unassignedDrivers[i]];
+    }
+
+    // 2. التوزيع الذكي (يمنع التتالي لنفس المندوب إذا كان يعمل أكثر من فترة)
+    let newDistributedShifts = [];
+    let currentShift = 1;
+    let isBackup = false;
+    let driverAssignedShifts = {}; // ذاكرة مؤقتة لتتبع الفترات التي نالها كل مندوب
+
+    let totalSlots = unassignedDrivers.length;
+
+    for (let i = 0; i < totalSlots; i++) {
+        let selectedIndex = -1;
+
+        // البحث عن أول مندوب في القائمة العشوائية لا يتعارض مع شرط "عدم التتالي"
+        for (let j = 0; j < unassignedDrivers.length; j++) {
+            let drvId = unassignedDrivers[j].driverId;
+            let assigned = driverAssignedShifts[drvId] || [];
+            
+            // شرط المنع: ألا يكون قد أخذ الفترة السابقة، أو اللاحقة، أو نفس الفترة مسبقاً
+            if (!assigned.includes(currentShift) && 
+                !assigned.includes(currentShift - 1) && 
+                !assigned.includes(currentShift + 1)) {
+                selectedIndex = j;
+                break;
+            }
+        }
+
+        // إذا لم يجد (حالة نادرة تحدث فقط إذا كان عدد المناديب قليل جداً والتكرار كثير)، يأخذ أول كابتن متاح إجبارياً
+        if (selectedIndex === -1) {
+            selectedIndex = 0;
+        }
+
+        let selectedDriver = unassignedDrivers.splice(selectedIndex, 1)[0];
+
+        // إسناد الفترة للكابتن المختار
+        newDistributedShifts.push({
+            shiftId: currentShift,
+            driverId: selectedDriver.driverId,
+            name: selectedDriver.name,
+            phone: selectedDriver.phone,
+            isBackup: isBackup
+        });
+
+        // تسجيل هذه الفترة في سجل الكابتن لمنعه من التتالي في الدورات القادمة
+        if (!driverAssignedShifts[selectedDriver.driverId]) {
+            driverAssignedShifts[selectedDriver.driverId] = [];
+        }
+        driverAssignedShifts[selectedDriver.driverId].push(currentShift);
+
+        // الانتقال للفترة التالية برمجياً
+        currentShift++;
+        
+        // إذا وصلنا للفترة السادسة، نعود للأولى ونبدل مسار التوزيع إلى (احتياط)
+        if (currentShift > 6) {
+            currentShift = 1;
+            isBackup = !isBackup; 
+        }
+    }
+
+    // 3. اعتماد التوزيع الجديد وعرضه على الشاشة
+    currentGeneratedShifts = newDistributedShifts;
+    renderShiftsUI(currentGeneratedShifts);
+}
     </script>
 </body>
 </html>
