@@ -20,7 +20,7 @@
     <script src="https://cdnjs.ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary-gold: #D4AF37; --dark-gold: #AA8C2C; --bg-white: #FFFFFF; --text-dark: #2c3e50; --light-gray: #f4f7f6; --app-bg: #f8f9fa; }
-        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; background-color: var(--app-bg); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100dvh; overflow-x: hidden; }
         
         .header { background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.3); color: var(--text-dark); text-align: center; padding: 12px 15px; font-size: 22px; font-weight: 800; box-shadow: 0 2px 15px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; letter-spacing: -0.5px;}
         .header img { height: 35px; margin-left: 10px; border-radius: 8px; }
@@ -749,7 +749,7 @@
             const phone = localStorage.getItem('customerPhone');
             if(email && email.includes('@')) {
                 const btn = e.target; btn.innerText = '⏳'; btn.disabled = true;
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) })
                 .then(res => res.json()).then(data => {
                     if(data.status === 'success') {
                         localStorage.setItem('customerEmail', email);
@@ -775,7 +775,7 @@
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; font-weight:bold;">جاري استدعاء سجل العمليات من السيرفر... ⏳</td></tr>';
             container.classList.remove('hidden');
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_customers_history' }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_customers_history' }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') {
                     tbody.innerHTML = '';
@@ -1010,7 +1010,7 @@
         }
 
         function loadSettings() {
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_settings' }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_settings' }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success' && data.settings) {
                     if(data.settings.banner) { document.getElementById('promo-text').innerText = data.settings.banner; document.getElementById('promo-banner-container').classList.remove('hidden'); }
@@ -1023,7 +1023,7 @@
             const p = document.getElementById('cust-phone').value; 
             if(p.length >= 8) { 
                 localStorage.setItem('customerPhone', p); 
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: p }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: p }) })
                 .then(res => res.json()).then(data => {
                     if(data.status === 'success' && data.email) {
                         localStorage.setItem('customerEmail', data.email);
@@ -1046,7 +1046,7 @@
             const phone = localStorage.getItem('customerPhone');
             if(email && email.includes('@')) {
                 localStorage.setItem('customerEmail', email);
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) });
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'save_customer_email', phone: phone, email: email }) });
                 proceedToCustomerDashboard();
             } else {
                 alert('يرجى إدخال بريد إلكتروني صحيح أو الضغط على تخطي.');
@@ -1069,7 +1069,7 @@
         function applyCoupon(event) {
             const code = document.getElementById('promo-code').value; if(!code) return;
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_coupon', code: code }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'check_coupon', code: code }) })
             .then(res => res.json()).then(data => {
                 const msgBox = document.getElementById('coupon-msg'); msgBox.classList.remove('hidden');
                 if(data.status === 'valid') { msgBox.innerText = `✅ تم تفعيل خصم ${data.discount}%!`; activePromoCode = code; document.getElementById('promo-code').disabled = true;}
@@ -1091,7 +1091,7 @@
             const phone = localStorage.getItem('customerPhone'); const statusArea = document.getElementById('customer-status-area'); 
             statusArea.innerHTML = '<div class="skeleton-box skel-title" style="margin: 0 auto 15px auto;"></div><div class="skeleton-box skel-text" style="width:80%; margin: 0 auto;"></div><div class="skeleton-box skel-text" style="width:60%; margin: 10px auto 0 auto;"></div>';
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) })
             .then(res => res.json()).then(data => {
                 if(data.status === "success") {
                     if(data.email) { localStorage.setItem('customerEmail', data.email); }
@@ -1123,7 +1123,7 @@
 
         function refreshCustomerMapOnly() {
             const phone = localStorage.getItem('customerPhone');
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) }).then(res => res.json()).then(data => {
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'check_customer_order', phone: phone }) }).then(res => res.json()).then(data => {
                 if(data.status === "success" && data.activeOrder && data.activeOrder.status.includes('توصيل') && data.activeOrder.lat) {
                     if(customerMap && customerMarker) { customerMarker.setLatLng([data.activeOrder.lat, data.activeOrder.lng]); customerMap.panTo([data.activeOrder.lat, data.activeOrder.lng]); } else if (!customerMap) { checkMyOrder(); }
                 } else if (!data.activeOrder || data.activeOrder.status.includes('تم التسليم')) { clearInterval(customerMapInterval); customerMapInterval = null; checkMyOrder(); }
@@ -1155,7 +1155,7 @@
             if(!payload.city || !payload.area || !payload.pickup) { alert('الرجاء التأكد من حفظ موقعك وكتابة مكان الاستلام'); return; }
             const btn = e.target; btn.innerText = 'جاري التسجيل... ⏳'; btn.disabled = true;
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(() => {
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) }).then(() => {
                 alert('✅ تم إرسال الطلب بنجاح لأسطول نعاون!'); 
                 document.getElementById('pickup-loc').value = ''; document.getElementById('order-details').value = ''; document.getElementById('promo-code').value = ''; 
                 activePromoCode = ""; document.getElementById('coupon-msg').classList.add('hidden'); document.getElementById('promo-code').disabled = false;
@@ -1170,7 +1170,7 @@
             const rating = document.getElementById('cust-rating').value; const text = document.getElementById('cust-feedback').value; const phone = localStorage.getItem('customerPhone');
             if(!text) { alert('الرجاء كتابة ملاحظتك أو شكواك.'); return; }
             const btn = e.target; btn.innerText = 'جاري الإرسال...'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'new_feedback', phone: phone, rating: rating, text: text }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'new_feedback', phone: phone, rating: rating, text: text }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('شكراً لك! تم إرسال تقييمك للإدارة بنجاح.'); document.getElementById('cust-feedback').value = ''; }
             }).finally(() => { btn.innerText = 'إرسال التقييم 📤'; btn.disabled = false; });
@@ -1179,7 +1179,7 @@
         function loginVendor(e) {
             const id = document.getElementById('vnd-id').value; const pass = document.getElementById('vnd-pass').value; if(!id || !pass) return;
             const btn = e.target; btn.innerText = 'جاري التحقق...'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'login_vendor', id: id, pass: pass }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'login_vendor', id: id, pass: pass }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { 
                     localStorage.setItem('vendorId', id); localStorage.setItem('vendorName', data.name); 
@@ -1196,7 +1196,7 @@
             if(!payload.name || !payload.phone || !area || !car) { alert("الرجاء تعبئة كافة البيانات"); return; }
             payload.details = "المنطقة: " + area + " | المركبة: " + car;
             let btn = event.target; btn.innerText = "جاري الإرسال... ⏳"; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تم استلام طلبك بنجاح!'); showSection('customer-login'); document.getElementById('jd-name').value=''; document.getElementById('jd-phone').value=''; document.getElementById('jd-area').value=''; document.getElementById('jd-car').value=''; }
             }).finally(() => { btn.innerText = "إرسال طلب الالتحاق 🚀"; btn.disabled = false; });
         }
@@ -1207,7 +1207,7 @@
             if(!payload.name || !payload.phone || !packageType) { alert("الرجاء تعبئة كافة البيانات"); return; }
             payload.details = "الباقة المختارة: " + packageType;
             let btn = event.target; btn.innerText = "جاري الإرسال... ⏳"; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تم استلام طلب الاشتراك بنجاح!'); showSection('customer-login'); document.getElementById('jv-name').value=''; document.getElementById('jv-phone').value=''; document.getElementById('jv-package').value=''; }
             }).finally(() => { btn.innerText = "إرسال طلب الاشتراك والبدء 🚀"; btn.disabled = false; });
         }
@@ -1217,7 +1217,7 @@
             const container = document.getElementById('vendor-orders-list'); 
             container.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div><div class="skeleton-box skel-text" style="width:70%"></div><div class="skeleton-box skel-text" style="width:50%; margin-top:15px;"></div></div>';
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_vendor_data', vendorName: vName }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_vendor_data', vendorName: vName }) })
             .then(res => res.json()).then(data => {
                 if(data.status !== "success") return; 
                 container.innerHTML = '';
@@ -1250,7 +1250,7 @@
             const payload = { action: 'new_order', phone: document.getElementById('vnd-cust-phone').value, city: document.getElementById('vnd-cust-city').value, area: document.getElementById('vnd-cust-area').value, pickup: vName, details: document.getElementById('vnd-order-details').value, price: document.getElementById('vnd-order-price').value || 0 };
             if(!payload.phone || !payload.area || !payload.details) { alert('الرجاء تعبئة بيانات الزبون الأساسية'); return; }
             const btn = e.target; btn.innerText = 'جاري إرسال الطلب... ⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(() => {
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) }).then(() => {
                 alert('✅ تم إرسال الطلب بنجاح لأسطول نعاون!'); fetchVendorOrders();
                 document.getElementById('vnd-cust-phone').value = ''; document.getElementById('vnd-cust-city').value = ''; document.getElementById('vnd-cust-area').value = ''; document.getElementById('vnd-order-details').value = ''; document.getElementById('vnd-order-price').value = '';
             }).finally(() => { btn.innerText = 'طلب مندوب فوراً 🛵'; btn.disabled = false; });
@@ -1267,13 +1267,13 @@
         function toggleDriverStatus() {
             let newStatus = (currentDriverStatus === "متصل") ? "غير متاح" : "متصل";
             applyDriverStatusUI(newStatus); localStorage.setItem('driverStatus', newStatus);
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_driver_status', driverId: localStorage.getItem('driverId'), status: newStatus }) });
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_driver_status', driverId: localStorage.getItem('driverId'), status: newStatus }) });
         }
 
         function loginDriver(e) {
             const id = document.getElementById('drv-id').value; const pass = document.getElementById('drv-pass').value; if(!id || !pass) return;
             const btn = e.target; btn.innerText = 'جاري التحقق...'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'login_driver', id: id, pass: pass }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'login_driver', id: id, pass: pass }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { 
                     localStorage.setItem('driverId', id); localStorage.setItem('driverName', data.name); 
@@ -1290,7 +1290,7 @@
         function fetchDriverOrders(userClicked = false) {
             if(userClicked) { isAudioAllowed = true; } const id = localStorage.getItem('driverId'); const container = document.getElementById('driver-orders-list'); 
             container.innerHTML = '<div class="card" style="padding:15px;"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text" style="width:100%"></div><div class="skeleton-box skel-text" style="width:80%"></div><div class="skeleton-box skel-btn"></div></div>';
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_driver_data', driverId: id }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_driver_data', driverId: id }) })
             .then(res => res.json()).then(data => {
                 if(data.status === "expired") { showSection('driver-expired-dashboard'); return; }
                 if(data.status !== "success") return;
@@ -1337,7 +1337,7 @@
             });
         }
 
-        function acceptOrder(orderId) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (المندوب في الطريق)', driverId: localStorage.getItem('driverId'), driverName: localStorage.getItem('driverName') }) }).then(() => fetchDriverOrders()); }
+        function acceptOrder(orderId) { fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (المندوب في الطريق)', driverId: localStorage.getItem('driverId'), driverName: localStorage.getItem('driverName') }) }).then(() => fetchDriverOrders()); }
 
         function startDriverGPS(orderId) {
             const mapCont = document.getElementById('map-container'); mapCont.classList.remove('hidden');
@@ -1346,7 +1346,7 @@
                 watchId = navigator.geolocation.watchPosition(pos => {
                     const lat = pos.coords.latitude; const lng = pos.coords.longitude;
                     if(!driverMarker) { driverMarker = L.marker([lat, lng]).addTo(driverMap); } else { driverMarker.setLatLng([lat, lng]); }
-                    driverMap.panTo([lat, lng]); fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_location', orderId: orderId, lat: lat, lng: lng }) });
+                    driverMap.panTo([lat, lng]); fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_location', orderId: orderId, lat: lat, lng: lng }) });
                 }, err => console.log("GPS"), {enableHighAccuracy: true});
             }
         }
@@ -1356,14 +1356,14 @@
             if(!collectedPrice || collectedPrice <= 0) { if(!confirm("⚠️ لم تقم بإدخال مبلغ للطلب! هل متأكد أنك سلمت الطلب بمبلغ 0 ريال؟")) return; }
             if(confirm("هل متأكد أنك قمت بتسليم الطلب للعميل؟")) {
                 if(watchId && navigator.geolocation) { navigator.geolocation.clearWatch(watchId); watchId = null; } document.getElementById('map-container').classList.add('hidden');
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم التسليم', price: collectedPrice }) }).then(() => { alert('شكراً لك! تمت إضافة المبلغ لعهدتك.'); fetchDriverOrders(); });
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم التسليم', price: collectedPrice }) }).then(() => { alert('شكراً لك! تمت إضافة المبلغ لعهدتك.'); fetchDriverOrders(); });
             }
         }
 
         function loginAdmin(event) { 
             const user = document.getElementById('adm-user').value; const pass = document.getElementById('adm-pass').value; if(!user || !pass) return;
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin', user: user, pass: pass }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'login_admin', user: user, pass: pass }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { localStorage.setItem('adminLogged', 'true'); isAudioAllowed = true; showSection('admin-dashboard'); startAdminAutoRefresh(); } else alert('خطأ في بيانات الدخول!');
             }).finally(() => { btn.innerText = 'دخول للوحة التحكم 🛡️'; btn.disabled = false; });
@@ -1385,7 +1385,7 @@
             
             const btn = event.target; btn.innerText = 'جاري الإرسال الجماعي... ⏳'; btn.disabled = true;
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'send_broadcast', subject: subject, message: message }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'send_broadcast', subject: subject, message: message }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') {
                     alert(`✅ تم إرسال العرض الترويجي بنجاح إلى (${data.sentCount}) زبون!`);
@@ -1400,7 +1400,7 @@
             if(isFetchingAdmin || window.pauseRefresh) return; 
             isFetchingAdmin = true;
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_admin_data' }) })
             .then(res => res.json()).then(data => {
                 if(!document.getElementById('admin-dashboard').classList.contains('hidden')){
                     
@@ -1537,7 +1537,7 @@
             if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { renderAdminDrivers(data.drivers); renderAdminVendors(data.vendors); }
             }).catch(e => console.log(e));
@@ -1548,11 +1548,27 @@
             if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4></div>'; return; }
             drivers.forEach(d => {
                 let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
+                
+                let expiryHtml = '';
+                if (d.expiryDate) {
+                    let expDate = new Date(d.expiryDate);
+                    let today = new Date();
+                    let diffTime = expDate - today;
+                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    let daysText = diffDays > 0 ? `متبقي ${diffDays} يوم` : (diffDays === 0 ? `ينتهي اليوم` : `منتهي منذ ${Math.abs(diffDays)} يوم`);
+                    let daysColor = diffDays > 5 ? '#2ed573' : (diffDays >= 0 ? '#f39c12' : '#ff4757');
+                    let displayDate = expDate.toISOString().split('T')[0];
+                    expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span dir="ltr">${displayDate}</span> (<span style="color:${daysColor}; font-weight:bold;">${daysText}</span>)</p>`;
+                } else {
+                    expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span style="color:#ff4757; font-weight:bold;">غير محدد (منتهي)</span></p>`;
+                }
+
                 container.innerHTML += `
                 <div class="grid-card">
                     <h4 style="margin-top:0; color:var(--text-dark);">${d.name}</h4>
                     <p style="margin:5px 0; font-size:14px;"><strong>المعرف (ID):</strong> ${d.id}</p>
                     <p style="margin:5px 0; font-size:14px;"><strong>رقم الواتساب:</strong> ${d.phone || 'غير محدد'}</p>
+                    ${expiryHtml}
                     <p style="margin:5px 0; font-size:14px;"><strong>الحالة الحالية:</strong> <span style="color:${statusColor}; font-weight:bold;">${d.status || 'غير متاح'}</span></p>
                     <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:15px;">
                         <button onclick="updateAdminDriverPhone('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#17a2b8; color:white; border-radius:6px; box-shadow:none;">📱 الرقم</button>
@@ -1583,47 +1599,47 @@
 
         function deleteAdminDriver(id) {
             if(confirm('⚠️ هل أنت متأكد من حذف هذا المندوب نهائياً؟')) {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_delete_driver', id: id }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
             }
         }
         function updateAdminDriverPassword(id) {
             let newPass = prompt('أدخل كلمة المرور الجديدة للمندوب:');
             if(newPass && newPass.trim() !== "") {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_pass', id: id, pass: newPass }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_pass', id: id, pass: newPass }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم التحديث.'); });
             }
         }
         function updateAdminDriverPhone(id) {
             let newPhone = prompt('أدخل رقم الواتساب الجديد:');
             if(newPhone && newPhone.trim() !== "") {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_phone', id: id, phone: newPhone }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_update_driver_phone', id: id, phone: newPhone }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
             }
         }
         function toggleAdminDriverStatus(id, currentStatus) {
             let newStatus = currentStatus === 'متصل' ? 'غير متاح' : 'متصل';
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_driver_status', driverId: id, status: newStatus }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_driver_status', driverId: id, status: newStatus }) })
             .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
         }
 
         function deleteAdminVendor(id) {
             if(confirm('⚠️ هل أنت متأكد من حذف هذا التاجر؟')) {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_delete_vendor', id: id }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_delete_vendor', id: id }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') fetchAdminUsersList(); });
             }
         }
         function updateAdminVendorPassword(id) {
             let newPass = prompt('أدخل كلمة المرور الجديدة للتاجر:');
             if(newPass && newPass.trim() !== "") {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_pass', id: id, pass: newPass }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_pass', id: id, pass: newPass }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') alert('✅ تم التحديث.'); });
             }
         }
         function updateAdminVendorId(oldId) {
             let newId = prompt('أدخل المعرف الجديد للتاجر:');
             if(newId && newId.trim() !== "") {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_id', oldId: oldId, newId: newId }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'admin_update_vendor_id', oldId: oldId, newId: newId }) })
                 .then(res => res.json()).then(data => { 
                     if(data.status === 'success') fetchAdminUsersList(); 
                     else if(data.status === 'exists') alert('المعرف الجديد موجود مسبقاً.');
@@ -1650,7 +1666,7 @@
         function clearDriverCash(driverId, driverName, amount) {
             if(amount === 0) { alert('العهدة مصفرة بالفعل!'); return; }
             if(confirm(`هل متأكد أنك استلمت (${amount} ر.ع) كاش من المندوب ${driverName}؟`)) {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'clear_driver_cash', driverId: driverId }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'clear_driver_cash', driverId: driverId }) })
                 .then(res => res.json()).then(data => { if(data.status === 'success') { alert('تم تصفية العهدة!'); fetchAdminData(); } });
             }
         }
@@ -1659,7 +1675,7 @@
             if(confirm('⚠️ هل أنت متأكد من إغلاق اليوم وعمل أرشفة شاملة للمنصة؟')) {
                 const btn = document.querySelector('button[onclick="archiveCompletedOrders()"]');
                 btn.innerText = "جاري الإغلاق... ⏳";
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'force_archive_all' }) })
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'force_archive_all' }) })
                 .then(res => res.json()).then(data => {
                     if(data.status === 'success') { alert(`✅ تم تصفير النظام بنجاح وأرشفة (${data.archivedCount}) طلب.`); fetchAdminData(); }
                 }).finally(() => { btn.innerText = "🗄️ إغلاق اليوم"; });
@@ -1669,7 +1685,7 @@
             let newPhone = document.getElementById('admin-notify-phone').value;
             if(!newPhone) { alert("الرجاء إدخال رقم الإدارة الجديد"); return; }
             let btn = event.target; btn.innerText = "جاري الحفظ... ⏳"; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_admin_phone', phone: newPhone }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_admin_phone', phone: newPhone }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تم تحديث رقم الإدارة بنجاح!'); document.getElementById('admin-notify-phone').value = ''; }
             }).finally(() => { btn.innerText = "حفظ واعتماد 💾"; btn.disabled = false; });
@@ -1679,7 +1695,7 @@
             if(availableDriversData.length === 0) { alert('لا يوجد مناديب متاحين حالياً!'); return; }
             let bestDriver = availableDriversData.reduce((prev, curr) => (prev.load < curr.load) ? prev : curr);
             if(confirm(`سيتم إسناد الطلب ذكياً للمندوب: ${bestDriver.name}. هل توافق؟`)) {
-                fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: bestDriver.id, driverName: bestDriver.name }) }).then(() => fetchAdminData());
+                fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: bestDriver.id, driverName: bestDriver.name }) }).then(() => fetchAdminData());
             }
         }
 
@@ -1693,7 +1709,7 @@
             const select = document.getElementById(`driver-select-${orderId}`); if(!select.value) { alert('اختر مندوباً أولاً!'); return; }
             event.target.innerText = 'جاري...';
             let driverName = select.options[select.selectedIndex].getAttribute('data-name'); 
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
         }
 
         function reassignOrder(orderId, event) {
@@ -1701,18 +1717,18 @@
             if(!confirm('هل أنت متأكد من سحب الطلب ونقله للمندوب الجديد؟')) return;
             event.target.innerText = 'جاري النقل...';
             let driverName = select.options[select.selectedIndex].getAttribute('data-name'); 
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم الإسناد للمندوب', driverId: select.value, driverName: driverName }) }).then(() => { fetchAdminData(); });
         }
 
         function assignOrderToAdmin(orderId, phone, encArea, encPickup, encDetails) {
             if(!confirm('هل ستقوم بتوصيل هذا الطلب بنفسك؟')) return;
             let adminMessage = `🚗 *استلام طلب للإدارة* \n\n*رقم الطلب:* ${orderId}\n*هاتف الزبون:* ${phone}\n*الاستلام من:* ${decodeURIComponent(encPickup)}\n*التوصيل إلى:* ${decodeURIComponent(encArea)}`;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (الإدارة)', driverId: 'admin_00', driverName: 'الإدارة المناوبة 🚗', adminMsg: adminMessage }) }).then(() => { fetchAdminData(); });
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'قيد التوصيل (الإدارة)', driverId: 'admin_00', driverName: 'الإدارة المناوبة 🚗', adminMsg: adminMessage }) }).then(() => { fetchAdminData(); });
         }
 
         function archiveOrder(orderId) {
             if(!confirm('هل أنت متأكد من إغلاق وأرشفة هذا الطلب إجبارياً؟')) return;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم التسليم (أرشفة الإدارة)' }) }).then(() => { fetchAdminData(); });
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'update_status', orderId: orderId, newStatus: 'تم التسليم (أرشفة الإدارة)' }) }).then(() => { fetchAdminData(); });
         }
 
         function generateMagicLink(vendorName) {
@@ -1730,7 +1746,7 @@
             const receipt = document.getElementById('receipt-input').value; if(!receipt || receipt.length < 4) { alert('الرجاء إدخال رقم إيصال صحيح!'); return; }
             const btn = document.getElementById('submit-receipt-btn'); btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
             const payload = { action: 'submit_receipt', driverId: localStorage.getItem('driverId'), driverName: localStorage.getItem('driverName'), receiptNo: receipt };
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تم استلام إيصالك! جاري التحقق منه من قبل الإدارة.'); btn.innerText = 'الطلب قيد المراجعة ⏳'; btn.style.background = '#f39c12'; }
             });
@@ -1740,20 +1756,20 @@
 
         function approveDriverRenewal(driverId) {
             if(!confirm('هل أنت متأكد من استلامك للمبلغ وتفعيل حساب المندوب؟')) return;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve_renewal', driverId: driverId }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'approve_renewal', driverId: driverId }) })
             .then(res => res.json()).then(data => { if(data.status === 'success') { alert('✅ تم التجديد بنجاح!'); fetchAdminData(); } });
         }
 
         function deleteDriverReceipt(driverId) {
             if(!confirm('هل أنت متأكد من رفض وحذف هذا الإيصال؟')) return;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_receipt', driverId: driverId }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'delete_receipt', driverId: driverId }) })
             .then(res => res.json()).then(data => { if(data.status === 'success') { fetchAdminData(); } });
         }
 
         function deleteOrderAdmin(orderId) {
             if(!confirm(`⚠️ هل أنت متأكد من حذف الطلب (${orderId}) نهائياً؟`)) return;
             window.pauseRefresh = true; 
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_order', orderId: orderId }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'delete_order', orderId: orderId }) })
             .then(res => res.json()).then(data => { if(data.status === 'success') { fetchAdminData(); } }).finally(() => { window.pauseRefresh = false; });
         }
 
@@ -1762,7 +1778,7 @@
             const name = document.getElementById('new-drv-name').value; const phone = document.getElementById('new-drv-phone').value;
             if(!id || !pass || !name) { alert('تأكد من البيانات الأساسية!'); return; }
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'add_new_driver', id: id, name: name, phone: phone, pass: pass }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'add_new_driver', id: id, name: name, phone: phone, pass: pass }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-drv-id').value=''; document.getElementById('new-drv-pass').value=''; document.getElementById('new-drv-name').value=''; document.getElementById('new-drv-phone').value=''; fetchAdminUsersList(); } 
                 else if (data.status === 'exists') alert('⚠️ المعرف موجود مسبقاً.');
@@ -1773,7 +1789,7 @@
             const id = document.getElementById('new-vnd-id').value; const pass = document.getElementById('new-vnd-pass').value; const name = document.getElementById('new-vnd-name').value;
             if(!id || !pass || !name) { alert('البيانات ناقصة!'); return; }
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass }) })
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass }) })
             .then(res => res.json()).then(data => {
                 if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-vnd-id').value=''; document.getElementById('new-vnd-pass').value=''; document.getElementById('new-vnd-name').value=''; fetchAdminUsersList(); } 
                 else if (data.status === 'exists') alert('⚠️ المعرف موجود.');
