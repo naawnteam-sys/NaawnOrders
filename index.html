@@ -458,6 +458,7 @@
                         <input type="text" id="new-vnd-id" placeholder="المعرف (ID)">
                         <input type="text" id="new-vnd-pass" placeholder="كلمة المرور">
                         <input type="text" id="new-vnd-name" placeholder="اسم المتجر التجاري">
+                        <input type="tel" id="new-vnd-phone" placeholder="رقم هاتف المتجر (للواتساب)">
                         <button onclick="addNewVendorAdmin(event)" style="background: #e67e22; color:white;">اعتماد المتجر ✅</button>
                     </div>
                 </div>
@@ -1786,13 +1787,30 @@
         }
 
         function addNewVendorAdmin(event) {
-            const id = document.getElementById('new-vnd-id').value; const pass = document.getElementById('new-vnd-pass').value; const name = document.getElementById('new-vnd-name').value;
-            if(!id || !pass || !name) { alert('البيانات ناقصة!'); return; }
+            const id = document.getElementById('new-vnd-id').value; 
+            const pass = document.getElementById('new-vnd-pass').value; 
+            const name = document.getElementById('new-vnd-name').value;
+            const phone = document.getElementById('new-vnd-phone').value; // جلب رقم الهاتف
+
+            if(!id || !pass || !name || !phone) { alert('الرجاء تعبئة كافة البيانات بما فيها رقم الهاتف!'); return; }
+            
             const btn = event.target; btn.innerText = '⏳'; btn.disabled = true;
-            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass }) })
+            
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
+                cache: 'no-store', 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'add_new_vendor', id: id, name: name, pass: pass, phone: phone }) // إرسال الهاتف للسيرفر
+            })
             .then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert('✅ تمت الإضافة'); document.getElementById('new-vnd-id').value=''; document.getElementById('new-vnd-pass').value=''; document.getElementById('new-vnd-name').value=''; fetchAdminUsersList(); } 
-                else if (data.status === 'exists') alert('⚠️ المعرف موجود.');
+                if(data.status === 'success') { 
+                    alert('✅ تمت إضافة المتجر بنجاح'); 
+                    document.getElementById('new-vnd-id').value=''; 
+                    document.getElementById('new-vnd-pass').value=''; 
+                    document.getElementById('new-vnd-name').value=''; 
+                    document.getElementById('new-vnd-phone').value=''; 
+                    fetchAdminUsersList(); 
+                } 
+                else if (data.status === 'exists') alert('⚠️ المعرف موجود مسبقاً.');
             }).finally(() => { btn.innerText = 'اعتماد المتجر ✅'; btn.disabled = false; });
         }
         function setDynamicGreeting() {
