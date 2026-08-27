@@ -935,8 +935,13 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('hasSeenGuide')) { document.getElementById('welcome-modal').classList.remove('hidden'); }
-            loadSettings(); 
+            // 1. الأولوية القصوى: إظهار الواجهة والألوان فوراً للمستخدم
+            document.body.style.opacity = "1";
+
+            // 2. تجهيز النصوص الخفيفة محلياً (بدون انتظار السيرفر)
+            if (!localStorage.getItem('hasSeenGuide')) { 
+                document.getElementById('welcome-modal').classList.remove('hidden'); 
+            }
             
             const urlParams = new URLSearchParams(window.location.search);
             const magicVendor = urlParams.get('vendor');
@@ -949,22 +954,39 @@
                 if(welcomeDesc) welcomeDesc.innerText = "أدخل رقم هاتفك لتأكيد الطلب وتتبعه مباشرة!";
             }
 
+            // فتح الشاشة المناسبة للمستخدم فوراً بناءً على الجلسة المخزنة
             if (localStorage.getItem('adminLogged') === 'true') { 
-                showSection('admin-dashboard'); startAdminAutoRefresh(); 
+                showSection('admin-dashboard'); 
             }
             else if (localStorage.getItem('driverId')) { 
                 document.getElementById('driver-welcome-msg').innerText = `أهلاً بك، ${localStorage.getItem('driverName')}`; 
                 applyDriverStatusUI(localStorage.getItem('driverStatus') || "متصل");
-                showSection('driver-dashboard'); fetchDriverOrders(false); 
+                showSection('driver-dashboard'); 
             }
             else if (localStorage.getItem('vendorId')) {
                 document.getElementById('vendor-welcome-msg').innerText = `أهلاً بك، متجر ${localStorage.getItem('vendorName')} 🏪`;
                 generateMagicLink(localStorage.getItem('vendorName')); 
-                showSection('vendor-dashboard'); fetchVendorOrders();
+                showSection('vendor-dashboard'); 
             }
             else if (localStorage.getItem('customerPhone')) { 
+                // الدالة أدناه قمنا بتعديلها مسبقاً لتقوم بتأخير طلبات السيرفر بداخلها
                 proceedToCustomerDashboard();
             }
+
+            // 3. تأخير طلبات السيرفر الثقيلة لجزء من الثانية لتتنفس الشاشة وتظهر بسرعة البرق
+            setTimeout(() => {
+                loadSettings(); 
+                
+                if (localStorage.getItem('adminLogged') === 'true') { 
+                    startAdminAutoRefresh(); 
+                }
+                else if (localStorage.getItem('driverId')) { 
+                    fetchDriverOrders(false); 
+                }
+                else if (localStorage.getItem('vendorId')) {
+                    fetchVendorOrders();
+                }
+            }, 100); 
         });
 
         function checkAndFillMagicVendor() {
@@ -1061,11 +1083,16 @@
         }
 
         function proceedToCustomerDashboard() {
+            // إظهار الواجهة فوراً
             showSection('customer-dashboard'); 
             initCustomerLocation(); 
-            checkMyOrder(); 
             checkAndFillMagicVendor(); 
             setDynamicGreeting();
+            
+            // تأخير الاتصال بالسيرفر 
+            setTimeout(() => {
+                checkMyOrder(); 
+            }, 100);
         }
 
         function applyCoupon(event) {
