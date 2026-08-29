@@ -409,16 +409,24 @@
             </div>
 
             <div id="admin-sub-marketing" class="tab-pane">
-                <h4 class="section-title" style="margin-top:0;">📢 مركز التسويق والإشعارات</h4>
-                <p style="font-size:13px; color:#666;">سيتم إرسال هذا العرض عبر البريد الإلكتروني الرسمي لجميع الزبائن المسجلين.</p>
-                <div class="card" style="padding:20px;">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة الترويجية:</label>
-                    <input type="text" id="promo-subject" placeholder="مثال: خصم 50% على طلبك الأول!">
-                    <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">محتوى العرض:</label>
-                    <textarea id="promo-message" placeholder="اكتب تفاصيل العرض الجذاب هنا..." style="height:150px;"></textarea>
-                    <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white;">إرسال العرض لجميع الزبائن 🚀</button>
-                </div>
-            </div>
+    <h4 class="section-title" style="margin-top:0;">📢 مركز التسويق والإشعارات</h4>
+    <p style="font-size:13px; color:#666;">قم بإرسال العروض الترويجية لزبائنك عبر القنوات المتاحة.</p>
+    <div class="card" style="padding:20px;">
+        <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">قناة الإرسال:</label>
+        <select id="promo-channel" style="border: 2px solid #eee; margin-bottom: 15px; background: #fff;">
+            <option value="email">البريد الإلكتروني 📧</option>
+            <option value="whatsapp">الواتساب (عبر UltraMsg) 💬</option>
+        </select>
+
+        <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">عنوان الرسالة الترويجية:</label>
+        <input type="text" id="promo-subject" placeholder="مثال: خصم 50% على طلبك الأول!">
+        
+        <label style="font-size: 13px; color: #888; font-weight: bold; display:block; margin-bottom:5px;">محتوى العرض:</label>
+        <textarea id="promo-message" placeholder="اكتب تفاصيل العرض الجذاب هنا..." style="height:150px; resize: none;"></textarea>
+        
+        <button onclick="sendPromoBroadcast(event)" style="background: #8e44ad; color: white; box-shadow: 0 4px 15px rgba(142,68,173,0.3);">إرسال العرض لجميع الزبائن 🚀</button>
+    </div>
+</div>
 
             <div id="admin-sub-settings" class="tab-pane">
                 
@@ -1430,22 +1438,51 @@
         }
 
         function sendPromoBroadcast(event) {
-            const subject = document.getElementById('promo-subject').value;
-            const message = document.getElementById('promo-message').value;
-            if(!subject || !message) { alert("يرجى تعبئة عنوان ومحتوى العرض."); return; }
-            if(!confirm("هل أنت متأكد من رغبتك في إرسال هذا العرض لجميع الزبائن المسجلين؟")) return;
-            
-            const btn = event.target; btn.innerText = 'جاري الإرسال الجماعي... ⏳'; btn.disabled = true;
-            
-            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'send_broadcast', subject: subject, message: message }) })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') {
-                    alert(`✅ تم إرسال العرض الترويجي بنجاح إلى (${data.sentCount}) زبون!`);
-                    document.getElementById('promo-subject').value = '';
-                    document.getElementById('promo-message').value = '';
-                } else { alert('حدث خطأ أثناء الإرسال.'); }
-            }).finally(() => { btn.innerText = 'إرسال العرض لجميع الزبائن 🚀'; btn.disabled = false; });
+    const channel = document.getElementById('promo-channel').value;
+    const subject = document.getElementById('promo-subject').value;
+    const message = document.getElementById('promo-message').value;
+    
+    if(!subject || !message) { 
+        alert("يرجى تعبئة عنوان ومحتوى العرض."); 
+        return; 
+    }
+    
+    // تخصيص رسالة التأكيد بناءً على القناة المختارة
+    let confirmMsg = channel === 'whatsapp' 
+        ? "هل أنت متأكد من إرسال هذا العرض عبر الواتساب لجميع الزبائن المسجلين؟" 
+        : "هل أنت متأكد من رغبتك في إرسال هذا العرض عبر البريد الإلكتروني لجميع الزبائن؟";
+        
+    if(!confirm(confirmMsg)) return;
+    
+    const btn = event.target; 
+    btn.innerText = 'جاري الإرسال الجماعي... ⏳'; 
+    btn.disabled = true;
+    
+    // إرسال البيانات متضمنة نوع القناة (channel) ليتعامل معها Google Apps Script
+    fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
+        cache: 'no-store', 
+        method: 'POST', 
+        body: JSON.stringify({ 
+            action: 'send_broadcast', 
+            channel: channel,
+            subject: subject, 
+            message: message 
+        }) 
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert(`✅ تم إرسال العرض الترويجي بنجاح إلى (${data.sentCount}) زبون!`);
+            document.getElementById('promo-subject').value = '';
+            document.getElementById('promo-message').value = '';
+        } else { 
+            alert('حدث خطأ أثناء الإرسال.'); 
         }
+    }).finally(() => { 
+        btn.innerText = 'إرسال العرض لجميع الزبائن 🚀'; 
+        btn.disabled = false; 
+    });
+}
 
         let isFetchingAdmin = false;
         function fetchAdminData() {
