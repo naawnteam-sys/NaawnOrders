@@ -2145,6 +2145,36 @@
             .catch(err => alert("حدث خطأ في الاتصال"))
             .finally(() => { btn.innerText = originalText; btn.disabled = false; });
         }
+        // --- دالة حجز سائق توصيل يومي ---
+        function submitDailyCommute(event) {
+            let payload = {
+                action: 'new_daily_commute',
+                name: document.getElementById('dc-name').value,
+                phone: document.getElementById('dc-phone').value,
+                from: document.getElementById('dc-from').value,
+                to: document.getElementById('dc-to').value,
+                type: document.getElementById('dc-type').value,
+                timeGo: document.getElementById('dc-time-go').value,
+                timeReturn: document.getElementById('dc-time-return').value,
+                days: document.getElementById('dc-days').value || 'غير محدد',
+                passengers: document.getElementById('dc-passengers').value || 1,
+                notes: document.getElementById('dc-notes').value
+            };
+
+            if(!payload.name || !payload.phone || !payload.from || !payload.to || !payload.type) {
+                alert("الرجاء تعبئة البيانات الأساسية");
+                return;
+            }
+
+            let btn = event.target; btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
+            
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { method: 'POST', body: JSON.stringify(payload) })
+            .then(res => res.json()).then(data => {
+                alert('✅ تم استلام طلبك بنجاح! سيتم التواصل معك لتأكيد الجدول والأسعار.');
+                showSection('customer-login');
+            }).catch(() => alert('حدث خطأ في الاتصال'))
+            .finally(() => { btn.innerText = 'إرسال طلب الحجز 🚀'; btn.disabled = false; });
+        }
     </script>
 </body>
 </html>
