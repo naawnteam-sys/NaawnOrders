@@ -731,16 +731,23 @@
             <div id="driver-internal-modals" style="margin-top: 15px;">
                 
                 <div id="deduction-modal" class="card hidden" style="border: 2px solid #2c3e50; background: #f4f7f6;">
-                    <h4 style="margin-top:0;">تسجيل استقطاع جديد</h4>
-                    <label style="font-size:12px; color:#666;">عدد الطلبات</label>
-                    <input type="number" id="ded-orders" required>
-                    <label style="font-size:12px; color:#666;">التاريخ</label>
-                    <input type="date" id="ded-date" required>
-                    <label style="font-size:12px; color:#666;">مبلغ التوصيل (كل مبلغ في سطر جديد)</label>
-                    <textarea id="ded-amounts" rows="4" placeholder="مثال:&#10;1.500&#10;2.000" required></textarea>
-                    <button onclick="submitExactForm('addDeduction', event)" class="btn-success" style="width:100%; margin-top:10px;">إرسال البيانات</button>
-                    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
-                </div>
+    <h4 style="margin-top:0;">تسجيل استقطاع جديد</h4>
+    
+    <label style="font-size:12px; color:#666;">التاريخ</label>
+    <input type="date" id="ded-date" required>
+    
+    <label style="font-size:12px; color:#666;">مبلغ التوصيل (كل مبلغ في سطر جديد)</label>
+    <textarea id="ded-amounts" rows="4" placeholder="مثال:&#10;1.500&#10;2.000" oninput="autoCalculateDeduction()" required></textarea>
+
+    <label style="font-size:12px; color:#666;">عدد الطلبات (يُحسب تلقائياً)</label>
+    <input type="number" id="ded-orders" placeholder="سيظهر هنا تلقائياً..." readonly required>
+    
+    <label style="font-size:12px; color:#666;">إجمالي مبلغ الاستقطاع المستحق</label>
+    <input type="text" id="ded-total" placeholder="سيتم الحساب تلقائياً..." readonly required>
+    
+    <button onclick="submitExactForm('addDeduction', event)" class="btn-success" style="width:100%; margin-top:10px;">إرسال البيانات</button>
+    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+</div>
 
                 <div id="invoice-modal" class="card hidden" style="border: 2px solid var(--primary-gold); background: #fdfaf0;">
                     <h4 style="margin-top:0;">تسجيل فاتورة طلبية</h4>
@@ -2175,6 +2182,49 @@
             }).catch(() => alert('حدث خطأ في الاتصال'))
             .finally(() => { btn.innerText = 'إرسال طلب الحجز 🚀'; btn.disabled = false; });
         }
+        // دالة الحساب التلقائي للاستقطاعات وتحديث واجهة المندوب
+function autoCalculateDeduction() {
+    // قاموس نسب الاستقطاعات حسب صورتك
+    const deductionRates = {
+        0.5: 0.050, 0.6: 0.060, 0.7: 0.080, 0.8: 0.080, 0.9: 0.090,
+        1: 0.175, 1.2: 0.225, 1.3: 0.225, 1.4: 0.225, 1.5: 0.225,
+        1.6: 0.250, 1.7: 0.250, 1.8: 0.250, 1.9: 0.250, 2: 0.300,
+        2.5: 0.350, 3: 0.525, 3.5: 0.575, 4: 0.700, 5: 0.875,
+        6: 1.050, 7: 1.225, 8: 1.400, 10: 1.750, 12: 2.100,
+        13: 2.275, 14: 2.450, 15: 2.625, 16: 2.800, 17: 2.975,
+        18: 3.150, 19: 3.325, 20: 3.500
+    };
+
+    // سحب النصوص من مربع "مبلغ التوصيل"
+    let text = document.getElementById('ded-amounts').value;
+    let lines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
+    
+    let totalDeduction = 0;
+    let validOrdersCount = 0;
+
+    // المرور على كل مبلغ وجمعه
+    lines.forEach(line => {
+        let amount = parseFloat(line); 
+        if (!isNaN(amount)) {
+            validOrdersCount++; 
+            if (deductionRates[amount] !== undefined) {
+                totalDeduction += deductionRates[amount];
+            }
+        }
+    });
+
+    let countInput = document.getElementById('ded-orders');
+    let deductionInput = document.getElementById('ded-total');
+
+    // عرض النتائج في الشاشة
+    if (validOrdersCount > 0) {
+        countInput.value = validOrdersCount;
+        deductionInput.value = totalDeduction.toFixed(3);
+    } else {
+        countInput.value = '';
+        deductionInput.value = '';
+    }
+}
     </script>
 </body>
 </html>
