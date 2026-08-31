@@ -158,6 +158,7 @@
             <button class="sidebar-close" onclick="closeSidebar()">✖</button>
         </div>
         
+        <div class="sidebar-link" onclick="closeSidebar(); showSection('daily-commute-section')">طلب سائق توصيل يومي</div>
         <div class="sidebar-link" onclick="closeSidebar(); showSection('driver-login')">الموظفين</div>
         <div class="sidebar-link" onclick="closeSidebar(); showSection('vendor-login')">التجار</div>
         <div class="sidebar-link" onclick="closeSidebar(); showSection('join-driver')">الانضمام كمندوب توصيل</div>
@@ -581,7 +582,49 @@
             </select>
             <button onclick="submitVendorApplication(event)" style="background: var(--primary-gold); color: black; font-weight: bold;">إرسال طلب الاشتراك والبدء 🚀</button>
         </div>
+        
+<!-- قسم حجز سائق يومي -->
+     <div id="daily-commute-section" class="card section hidden">
+         <button class="btn-back" onclick="showSection('customer-login')">🔙 العودة للرئيسية</button>
+         <div style="text-align: center;"><div style="font-size: 50px; margin-bottom: 10px;">🚐</div></div>
+         <h3 style="color:var(--text-dark); text-align:center; margin-top:0;">حجز سائق توصيل يومي</h3>
+         <p style="text-align:center; font-size:14px; color:#666;">للموظفين، طلاب الجامعات والمدارس (عقود شهرية) والنقل العام</p>
 
+         <input type="text" id="dc-name" placeholder="الاسم">
+         <input type="tel" id="dc-phone" placeholder="رقم هاتف للتواصل">
+
+         <div style="display: flex; gap: 10px;">
+             <input type="text" id="dc-from" placeholder="نقطة الانطلاق (من)">
+             <input type="text" id="dc-to" placeholder="الوجهة (إلى)">
+         </div>
+
+         <select id="dc-type" style="border: 1px solid var(--primary-gold);">
+             <option value="">نوع الرحلة...</option>
+             <option value="ذهاب وعودة">ذهاب وعودة 🔄</option>
+             <option value="ذهاب فقط">ذهاب فقط ➡️</option>
+             <option value="عودة فقط">عودة فقط ⬅️</option>
+         </select>
+
+         <div style="display: flex; gap: 10px;">
+             <div style="flex: 1;">
+                 <label style="font-size:12px; color:#888; font-weight:bold;">وقت الذهاب:</label>
+                 <input type="time" id="dc-time-go">
+             </div>
+             <div style="flex: 1;">
+                 <label style="font-size:12px; color:#888; font-weight:bold;">وقت العودة:</label>
+                 <input type="time" id="dc-time-return">
+             </div>
+         </div>
+
+         <div style="display: flex; gap: 10px;">
+             <input type="number" id="dc-days" placeholder="عدد الأيام بالشهر (اختياري)">
+             <input type="number" id="dc-passengers" placeholder="عدد الركاب">
+         </div>
+
+         <textarea id="dc-notes" placeholder="أي ملاحظات إضافية؟ (اختياري)"></textarea>
+
+         <button onclick="submitDailyCommute(event)" style="background: var(--primary-gold); color: black;">إرسال طلب الحجز 🚀</button>
+     </div>
         <div id="join-driver" class="card section hidden">
             <button class="btn-back" onclick="showSection('customer-login')">🔙 العودة للرئيسية</button>
             <div style="text-align: center;"><img src="https://i.imgur.com/OqQuD0p.png" style="width: 80px; border-radius: 10px; margin-bottom:10px;"></div>
@@ -676,7 +719,61 @@
                 <h4 class="section-title">📍 خريطتك المباشرة</h4>
                 <div id="driver-map" class="map-box"></div>
             </div>
-            
+            <hr style="border:0; border-top: 1px dashed #ddd; margin: 25px 0;">
+            <h4 class="section-title">الانظمة الداخلية</h4>
+            <div class="grid-layout" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button onclick="openDriverModal('deduction-modal')" style="background:#f4f7f6; color:#2c3e50; border:1px solid #eee; padding:10px; font-weight:bold;">تسجيل استقطاعات</button>
+                <button onclick="openDriverModal('invoice-modal')" style="background:#fdfaf0; color:#333; border:1px solid var(--primary-gold); padding:10px; font-weight:bold;">تسجيل فاتورة طلبية</button>
+                <button onclick="openDriverModal('notes-modal')" style="background:#34495e; color:white; padding:10px; font-weight:bold;">📝 تسجيل ملاحظة</button>
+                <button onclick="openDriverModal('apology-modal')" style="background:#e74c3c; color:white; padding:10px; font-weight:bold;">🚫 اعتذار عن مناوبة</button>
+            </div>
+
+            <div id="driver-internal-modals" style="margin-top: 15px;">
+                
+                <div id="deduction-modal" class="card hidden" style="border: 2px solid #2c3e50; background: #f4f7f6;">
+                    <h4 style="margin-top:0;">تسجيل استقطاع جديد</h4>
+                    <label style="font-size:12px; color:#666;">عدد الطلبات</label>
+                    <input type="number" id="ded-orders" required>
+                    <label style="font-size:12px; color:#666;">التاريخ</label>
+                    <input type="date" id="ded-date" required>
+                    <label style="font-size:12px; color:#666;">مبلغ التوصيل (كل مبلغ في سطر جديد)</label>
+                    <textarea id="ded-amounts" rows="4" placeholder="مثال:&#10;1.500&#10;2.000" required></textarea>
+                    <button onclick="submitExactForm('addDeduction', event)" class="btn-success" style="width:100%; margin-top:10px;">إرسال البيانات</button>
+                    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+                </div>
+
+                <div id="invoice-modal" class="card hidden" style="border: 2px solid var(--primary-gold); background: #fdfaf0;">
+                    <h4 style="margin-top:0;">تسجيل فاتورة طلبية</h4>
+                    <input type="text" id="inv-rest" placeholder="اسم المطعم" required>
+                    <input type="text" id="inv-loc" placeholder="مكان التوصيل" required>
+                    <label style="font-size:12px; color:#666;">التاريخ</label>
+                    <input type="date" id="inv-date" required>
+                    <textarea id="inv-details" rows="3" placeholder="تفاصيل الطلبية" required></textarea>
+                    <input type="number" id="inv-price" step="0.001" placeholder="قيمة الطلبية (ر.ع)" required>
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px dashed var(--primary-gold); margin-bottom:10px;">
+                        <label style="color: var(--primary-gold); font-size: 14px;">📷 تصوير فاتورة المطعم</label>
+                        <input type="file" id="inv-image" accept="image/*">
+                    </div>
+                    <button onclick="submitExactForm('addInvoice', event)" class="btn-success" style="width:100%;">إرسال الفاتورة</button>
+                    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+                </div>
+
+                <div id="notes-modal" class="card hidden" style="border: 2px solid #34495e; background: #ecf0f1;">
+                    <h4 style="margin-top:0; color:#34495e;">📝 تسجيل ملاحظة</h4>
+                    <textarea id="note-text" rows="4" placeholder="اكتب هنا بوضوح..." required></textarea>
+                    <button onclick="submitExactForm('addNote', event)" style="background:#34495e; color:white; width:100%; margin-top:10px;">إرسال للإدارة</button>
+                    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+                </div>
+
+                <div id="apology-modal" class="card hidden" style="border: 2px solid #e74c3c; background: #fff5f5;">
+                    <h4 style="margin-top:0; color:#e74c3c;">🚫 طلب اعتذار عن مناوبة</h4>
+                    <label style="font-size:12px; color:#666;">تاريخ المناوبة</label>
+                    <input type="date" id="apo-date" required>
+                    <textarea id="apo-reason" rows="3" placeholder="يرجى ذكر السبب بوضوح" required></textarea>
+                    <button onclick="submitExactForm('addApology', event)" class="btn-danger" style="width:100%; margin-top:10px;">إرسال الطلب</button>
+                    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+                </div>
+            </div>
             <button onclick="logout()" class="btn-danger" style="margin-top:30px;">تسجيل خروج 🚪</button>
         </div>
 
@@ -1974,6 +2071,79 @@
         function closeSidebar() {
             document.getElementById('sidebarOverlay').classList.remove('active');
             document.getElementById('sidebarMenu').classList.remove('active');
+        }
+        // --- دوال النظام الداخلي للمندوب (مطابقة لـ Google Apps Script) ---
+        function openDriverModal(modalId) {
+            document.querySelectorAll('#driver-internal-modals .card').forEach(el => el.classList.add('hidden'));
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeDriverModals() {
+            document.querySelectorAll('#driver-internal-modals .card').forEach(el => el.classList.add('hidden'));
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function submitExactForm(actionType, event) {
+            let payload = { 
+                action: 'submit_driver_exact', 
+                exact_action: actionType,
+                driverId: localStorage.getItem('driverId'), 
+                driverName: localStorage.getItem('driverName')
+            };
+
+            if (actionType === 'addDeduction') {
+                payload.orders_count = document.getElementById('ded-orders').value;
+                payload.date_val = document.getElementById('ded-date').value;
+                payload.amounts = document.getElementById('ded-amounts').value;
+                if(!payload.orders_count || !payload.date_val || !payload.amounts) { alert("الرجاء إكمال كافة البيانات"); return; }
+            } 
+            else if (actionType === 'addInvoice') {
+                payload.rest_name = document.getElementById('inv-rest').value;
+                payload.location = document.getElementById('inv-loc').value;
+                payload.date_val = document.getElementById('inv-date').value;
+                payload.details = document.getElementById('inv-details').value;
+                payload.price = document.getElementById('inv-price').value;
+                if(!payload.rest_name || !payload.date_val) { alert("الرجاء إكمال كافة البيانات"); return; }
+
+                let fileInput = document.getElementById('inv-image');
+                if (fileInput && fileInput.files.length > 0) {
+                    payload.imageFile = await getBase64(fileInput.files[0]);
+                    payload.imageName = "Invoice_" + payload.driverId + "_" + Date.now();
+                }
+            }
+            else if (actionType === 'addApology') {
+                payload.shift_date = document.getElementById('apo-date').value;
+                payload.reason = document.getElementById('apo-reason').value;
+                if(!payload.shift_date || !payload.reason) { alert("الرجاء إكمال كافة البيانات"); return; }
+            }
+            else if (actionType === 'addNote') {
+                payload.note_text = document.getElementById('note-text').value;
+                if(!payload.note_text) { alert("الرجاء إكمال كافة البيانات"); return; }
+            }
+
+            let btn = event.target; let originalText = btn.innerText; 
+            btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
+
+            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
+                method: 'POST', 
+                body: JSON.stringify(payload) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert('✅ تم الحفظ بنجاح وتسجيلها في النظام!');
+                closeDriverModals();
+                document.querySelectorAll('#driver-internal-modals input, #driver-internal-modals textarea').forEach(el => el.value = '');
+            })
+            .catch(err => alert("حدث خطأ في الاتصال"))
+            .finally(() => { btn.innerText = originalText; btn.disabled = false; });
         }
     </script>
 </body>
