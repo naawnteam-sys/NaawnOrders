@@ -1321,7 +1321,11 @@
             });
         }
 
-      
+      function submitOrder(e) {
+           if (!isWithinWorkingHours()) {
+               alert(`⚠️ عذراً! أنت تطلب خارج أوقات العمل الرسمية لفريق نعاون.\nساعات العمل من ${workStartTime} إلى ${workEndTime}.\nالرجاء المحاولة خلال الأوقات المتاحة.`);
+               return;
+           }
 
             let originalDetails = document.getElementById('order-details').value;
             let urgency = document.getElementById('cust-urgency').value;
@@ -1538,11 +1542,7 @@
             }
         }
 
-         function submitOrder(e) {
-           if (!isWithinWorkingHours()) {
-               alert(`⚠️ عذراً! أنت تطلب خارج أوقات العمل الرسمية لفريق نعاون.\nساعات العمل من ${workStartTime} إلى ${workEndTime}.\nالرجاء المحاولة خلال الأوقات المتاحة.`);
-               return;
-           }
+        
 
         function completeOrder(orderId) {
             let priceInput = document.getElementById(`collected-price-${orderId}`); let collectedPrice = priceInput ? parseFloat(priceInput.value) : 0;
