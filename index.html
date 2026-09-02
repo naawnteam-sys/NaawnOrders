@@ -1321,41 +1321,78 @@
             });
         }
 
-      function submitOrder(e) {
-           if (!isWithinWorkingHours()) {
-               alert(`⚠️ عذراً! أنت تطلب خارج أوقات العمل الرسمية لفريق نعاون.\nساعات العمل من ${workStartTime} إلى ${workEndTime}.\nالرجاء المحاولة خلال الأوقات المتاحة.`);
-               return;
-           }
+   // تعريف متغيرات النصوص لرسالة التنبيه
+const workStartTime = "7 صباحاً";
+const workEndTime = "1 ليلاً";
 
-            let originalDetails = document.getElementById('order-details').value;
-            let urgency = document.getElementById('cust-urgency').value;
-            let finalDetails = "[أولوية: " + urgency + "] | " + originalDetails;
+function isWithinWorkingHours() {
+    // جلب الساعة الحالية بتوقيت سلطنة عمان (مسقط) لضمان الدقة التامة
+    const options = { timeZone: 'Asia/Muscat', hour: 'numeric', hourCycle: 'h23' };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    
+    // تحويل الوقت إلى رقم صحيح (من 0 إلى 23)
+    const currentHour = parseInt(formatter.format(new Date()), 10);
 
-            const payload = { 
-                action: 'new_order', 
-                phone: localStorage.getItem('customerPhone'), 
-                city: document.getElementById('cust-city').value, 
-                area: document.getElementById('cust-area').value, 
-                pickup: document.getElementById('pickup-loc').value, 
-                details: finalDetails, 
-                custLat: tempCustLat, 
-                custLng: tempCustLng, 
-                promoCode: activePromoCode 
-            };
-            
-            if(!payload.city || !payload.area || !payload.pickup) { alert('الرجاء التأكد من حفظ موقعك وكتابة مكان الاستلام'); return; }
-            const btn = e.target; btn.innerText = 'جاري التسجيل... ⏳'; btn.disabled = true;
-            
-            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) }).then(() => {
-                alert('✅ تم إرسال الطلب بنجاح لأسطول نعاون!'); 
-                document.getElementById('pickup-loc').value = ''; document.getElementById('order-details').value = ''; document.getElementById('promo-code').value = ''; 
-                activePromoCode = ""; document.getElementById('coupon-msg').classList.add('hidden'); document.getElementById('promo-code').disabled = false;
-                
-                let trackNavBtn = document.querySelector('#cust-bottom-nav .nav-item:nth-child(2)');
-                if(trackNavBtn) { switchTab('cust', 'track', trackNavBtn); checkMyOrder(); }
-                
-            }).finally(() => { btn.innerText = 'إرسال الطلب الآن 🚀'; btn.disabled = false; });
-        }
+    // المنطق: المتجر مغلق فقط من الساعة 1 صباحاً (01:00) وحتى 6:59 صباحاً
+    if (currentHour >= 1 && currentHour < 7) {
+        return false; // خارج أوقات العمل
+    }
+    
+    return true; // داخل أوقات العمل
+}
+
+function submitOrder(e) {
+    // 1. فحص أوقات العمل أولاً
+    if (!isWithinWorkingHours()) {
+        alert(`⚠️ عذراً! أنت تطلب خارج أوقات العمل الرسمية لفريق نعاون.\nساعات العمل من ${workStartTime} إلى ${workEndTime}.\nالرجاء المحاولة خلال الأوقات المتاحة.`);
+        return; // هذا الأمر سيوقف إرسال الطلب ولن يكمل باقي الكود بالأسفل
+    }
+    
+    // 2. إذا كان الوقت متاحاً، سيكمل الكود إرسال الطلب بشكل طبيعي
+    let originalDetails = document.getElementById('order-details').value;
+    let urgency = document.getElementById('cust-urgency').value;
+    let finalDetails = "[أولوية: " + urgency + "] | " + originalDetails;
+
+    const payload = { 
+        action: 'new_order', 
+        phone: localStorage.getItem('customerPhone'), 
+        city: document.getElementById('cust-city').value, 
+        area: document.getElementById('cust-area').value, 
+        pickup: document.getElementById('pickup-loc').value, 
+        details: finalDetails, 
+        custLat: tempCustLat, 
+        custLng: tempCustLng, 
+        promoCode: activePromoCode 
+    };
+    
+    if(!payload.city || !payload.area || !payload.pickup) { 
+        alert('الرجاء التأكد من حفظ موقعك وكتابة مكان الاستلام'); 
+        return; 
+    }
+    
+    const btn = e.target; 
+    btn.innerText = 'جاري التسجيل... ⏳'; 
+    btn.disabled = true;
+    
+    fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify(payload) })
+    .then(() => {
+        alert('✅ تم إرسال الطلب بنجاح لأسطول نعاون!'); 
+        document.getElementById('pickup-loc').value = ''; 
+        document.getElementById('order-details').value = ''; 
+        document.getElementById('promo-code').value = ''; 
+        activePromoCode = ""; 
+        document.getElementById('coupon-msg').classList.add('hidden'); 
+        document.getElementById('promo-code').disabled = false;
+        
+        let trackNavBtn = document.querySelector('#cust-bottom-nav .nav-item:nth-child(2)');
+        if(trackNavBtn) { switchTab('cust', 'track', trackNavBtn); checkMyOrder(); }
+        
+    })
+    .finally(() => { 
+        btn.innerText = 'إرسال الطلب الآن 🚀'; 
+        btn.disabled = false; 
+    });
+}
 
         function submitFeedback(e) {
             const rating = document.getElementById('cust-rating').value; const text = document.getElementById('cust-feedback').value; const phone = localStorage.getItem('customerPhone');
