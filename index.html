@@ -1760,11 +1760,19 @@
             if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             
             fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'get_all_users' }) })
-            .then(res => res.json()).then(data => {
-                if(data.status === 'success') { renderAdminDrivers(data.drivers); renderAdminVendors(data.vendors); }
-            }).catch(e => console.log(e));
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') { 
+                    renderAdminDrivers(data.drivers); 
+                    renderAdminVendors(data.vendors); 
+                }
+            })
+            .catch(e => {
+                console.log(e);
+                alert("سبب المشكلة: " + e.message); // هذا السطر سيظهر لك الخطأ على شاشة الهاتف
+                if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات</p>';
+            });
         }
-
         function renderAdminDrivers(drivers) {
             const container = document.getElementById('admin-drivers-list'); if(!container) return; container.innerHTML = '';
             if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4></div>'; return; }
