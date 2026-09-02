@@ -1789,41 +1789,52 @@
             });
         }
         function renderAdminDrivers(drivers) {
-            const container = document.getElementById('admin-drivers-list'); if(!container) return; container.innerHTML = '';
-            if(!drivers || drivers.length === 0) { container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4></div>'; return; }
-            drivers.forEach(d => {
-                let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
-                
-                let expiryHtml = '';
-                if (d.expiryDate) {
-                    let expDate = new Date(d.expiryDate);
-                    let today = new Date();
-                    let diffTime = expDate - today;
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    let daysText = diffDays > 0 ? `متبقي ${diffDays} يوم` : (diffDays === 0 ? `ينتهي اليوم` : `منتهي منذ ${Math.abs(diffDays)} يوم`);
-                    let daysColor = diffDays > 5 ? '#2ed573' : (diffDays >= 0 ? '#f39c12' : '#ff4757');
-                    let displayDate = expDate.toISOString().split('T')[0];
-                    expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span dir="ltr">${displayDate}</span> (<span style="color:${daysColor}; font-weight:bold;">${daysText}</span>)</p>`;
-                } else {
-                    expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span style="color:#ff4757; font-weight:bold;">غير محدد (منتهي)</span></p>`;
-                }
+    const container = document.getElementById('admin-drivers-list'); 
+    if(!container) return; 
+    container.innerHTML = '';
+    
+    if(!drivers || drivers.length === 0) { 
+        container.innerHTML = '<div class="empty-state-container" style="grid-column: 1/-1;"><span class="empty-state-icon">🛵</span><h4 class="empty-state-title">لا يوجد مناديب</h4></div>'; 
+        return; 
+    }
+    
+    drivers.forEach(d => {
+        let statusColor = d.status === 'متصل' ? '#2ed573' : '#ff4757';
+        
+        let expiryHtml = '';
+        let expDate = new Date(d.expiryDate);
 
-                container.innerHTML += `
-                <div class="grid-card">
-                    <h4 style="margin-top:0; color:var(--text-dark);">${d.name}</h4>
-                    <p style="margin:5px 0; font-size:14px;"><strong>المعرف (ID):</strong> ${d.id}</p>
-                    <p style="margin:5px 0; font-size:14px;"><strong>رقم الواتساب:</strong> ${d.phone || 'غير محدد'}</p>
-                    ${expiryHtml}
-                    <p style="margin:5px 0; font-size:14px;"><strong>الحالة الحالية:</strong> <span style="color:${statusColor}; font-weight:bold;">${d.status || 'غير متاح'}</span></p>
-                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:15px;">
-                        <button onclick="updateAdminDriverPhone('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#17a2b8; color:white; border-radius:6px; box-shadow:none;">📱 الرقم</button>
-                        <button onclick="updateAdminDriverPassword('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#f39c12; color:white; border-radius:6px; box-shadow:none;">🔑 المرور</button>
-                        <button onclick="toggleAdminDriverStatus('${d.id}', '${d.status}')" style="flex:1; padding:8px; font-size:12px; background:#34495e; color:white; border-radius:6px; box-shadow:none;">🔄 الحالة</button>
-                        <button onclick="deleteAdminDriver('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#e74c3c; color:white; border-radius:6px; box-shadow:none;">🗑️ حذف</button>
-                    </div>
-                </div>`;
-            });
+        // التعديل هنا: نتحقق أن المتغير موجود، وأنه يمثل تاريخاً حقيقياً وليس كلمة نصية مثل "غير مسجل"
+        if (d.expiryDate && !isNaN(expDate.getTime())) {
+            let today = new Date();
+            let diffTime = expDate - today;
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            let daysText = diffDays > 0 ? `متبقي ${diffDays} يوم` : (diffDays === 0 ? `ينتهي اليوم` : `منتهي منذ ${Math.abs(diffDays)} يوم`);
+            let daysColor = diffDays > 5 ? '#2ed573' : (diffDays >= 0 ? '#f39c12' : '#ff4757');
+            let displayDate = expDate.toISOString().split('T')[0];
+            
+            expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span dir="ltr">${displayDate}</span> (<span style="color:${daysColor}; font-weight:bold;">${daysText}</span>)</p>`;
+        } else {
+            // في حال كان التاريخ غير موجود أو يحتوي على كلمة "غير مسجل"
+            expiryHtml = `<p style="margin:5px 0; font-size:14px;"><strong>صلاحية الاشتراك:</strong> <span style="color:#ff4757; font-weight:bold;">غير مسجل (أو منتهي)</span></p>`;
         }
+
+        container.innerHTML += `
+        <div class="grid-card">
+            <h4 style="margin-top:0; color:var(--text-dark);">${d.name}</h4>
+            <p style="margin:5px 0; font-size:14px;"><strong>المعرف (ID):</strong> ${d.id}</p>
+            <p style="margin:5px 0; font-size:14px;"><strong>رقم الواتساب:</strong> ${d.phone || 'غير محدد'}</p>
+            ${expiryHtml}
+            <p style="margin:5px 0; font-size:14px;"><strong>الحالة الحالية:</strong> <span style="color:${statusColor}; font-weight:bold;">${d.status || 'غير متاح'}</span></p>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:15px;">
+                <button onclick="updateAdminDriverPhone('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#17a2b8; color:white; border-radius:6px; box-shadow:none;">📱 الرقم</button>
+                <button onclick="updateAdminDriverPassword('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#f39c12; color:white; border-radius:6px; box-shadow:none;">🔑 المرور</button>
+                <button onclick="toggleAdminDriverStatus('${d.id}', '${d.status}')" style="flex:1; padding:8px; font-size:12px; background:#34495e; color:white; border-radius:6px; box-shadow:none;">🔄 الحالة</button>
+                <button onclick="deleteAdminDriver('${d.id}')" style="flex:1; padding:8px; font-size:12px; background:#e74c3c; color:white; border-radius:6px; box-shadow:none;">🗑️ حذف</button>
+            </div>
+        </div>`;
+    });
+}
 
         function renderAdminVendors(vendors) {
             const container = document.getElementById('admin-vendors-list'); if(!container) return; container.innerHTML = '';
