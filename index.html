@@ -1753,9 +1753,10 @@
             }).catch(e => { console.log("Fetch Error", e); }).finally(() => { isFetchingAdmin = false; });
         }
 
-        function fetchAdminUsersList() {
+       function fetchAdminUsersList() {
             const driversContainer = document.getElementById('admin-drivers-list');
             const vendorsContainer = document.getElementById('admin-vendors-list');
+            
             if(driversContainer) driversContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             if(vendorsContainer) vendorsContainer.innerHTML = '<div class="grid-card"><div class="skeleton-box skel-title"></div><div class="skeleton-box skel-text"></div></div>';
             
@@ -1763,14 +1764,28 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') { 
-                    renderAdminDrivers(data.drivers); 
-                    renderAdminVendors(data.vendors); 
+                    
+                    // 1. محاولة بناء المناديب بشكل مستقل
+                    try {
+                        renderAdminDrivers(data.drivers); 
+                    } catch(err) {
+                        console.log("خطأ في المناديب: ", err);
+                        if(driversContainer) driversContainer.innerHTML = '<p style="text-align:center; color:red;">تعذر عرض المناديب بسبب خطأ في التواريخ</p>';
+                    }
+
+                    // 2. محاولة بناء التجار بشكل مستقل
+                    try {
+                        renderAdminVendors(data.vendors); 
+                    } catch(err) {
+                        console.log("خطأ في التجار: ", err);
+                        if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">تعذر عرض التجار</p>';
+                    }
+                    
                 }
             })
             .catch(e => {
                 console.log(e);
-                alert("سبب المشكلة: " + e.message); // هذا السطر سيظهر لك الخطأ على شاشة الهاتف
-                if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في جلب البيانات</p>';
+                if(vendorsContainer) vendorsContainer.innerHTML = '<p style="text-align:center; color:red;">حدث خطأ في الاتصال بالسيرفر</p>';
             });
         }
         function renderAdminDrivers(drivers) {
