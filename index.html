@@ -726,6 +726,7 @@
                 <button onclick="openDriverModal('invoice-modal')" style="background:#fdfaf0; color:#333; border:1px solid var(--primary-gold); padding:10px; font-weight:bold;">تسجيل فاتورة طلبية</button>
                 <button onclick="openDriverModal('notes-modal')" style="background:#34495e; color:white; padding:10px; font-weight:bold;">📝 تسجيل ملاحظة</button>
                 <button onclick="openDriverModal('apology-modal')" style="background:#e74c3c; color:white; padding:10px; font-weight:bold;">🚫 اعتذار عن مناوبة</button>
+                <button onclick="document.getElementById('driver-records-section').classList.remove('hidden'); fetchDriverRecords();" style="background:#27ae60; color:white; border:none; padding:10px; font-weight:bold; grid-column: 1 / -1;">📁 عرض سجلاتي </button>
             </div>
 
             <div id="driver-internal-modals" style="margin-top: 15px;">
@@ -780,6 +781,18 @@
                     <button onclick="submitExactForm('addApology', event)" class="btn-danger" style="width:100%; margin-top:10px;">إرسال الطلب</button>
                     <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
                 </div>
+                <!-- قسم سجلات المندوب (يُفتح عند الضغط على زر سجلاتي) -->
+<div id="driver-records-section" class="card hidden" style="border: 2px solid var(--primary-gold); background: #fdfaf0; margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h4 style="margin: 0; color: var(--text-dark); font-weight: 800;">📁 أرشيف سجلاتي</h4>
+        <button onclick="document.getElementById('driver-records-section').classList.add('hidden')" style="background: #e74c3c; color: white; width: auto; padding: 5px 12px; font-size: 12px; border-radius: 20px; box-shadow: none;">إغلاق ✖</button>
+    </div>
+    
+    <!-- الصندوق الذي ستمتلئ فيه السجلات برمجياً -->
+    <div id="driver-records-container" style="max-height: 400px; overflow-y: auto;">
+        <p style="text-align: center; color: #666;">اضغط على زر التحديث لجلب سجلاتك...</p>
+    </div>
+</div>
             </div>
             <button onclick="logout()" class="btn-danger" style="margin-top:30px;">تسجيل خروج 🚪</button>
         </div>
@@ -2264,6 +2277,78 @@ function autoCalculateDeduction() {
         countInput.value = '';
         deductionInput.value = '';
     }
+}
+        function fetchDriverRecords() {
+    // جلب رقم المندوب المخزن في جهازه عند تسجيل الدخول
+    const driverId = localStorage.getItem('driverId'); 
+    const recordsContainer = document.getElementById('driver-records-container'); // يجب أن يكون لديك هذا الـ div في الـ HTML
+    
+    if(!driverId) return;
+    if(recordsContainer) recordsContainer.innerHTML = '<p style="text-align:center;">جاري جلب السجلات... ⏳</p>';
+
+    fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
+        cache: 'no-store', 
+        method: 'POST', 
+        body: JSON.stringify({ action: 'get_driver_records', driverId: driverId }) 
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            renderDriverRecords(data, recordsContainer);
+        } else {
+            if(recordsContainer) recordsContainer.innerHTML = '<p style="color:red; text-align:center;">تعذر جلب البيانات.</p>';
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        if(recordsContainer) recordsContainer.innerHTML = '<p style="color:red; text-align:center;">حدث خطأ في الاتصال.</p>';
+    });
+}
+
+function renderDriverRecords(data, container) {
+    if(!container) return;
+    container.innerHTML = ''; // تفريغ شاشة التحميل
+
+    let html = '';
+
+    // 1. قسم الفواتير
+    html += '<h3 style="margin-top:20px; color:#34495e; border-bottom:2px solid #eee; padding-bottom:5px;">🧾 فواتيري</h3>';
+    if(data.invoices.length === 0) { html += '<p style="color:#7f8c8d; font-size:14px;">لا توجد فواتير مسجلة.</p>'; }
+    data.invoices.forEach(inv => {
+        let statusColor = inv.status === 'قيد المراجعة' ? '#f39c12' : (inv.status === 'معتمدة' ? '#2ed573' : '#ff4757');
+        html += `
+        <div class="grid-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor};">
+            <h4 style="margin:0 0 5px 0;">${inv.rest_name} - ${inv.price} ر.ع</h4>
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>التاريخ:</strong> ${inv.date_val}</p>
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>التفاصيل:</strong> ${inv.details}</p>
+            <p style="margin:3px 0; font-size:13px;"><strong>حالة الإدارة:</strong> <span style="color:${statusColor}; font-weight:bold;">${inv.status}</span></p>
+        </div>`;
+    });
+
+    // 2. قسم الاستقطاعات
+    html += '<h3 style="margin-top:25px; color:#34495e; border-bottom:2px solid #eee; padding-bottom:5px;">💰 الاستقطاعات</h3>';
+    if(data.deductions.length === 0) { html += '<p style="color:#7f8c8d; font-size:14px;">لا توجد استقطاعات مسجلة.</p>'; }
+    data.deductions.forEach(ded => {
+        html += `
+        <div class="grid-card" style="margin-bottom:10px; border-right: 4px solid #3498db;">
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>التاريخ:</strong> ${ded.date_val}</p>
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>عدد الطلبات:</strong> ${ded.orders_count}</p>
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>المبالغ:</strong> ${ded.amounts}</p>
+        </div>`;
+    });
+
+    // 3. قسم الاعتذارات
+    html += '<h3 style="margin-top:25px; color:#34495e; border-bottom:2px solid #eee; padding-bottom:5px;">🚫 الاعتذارات</h3>';
+    if(data.apologies.length === 0) { html += '<p style="color:#7f8c8d; font-size:14px;">لا توجد اعتذارات مسجلة.</p>'; }
+    data.apologies.forEach(apo => {
+        html += `
+        <div class="grid-card" style="margin-bottom:10px; border-right: 4px solid #e74c3c;">
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>تاريخ الشفت:</strong> ${apo.shift_date}</p>
+            <p style="margin:3px 0; font-size:13px; color:#555;"><strong>السبب:</strong> ${apo.reason}</p>
+        </div>`;
+    });
+
+    container.innerHTML = html;
 }
     </script>
 </body>
