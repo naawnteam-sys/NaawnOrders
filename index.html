@@ -724,8 +724,9 @@
             <div class="grid-layout" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                 <button onclick="openDriverModal('deduction-modal')" style="background:#f4f7f6; color:#2c3e50; border:1px solid #eee; padding:10px; font-weight:bold;">تسجيل استقطاعات</button>
                 <button onclick="openDriverModal('invoice-modal')" style="background:#fdfaf0; color:#333; border:1px solid var(--primary-gold); padding:10px; font-weight:bold;">تسجيل فاتورة طلبية</button>
-                <button onclick="openDriverModal('notes-modal')" style="background:#34495e; color:white; padding:10px; font-weight:bold;">📝 تسجيل ملاحظة</button>
-                <button onclick="openDriverModal('apology-modal')" style="background:#e74c3c; color:white; padding:10px; font-weight:bold;">🚫 اعتذار عن مناوبة</button>
+                <button onclick="openDriverModal('notes-modal')" style="background:#34495e; color:white; padding:10px; font-weight:bold;"> تسجيل ملاحظة</button>
+                <button onclick="openDriverModal('apology-modal')" style="background:#e74c3c; color:white; padding:10px; font-weight:bold;"> اعتذار عن مناوبة</button>
+                <button onclick="openDriverModal('transport-modal')" style="background:#f39c12; color:white; padding:10px; font-weight:bold; border:none; border-radius: 8px;"> استمارة نقل أشخاص</button>
                 <button onclick="document.getElementById('driver-records-section').classList.remove('hidden'); fetchDriverRecords();" style="background:#27ae60; color:white; border:none; padding:10px; font-weight:bold; grid-column: 1 / -1;">📁 عرض سجلاتي </button>
             </div>
 
@@ -781,6 +782,25 @@
                     <button onclick="submitExactForm('addApology', event)" class="btn-danger" style="width:100%; margin-top:10px;">إرسال الطلب</button>
                     <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
                 </div>
+
+        <div id="transport-modal" class="card hidden" style="border: 2px solid #f39c12; background: #fffdf5;">
+    <h4 style="margin-top:0; color:#e67e22;">🚕 تسجيل نقل أشخاص</h4>
+    
+    <label style="font-size:12px; color:#666;">التاريخ</label>
+    <input type="date" id="trans-date" required>
+    
+    <input type="text" id="trans-from" placeholder="مكان الانطلاق (من أين؟)" required>
+    <input type="text" id="trans-to" placeholder="مكان النزول (إلى أين؟)" required>
+    
+    <select id="trans-type" style="border: 1px solid #f39c12; margin-bottom: 15px;">
+        <option value="ذهاب وعودة">ذهاب وعودة 🔄</option>
+        <option value="ذهاب فقط">ذهاب فقط ➡️</option>
+        <option value="عودة فقط">عودة فقط ⬅️</option>
+    </select>
+    
+    <button onclick="submitExactForm('addTransport', event)" style="background:#f39c12; color:white; width:100%;">إرسال الاستمارة للإدارة</button>
+    <button onclick="closeDriverModals()" class="btn-back" style="width:100%; margin-top:5px;">إلغاء</button>
+</div>
                 <!-- قسم سجلات المندوب (يُفتح عند الضغط على زر سجلاتي) -->
 <div id="driver-records-section" class="card hidden" style="border: 2px solid var(--primary-gold); background: #fdfaf0; margin-top: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -2152,59 +2172,71 @@
         }
 
         async function submitExactForm(actionType, event) {
-            let payload = { 
-                action: 'submit_driver_exact', 
-                exact_action: actionType,
-                driverId: localStorage.getItem('driverId'), 
-                driverName: localStorage.getItem('driverName')
-            };
+    let payload = { 
+        action: 'submit_driver_exact', 
+        exact_action: actionType,
+        driverId: localStorage.getItem('driverId'), 
+        driverName: localStorage.getItem('driverName')
+    };
 
-            if (actionType === 'addDeduction') {
-                payload.orders_count = document.getElementById('ded-orders').value;
-                payload.date_val = document.getElementById('ded-date').value;
-                payload.amounts = document.getElementById('ded-amounts').value;
-                if(!payload.orders_count || !payload.date_val || !payload.amounts) { alert("الرجاء إكمال كافة البيانات"); return; }
-            } 
-            else if (actionType === 'addInvoice') {
-                payload.rest_name = document.getElementById('inv-rest').value;
-                payload.location = document.getElementById('inv-loc').value;
-                payload.date_val = document.getElementById('inv-date').value;
-                payload.details = document.getElementById('inv-details').value;
-                payload.price = document.getElementById('inv-price').value;
-                if(!payload.rest_name || !payload.date_val) { alert("الرجاء إكمال كافة البيانات"); return; }
+    if (actionType === 'addDeduction') {
+        payload.orders_count = document.getElementById('ded-orders').value;
+        payload.date_val = document.getElementById('ded-date').value;
+        payload.amounts = document.getElementById('ded-amounts').value;
+        if(!payload.orders_count || !payload.date_val || !payload.amounts) { alert("الرجاء إكمال كافة البيانات"); return; }
+    } 
+    else if (actionType === 'addInvoice') {
+        payload.rest_name = document.getElementById('inv-rest').value;
+        payload.location = document.getElementById('inv-loc').value;
+        payload.date_val = document.getElementById('inv-date').value;
+        payload.details = document.getElementById('inv-details').value;
+        payload.price = document.getElementById('inv-price').value;
+        if(!payload.rest_name || !payload.date_val) { alert("الرجاء إكمال كافة البيانات"); return; }
 
-                let fileInput = document.getElementById('inv-image');
-                if (fileInput && fileInput.files.length > 0) {
-                    payload.imageFile = await getBase64(fileInput.files[0]);
-                    payload.imageName = "Invoice_" + payload.driverId + "_" + Date.now();
-                }
-            }
-            else if (actionType === 'addApology') {
-                payload.shift_date = document.getElementById('apo-date').value;
-                payload.reason = document.getElementById('apo-reason').value;
-                if(!payload.shift_date || !payload.reason) { alert("الرجاء إكمال كافة البيانات"); return; }
-            }
-            else if (actionType === 'addNote') {
-                payload.note_text = document.getElementById('note-text').value;
-                if(!payload.note_text) { alert("الرجاء إكمال كافة البيانات"); return; }
-            }
-
-            let btn = event.target; let originalText = btn.innerText; 
-            btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
-
-            fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
-                method: 'POST', 
-                body: JSON.stringify(payload) 
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert('✅ تم الحفظ بنجاح وتسجيلها في النظام!');
-                closeDriverModals();
-                document.querySelectorAll('#driver-internal-modals input, #driver-internal-modals textarea').forEach(el => el.value = '');
-            })
-            .catch(err => alert("حدث خطأ في الاتصال"))
-            .finally(() => { btn.innerText = originalText; btn.disabled = false; });
+        let fileInput = document.getElementById('inv-image');
+        if (fileInput && fileInput.files.length > 0) {
+            payload.imageFile = await getBase64(fileInput.files[0]);
+            payload.imageName = "Invoice_" + payload.driverId + "_" + Date.now();
         }
+    }
+    else if (actionType === 'addApology') {
+        payload.shift_date = document.getElementById('apo-date').value;
+        payload.reason = document.getElementById('apo-reason').value;
+        if(!payload.shift_date || !payload.reason) { alert("الرجاء إكمال كافة البيانات"); return; }
+    }
+    else if (actionType === 'addNote') {
+        payload.note_text = document.getElementById('note-text').value;
+        if(!payload.note_text) { alert("الرجاء إكمال كافة البيانات"); return; }
+    }
+    // 👇 التعديل الصحيح للقسم الجديد
+    else if (actionType === 'addTransport') {
+        payload.trans_date = document.getElementById('trans-date').value;
+        payload.trans_from = document.getElementById('trans-from').value;
+        payload.trans_to = document.getElementById('trans-to').value;
+        payload.trans_type = document.getElementById('trans-type').value;
+        
+        if(!payload.trans_date || !payload.trans_from || !payload.trans_to) {
+            alert("يرجى تعبئة كافة حقول الاستمارة!");
+            return;
+        }
+    }
+
+    let btn = event.target; let originalText = btn.innerText; 
+    btn.innerText = 'جاري الإرسال... ⏳'; btn.disabled = true;
+
+    fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { 
+        method: 'POST', 
+        body: JSON.stringify(payload) 
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert('✅ تم الحفظ بنجاح وتسجيلها في النظام!');
+        closeDriverModals();
+        document.querySelectorAll('#driver-internal-modals input, #driver-internal-modals textarea').forEach(el => el.value = '');
+    })
+    .catch(err => alert("حدث خطأ في الاتصال"))
+    .finally(() => { btn.innerText = originalText; btn.disabled = false; });
+}
         // --- دالة حجز سائق توصيل يومي ---
         function submitDailyCommute(event) {
             let payload = {
