@@ -2079,6 +2079,34 @@
             .then(res => res.json()).then(data => { if(data.status === 'success') { alert('✅ تم التجديد بنجاح!'); fetchAdminData(); } });
         }
 
+        // دالة تشغيل نظام الفحص التلقائي للاشتراكات المنتهية
+function checkExpiredSubscriptions(event) {
+    if(!confirm("تنبيه: سيقوم النظام بفحص جميع المناديب، وتجميد حسابات من انتهى اشتراكهم اليوم، وإرسال رسالة واتساب آلية لهم. هل تود المتابعة؟")) return;
+    
+    const btn = event.target;
+    btn.innerText = "جاري الفحص وإرسال الرسائل... ⏳";
+    btn.disabled = true;
+
+    fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), {
+        method: 'POST',
+        body: JSON.stringify({ action: 'check_expired_subscriptions' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(`✅ اكتمل الفحص بنجاح!\nتم تجميد وإرسال رسالة تنبيه إلى (${data.expired_alerts_sent}) كابتن.`);
+            fetchAdminUsersList(); // تحديث قائمة المناديب في الخلفية
+        } else {
+            alert("حدث خطأ أثناء الفحص.");
+        }
+    })
+    .catch(err => alert("حدث خطأ في الاتصال بالسيرفر"))
+    .finally(() => {
+        btn.innerText = "🚨 فحص الاشتراكات المنتهية وإرسال التنبيهات";
+        btn.disabled = false;
+    });
+}
+
         function deleteDriverReceipt(driverId) {
             if(!confirm('هل أنت متأكد من رفض وحذف هذا الإيصال؟')) return;
             fetch(SCRIPT_URL + '?_t=' + new Date().getTime(), { cache: 'no-store', method: 'POST', body: JSON.stringify({ action: 'delete_receipt', driverId: driverId }) })
