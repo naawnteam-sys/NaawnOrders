@@ -1,4 +1,4 @@
-const CACHE_NAME = 'naawn-delivery-v149'; // تم التحديث هنا لإجبار مسح الكاش
+const CACHE_NAME = 'naawn-delivery-v150'; // تم التحديث هنا لإجبار مسح الكاش
 
 self.addEventListener('install', (e) => {
     self.skipWaiting();
